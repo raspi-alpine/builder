@@ -1,8 +1,54 @@
+FROM debian:buster AS uboot
+
+RUN apt-get update && \
+    apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi device-tree-compiler bc
+
+RUN mkdir /uboot_build/ && \
+    mkdir /uboot/
+
+WORKDIR /uboot_build/
+
+RUN wget ftp://ftp.denx.de/pub/u-boot/u-boot-2019.10.tar.bz2 && \
+    tar -xjf u-boot-2019.10.tar.bz2
+
+WORKDIR /uboot_build/u-boot-2019.10/
+
+# model a/b/zero
+RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
+    make CROSS_COMPILE=arm-linux-gnueabi- rpi_defconfig && \
+    make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
+    cp u-boot.bin /uboot/u-boot_rpi1.bin
+
+# model zero w
+RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
+    make CROSS_COMPILE=arm-linux-gnueabi- rpi_0_w_defconfig && \
+    make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
+    cp u-boot.bin /uboot/u-boot_rpi0_w.bin
+
+# model 2 b
+RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
+    make CROSS_COMPILE=arm-linux-gnueabi- rpi_2_defconfig && \
+    make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
+    cp u-boot.bin /uboot/u-boot_rpi2.bin
+
+# model 3 (32 bit)
+RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
+    make CROSS_COMPILE=arm-linux-gnueabi- rpi_3_32b_defconfig && \
+    make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
+    cp u-boot.bin /uboot/u-boot_rpi3.bin
+
+# model 4 (32 bit)
+RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
+    make CROSS_COMPILE=arm-linux-gnueabi- rpi_4_32b_defconfig && \
+    make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
+    cp u-boot.bin /uboot/u-boot_rpi4.bin
+
+
 FROM alpine:3.10
 
 RUN apk update && \
     apk add automake build-base git autoconf confuse-dev linux-headers \
-            findutils mtools e2fsprogs-extra alpine-sdk dosfstools && \
+            findutils mtools e2fsprogs-extra alpine-sdk dosfstools uboot-tools && \
     rm -rf /var/cache/apk/*
 
 RUN git clone https://github.com/pengutronix/genimage.git /tmp/genimage && \
@@ -23,5 +69,6 @@ RUN cd /genext2fs && \
     rm -rf /tmp/pkg/
 
 ADD ./resources /resources
+COPY --from=uboot /uboot/ /uboot/
 
 WORKDIR /work

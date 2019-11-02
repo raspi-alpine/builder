@@ -18,11 +18,8 @@ esac
 LAST_PART_NUM=$(parted /dev/${ROOT_DEV} -ms unit s p | tail -n 1 | cut -f 1 -d:)
 LAST_PART="${ROOT_DEV}p${LAST_PART_NUM}"
 
-
-# unmount if mounted
-if grep -qs "/dev/${LAST_PART}" /proc/mounts; then
-  umount /dev/${LAST_PART}
-fi
+# unmount last partition
+umount /dev/${LAST_PART}
 
 # Get the starting offset of last partition
 PART_START=$(parted /dev/${ROOT_DEV} -ms unit s p | grep "^${LAST_PART_NUM}" | cut -f 2 -d: | sed 's/[^0-9]//g')
@@ -60,4 +57,4 @@ partprobe /dev/${ROOT_DEV} &&
 
 mount -a
 
-rm -f /etc/local.d/90-resizedata.start
+chmod -x /etc/local.d/90-resizedata.start

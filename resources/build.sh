@@ -72,7 +72,6 @@ apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armhf add $BASE_PACKAGE
 # add google DNS to enable network access inside chroot
 echo "nameserver 8.8.8.8" > ${ROOTFS_PATH}/etc/resolv.conf
 
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Configure root FS"
 
@@ -139,8 +138,15 @@ chmod +x ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
-/dev/mmcblk0p1   /boot  vfat    defaults,ro    0       2
-/dev/mmcblk0p3   /data  ext4    defaults       0       1
+/dev/mmcblk0p1   /uboot  vfat    defaults,ro    0       2
+/dev/mmcblk0p4   /data   ext4    defaults       0       1
+
+proc           /proc        proc   defaults        0     0
+sysfs          /sys         sysfs  defaults        0     0
+devpts         /dev/pts     devpts gid=4,mode=620  0     0
+tmpfs          /dev/shm     tmpfs  defaults        0     0
+tmpfs          /tmp         tmpfs  defaults        0     0
+tmpfs          /run         tmpfs  defaults        0     0
 EOF
 
 # custom
@@ -151,6 +157,12 @@ chroot_exec rc-update add dropbear
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 
 # TODO /etc/motd
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo ">> Prepare kernel for uboot"
+
+# build uImage
+mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -164,16 +176,31 @@ mkdir -p ${BOOTFS_PATH}
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/bootcode.bin
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup.dat
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_cd.dat
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_db.dat
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_x.dat
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4.dat
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4cd.dat
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4db.dat
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4x.dat
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start.elf
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_cd.elf
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_db.elf
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_x.elf
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4.elf
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4cd.elf
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4db.elf
+wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4x.elf
 
-# copy linux kernel and overlays
+# copy linux kernel and overlays to boot
 cp ${ROOTFS_PATH}/usr/lib/linux-*-rpi2/*.dtb ${BOOTFS_PATH}/
 cp -r ${ROOTFS_PATH}/usr/lib/linux-*-rpi2/overlays ${BOOTFS_PATH}/
-cp ${ROOTFS_PATH}/boot/initramfs-rpi2 ${BOOTFS_PATH}/
-cp ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${BOOTFS_PATH}/
+
+# copy u-boot
+cp /uboot/* ${BOOTFS_PATH}/
+
+# generate boot script
+mkimage -A arm -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
+
 
 # write boot config
 cat >${BOOTFS_PATH}/config.txt <<EOF
@@ -189,22 +216,27 @@ hdmi_mode=1
 hdmi_mode=87
 hdmi_cvt 800 480 60 6 0 0 0
 
+kernel=u-boot_rpi1.bin
+
+[pi0w]
+kernel=u-boot_rpi0_w.bin
+
 [pi2]
-kernel=vmlinuz-rpi2
-initramfs initramfs-rpi2
+kernel=u-boot_rpi2.bin
 
 [pi3]
-kernel=vmlinuz-rpi2
-initramfs initramfs-rpi2
+kernel=u-boot_rpi3.bin
+
+[pi4]
+kernel=u-boot_rpi4.bin
 
 [all]
-include usercfg.txt
+enable_uart=1
 
 EOF
 
 cat >${BOOTFS_PATH}/cmdline.txt <<EOF
 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rw rootwait quiet
-
 EOF
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -224,8 +256,8 @@ echo ">> Create SD card image"
 # boot partition
 cat >${WORK_PATH}/genimage_boot.cfg <<EOF
 image boot.vfat {
-  name = "boot"
   vfat {
+    label = "boot"
   }
   size = 32M
 }
@@ -235,8 +267,8 @@ make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
 # root partition
 cat >${WORK_PATH}/genimage_root.cfg <<EOF
 image rootfs.ext4 {
-  name = "root"
   ext4 {
+    label = "rootfs"
   }
   size = 150MB
 }
@@ -246,8 +278,8 @@ make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
 # data partition
 cat >${WORK_PATH}/genimage_data.cfg <<EOF
 image datafs.ext4 {
-  name = "data"
   ext4 {
+    label = "data"
   }
   size = 20MB
 }
@@ -266,7 +298,11 @@ image sdcard.img {
     image = "boot.vfat"
   }
 
-  partition rootfs {
+  partition rootfs_a {
+    partition-type = 0x83
+    image = "rootfs.ext4"
+  }
+  partition rootfs_b {
     partition-type = 0x83
     image = "rootfs.ext4"
   }
