@@ -7,9 +7,14 @@ set -e
 : ${ALPINE_BRANCH:="3.10"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 
-: ${TIME_ZONE:="Etc/UTC"}
-: ${HOST_NAME:="alpine"}
+: ${DEFAULT_TIMEZONE:="Etc/UTC"}
+: ${DEFAULT_HOSTNAME:="alpine"}
 : ${ROOT_PASSWORD:="alpine"}
+
+: ${SIZE_BOOT:="100M"}
+: ${SIZE_ROOT_FS:="150M"}
+: ${SIZE_ROOT_PART:="250M"}
+: ${SIZE_DATA:="20M"}
 : ${IMG_NAME:="alpine-${ALPINE_BRANCH}-sdcard"}
 
 
@@ -82,18 +87,12 @@ ${ROOT_PASSWORD}
 EOF
 
 # Set time zone
-echo "${TIME_ZONE}" > ${ROOTFS_PATH}/etc/timezone
-chroot_exec ln -fs /usr/share/zoneinfo/${TIME_ZONE} /etc/localtime
+ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone
+ln -fs /data/etc/localtime ${ROOTFS_PATH}/etc/localtime
 
 # Set host name
 chroot_exec rc-update add hostname default
-cat >${ROOTFS_PATH}/etc/hosts <<EOF
-127.0.0.1   localhost ${HOST_NAME}
-::1     localhost ${HOST_NAME}
-EOF
-cat >${ROOTFS_PATH}/etc/hostname <<EOF
-${HOST_NAME}
-EOF
+ln -fs /data/etc/hostname ${ROOTFS_PATH}/etc/hostname
 
 # enable local startup files (stored in /etc/local.d/)
 chroot_exec rc-update add local default
@@ -103,17 +102,7 @@ EOF
 
 # prepare network
 chroot_exec rc-update add networking default
-cat >${ROOTFS_PATH}/etc/network/interfaces <<EOF
-# interfaces(5) file used by ifup(8) and ifdown(8)
-# Include files from /etc/network/interfaces.d:
-source-directory /etc/network/interfaces.d
-
-auto lo
-iface lo inet loopback
-
-auto eth0
-iface eth0 inet dhcp
-EOF
+ln -fs /data/etc/interfaces ${ROOTFS_PATH}/etc/network/interfaces
 
 # run local before network -> local brings up the interface
 sed -i '/^\tneed/ s/$/ local/' ${ROOTFS_PATH}/etc/init.d/networking
@@ -210,12 +199,34 @@ cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
 mkdir -p /data/etc/
 touch /data/etc/resolv.conf
 
-mkdir -p /data/root/
+# Set time zone
+if [ ! -f /data/etc/timezone ]; then
+  echo "${DEFAULT_TIMEZONE}" > /data/etc/timezone
+  ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} /data/etc/localtime
+fi
 
+# set host name
+if [ ! -f /data/etc/hostname ]; then
+  echo "${DEFAULT_HOSTNAME}" > /data/etc/hostname
+fi
+
+if [ ! -f /data/etc/interfaces ]; then
+cat > /data/etc/interfaces <<EOF2
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF2
+fi
+
+# dropbear
 mkdir -p /data/etc/dropbear/
 if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
   cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
 fi
+
+mkdir -p /data/root/
 
 EOF
 chmod +x ${ROOTFS_PATH}/etc/local.d/20-data_prepare.start
@@ -230,8 +241,7 @@ cat >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf <<EOF
 RESOLV_CONF=/data/etc/resolv.conf
 
 EOF
-rm ${ROOTFS_PATH}/etc/resolv.conf
-ln -s /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
+ln -fs /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -335,7 +345,7 @@ image boot.vfat {
   vfat {
     label = "boot"
   }
-  size = 100M
+  size = ${SIZE_BOOT}
 }
 EOF
 make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
@@ -346,7 +356,7 @@ image rootfs.ext4 {
   ext4 {
     label = "rootfs"
   }
-  size = 150MB
+  size = ${SIZE_ROOT_FS}
 }
 EOF
 make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
@@ -357,7 +367,7 @@ image datafs.ext4 {
   ext4 {
     label = "data"
   }
-  size = 20MB
+  size = ${SIZE_DATA}
 }
 EOF
 make_image ${DATAFS_PATH} ${WORK_PATH}/genimage_data.cfg
@@ -377,10 +387,12 @@ image sdcard.img {
   partition rootfs_a {
     partition-type = 0x83
     image = "rootfs.ext4"
+    size = ${SIZE_ROOT_PART}
   }
   partition rootfs_b {
     partition-type = 0x83
     image = "rootfs.ext4"
+    size = ${SIZE_ROOT_PART}
   }
 
   partition datafs {
