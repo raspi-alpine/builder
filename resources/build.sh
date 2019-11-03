@@ -115,7 +115,7 @@ auto eth0
 iface eth0 inet dhcp
 EOF
 
-# networking should not wait for local -> local brings up the interface
+# run local before network -> local brings up the interface
 sed -i '/^\tneed/ s/$/ local/' ${ROOTFS_PATH}/etc/init.d/networking
 
 # bring up eth0 on startup
@@ -125,19 +125,13 @@ ifconfig eth0 up
 EOF
 chmod +x ${ROOTFS_PATH}/etc/local.d/11-up_eth0.start
 
-# make root file system writeable 
-cat >${ROOTFS_PATH}/etc/local.d/10-remount_root.start <<EOF
-#!/bin/sh
-mount -o remount,rw /
-EOF
-chmod +x ${ROOTFS_PATH}/etc/local.d/10-remount_root.start
-
 # add script to resize data partition 
 cp ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
 chmod +x ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
+none             /       ext4    defaults,ro    0       1
 /dev/mmcblk0p1   /uboot  vfat    defaults,ro    0       2
 /dev/mmcblk0p4   /data   ext4    defaults       0       1
 
@@ -147,30 +141,21 @@ devpts         /dev/pts     devpts gid=4,mode=620  0     0
 tmpfs          /dev/shm     tmpfs  defaults        0     0
 tmpfs          /tmp         tmpfs  defaults        0     0
 tmpfs          /run         tmpfs  defaults        0     0
+tmpfs          /var/lock    tmpfs  defaults        0     0
 EOF
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo ">> Move persistent data to /data"
-
-# prepare /data
-cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
-#!/bin/sh
-mkdir -p /data/root/
-
-mkdir -p /data/dropbear/
-if [ ! -f /data/dropbear/dropbear.conf ]; then
-  cp /etc/conf.d/dropbear_org /data/dropbear/dropbear.conf
-fi
-
-EOF
-chmod +x ${ROOTFS_PATH}/etc/local.d/20-data_prepare.start
-
-# link root dir
-rmdir ${ROOTFS_PATH}/root
-ln -s /data/root ${ROOTFS_PATH}/root
+# prepare mount points
+mkdir -p ${ROOTFS_PATH}/uboot
+mkdir -p ${ROOTFS_PATH}/data
+mkdir -p ${ROOTFS_PATH}/proc
+mkdir -p ${ROOTFS_PATH}/sys
+mkdir -p ${ROOTFS_PATH}/tmp
+mkdir -p ${ROOTFS_PATH}/run
+mkdir -p ${ROOTFS_PATH}/dev/pts
+mkdir -p ${ROOTFS_PATH}/dev/shm
+mkdir -p ${ROOTFS_PATH}/var/lock
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 
 # uboot tools config
 cat >${ROOTFS_PATH}/etc/fw_env.config <<EOF
@@ -204,9 +189,41 @@ mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
 
+# cleanup
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 
-# TODO /etc/motd
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo ">> Move persistent data to /data"
+
+# prepare /data
+cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
+#!/bin/sh
+touch /data/resolv.conf
+
+mkdir -p /data/root/
+
+mkdir -p /data/dropbear/
+if [ ! -f /data/dropbear/dropbear.conf ]; then
+  cp /etc/conf.d/dropbear_org /data/dropbear/dropbear.conf
+fi
+
+EOF
+chmod +x ${ROOTFS_PATH}/etc/local.d/20-data_prepare.start
+
+# link root dir
+rmdir ${ROOTFS_PATH}/root
+ln -s /data/root ${ROOTFS_PATH}/root
+
+# resolv.conf & udhcpc
+mkdir -p ${ROOTFS_PATH}/etc/udhcpc
+cat >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf <<EOF
+RESOLV_CONF=/data/resolv.conf
+
+EOF
+
+rm ${ROOTFS_PATH}/etc/resolv.conf
+ln -s /data/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Prepare kernel for uboot"
@@ -286,7 +303,7 @@ enable_uart=1
 EOF
 
 cat >${BOOTFS_PATH}/cmdline.txt <<EOF
-console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes rw rootwait quiet
+console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet
 EOF
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
