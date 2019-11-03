@@ -1,4 +1,10 @@
 #!/bin/sh -e
+
+# resize already done?
+if [ -f /data/resize_done ]; then
+  return 0
+fi
+
 logger -t "rc.resizedata" "Expanding root partition"
 
 # Detect root partition device
@@ -57,4 +63,4 @@ partprobe /dev/${ROOT_DEV} &&
 
 mount -a
 
-chmod -x /etc/local.d/90-resizedata.start
+touch /data/resize_done

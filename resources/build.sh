@@ -10,14 +10,14 @@ set -e
 : ${TIME_ZONE:="Etc/UTC"}
 : ${HOST_NAME:="alpine"}
 : ${ROOT_PASSWORD:="alpine"}
-: ${IMG_NAME:="alpine-${ALPINE_BRANCH}-sdcard.img"}
+: ${IMG_NAME:="alpine-${ALPINE_BRANCH}-sdcard"}
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi2"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi2 uboot-tools"
 
 WORK_PATH="/work"
 OUTPUT_PATH="/output"
@@ -149,9 +149,59 @@ tmpfs          /tmp         tmpfs  defaults        0     0
 tmpfs          /run         tmpfs  defaults        0     0
 EOF
 
-# custom
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo ">> Move persistent data to /data"
+
+# prepare /data
+cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
+#!/bin/sh
+mkdir -p /data/root/
+
+mkdir -p /data/dropbear/
+if [ ! -f /data/dropbear/dropbear.conf ]; then
+  cp /etc/conf.d/dropbear_org /data/dropbear/dropbear.conf
+fi
+
+EOF
+chmod +x ${ROOTFS_PATH}/etc/local.d/20-data_prepare.start
+
+# link root dir
+rmdir ${ROOTFS_PATH}/root
+ln -s /data/root ${ROOTFS_PATH}/root
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+# uboot tools config
+cat >${ROOTFS_PATH}/etc/fw_env.config <<EOF
+/uboot/uboot.env  0x0000          0x4000
+EOF
+
+# TODO REMOVE THIS
+# mark system as booted (should be moved to application)
+cat >${ROOTFS_PATH}/etc/local.d/99-uboot.start <<EOF
+#!/bin/sh
+mount -o remount,rw /uboot
+
+fw_setenv boot_count 1
+
+sync
+mount -o remount,ro /uboot
+EOF
+chmod +x ${ROOTFS_PATH}/etc/local.d/99-uboot.start
+
+# copy helper scripts
+cp ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
+
+
+# TODO configurable
+# dropbear
 chroot_exec apk add dropbear
 chroot_exec rc-update add dropbear
+ln -s /data/dropbear/ ${ROOTFS_PATH}/etc/dropbear
+
+mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
+ln -s /data/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
 
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
@@ -259,7 +309,7 @@ image boot.vfat {
   vfat {
     label = "boot"
   }
-  size = 32M
+  size = 100M
 }
 EOF
 make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
@@ -315,5 +365,12 @@ image sdcard.img {
 EOF
 make_image ${IMAGE_PATH} ${WORK_PATH}/genimage_sdcard.cfg
 
+echo ">> Compress images"
 # copy final image
-cp ${IMAGE_PATH}/sdcard.img ${OUTPUT_PATH}/${IMG_NAME}
+gzip -c ${IMAGE_PATH}/sdcard.img > ${OUTPUT_PATH}/${IMG_NAME}.img.gz
+gzip -c ${IMAGE_PATH}/rootfs.ext4 > ${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
+
+# create checksums
+cd ${OUTPUT_PATH}/
+sha256sum ${IMG_NAME}.img.gz > ${IMG_NAME}.img.gz.sha256
+sha256sum ${IMG_NAME}_update.img.gz > ${IMG_NAME}_update.img.gz.sha256
