@@ -17,7 +17,7 @@ set -e
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi2 uboot-tools"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi2 uboot-tools openntpd"
 
 WORK_PATH="/work"
 OUTPUT_PATH="/output"
@@ -131,7 +131,7 @@ chmod +x ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
-none             /       ext4    defaults,ro    0       1
+none             /       ext4    defaults,ro    0       0
 /dev/mmcblk0p1   /uboot  vfat    defaults,ro    0       2
 /dev/mmcblk0p4   /data   ext4    defaults       0       1
 
@@ -154,6 +154,15 @@ mkdir -p ${ROOTFS_PATH}/run
 mkdir -p ${ROOTFS_PATH}/dev/pts
 mkdir -p ${ROOTFS_PATH}/dev/shm
 mkdir -p ${ROOTFS_PATH}/var/lock
+
+# time
+chroot_exec rc-update add openntpd default
+cat >${ROOTFS_PATH}/etc/conf.d/openntpd <<EOF
+NTPD_OPTS="-s"
+EOF
+cat >${ROOTFS_PATH}/etc/ntpd.conf <<EOF
+servers pool.ntp.org
+EOF
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -183,10 +192,10 @@ cp ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
 # dropbear
 chroot_exec apk add dropbear
 chroot_exec rc-update add dropbear
-ln -s /data/dropbear/ ${ROOTFS_PATH}/etc/dropbear
+ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
-ln -s /data/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
+ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
 
 # cleanup
@@ -198,13 +207,14 @@ echo ">> Move persistent data to /data"
 # prepare /data
 cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
 #!/bin/sh
-touch /data/resolv.conf
+mkdir -p /data/etc/
+touch /data/etc/resolv.conf
 
 mkdir -p /data/root/
 
-mkdir -p /data/dropbear/
-if [ ! -f /data/dropbear/dropbear.conf ]; then
-  cp /etc/conf.d/dropbear_org /data/dropbear/dropbear.conf
+mkdir -p /data/etc/dropbear/
+if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
+  cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
 fi
 
 EOF
@@ -217,12 +227,11 @@ ln -s /data/root ${ROOTFS_PATH}/root
 # resolv.conf & udhcpc
 mkdir -p ${ROOTFS_PATH}/etc/udhcpc
 cat >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf <<EOF
-RESOLV_CONF=/data/resolv.conf
+RESOLV_CONF=/data/etc/resolv.conf
 
 EOF
-
 rm ${ROOTFS_PATH}/etc/resolv.conf
-ln -s /data/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
+ln -s /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
