@@ -9,7 +9,7 @@ set -e
 
 : ${DEFAULT_TIMEZONE:="Etc/UTC"}
 : ${DEFAULT_HOSTNAME:="alpine"}
-: ${ROOT_PASSWORD:="alpine"}
+: ${DEFAULT_ROOT_PASSWORD:="alpine"}
 
 : ${SIZE_BOOT:="100M"}
 : ${SIZE_ROOT_FS:="150M"}
@@ -79,12 +79,6 @@ echo "nameserver 8.8.8.8" > ${ROOTFS_PATH}/etc/resolv.conf
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Configure root FS"
-
-# set root password
-chroot_exec passwd << EOF
-${ROOT_PASSWORD}
-${ROOT_PASSWORD}
-EOF
 
 # Set time zone
 ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone
@@ -186,7 +180,6 @@ ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
-
 # cleanup
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 
@@ -210,6 +203,11 @@ if [ ! -f /data/etc/hostname ]; then
   echo "${DEFAULT_HOSTNAME}" > /data/etc/hostname
 fi
 
+# root password
+root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
+echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
+
+# interface
 if [ ! -f /data/etc/interfaces ]; then
 cat > /data/etc/interfaces <<EOF2
 auto lo
@@ -243,6 +241,8 @@ RESOLV_CONF=/data/etc/resolv.conf
 EOF
 ln -fs /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
+# root password
+ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Prepare kernel for uboot"
