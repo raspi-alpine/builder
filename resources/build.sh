@@ -12,8 +12,8 @@ set -e
 : ${DEFAULT_ROOT_PASSWORD:="alpine"}
 
 : ${SIZE_BOOT:="100M"}
-: ${SIZE_ROOT_FS:="150M"}
-: ${SIZE_ROOT_PART:="250M"}
+: ${SIZE_ROOT_FS:="200M"}
+: ${SIZE_ROOT_PART:="500M"}
 : ${SIZE_DATA:="20M"}
 : ${IMG_NAME:="alpine-${ALPINE_BRANCH}-sdcard"}
 
@@ -22,7 +22,7 @@ set -e
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi2 uboot-tools openntpd"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2"
 
 WORK_PATH="/work"
 OUTPUT_PATH="/output"
@@ -139,20 +139,12 @@ mkdir -p ${ROOTFS_PATH}/dev/shm
 mkdir -p ${ROOTFS_PATH}/var/lock
 
 # time
-chroot_exec rc-update add openntpd default
-cat >${ROOTFS_PATH}/etc/conf.d/openntpd <<EOF
-NTPD_OPTS="-s"
-EOF
-cat >${ROOTFS_PATH}/etc/ntpd.conf <<EOF
-servers pool.ntp.org
-EOF
+chroot_exec rc-update add ntpd default
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# uboot tools config
-cat >${ROOTFS_PATH}/etc/fw_env.config <<EOF
-/uboot/uboot.env  0x0000          0x4000
-EOF
+# uboot tools
+cp /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
 
 # TODO REMOVE THIS
 # mark system as booted (should be moved to application)
@@ -160,7 +152,7 @@ cat >${ROOTFS_PATH}/etc/local.d/99-uboot.start <<EOF
 #!/bin/sh
 mount -o remount,rw /uboot
 
-fw_setenv boot_count 1
+/sbin/uboot_tool reset_counter
 
 sync
 mount -o remount,ro /uboot
@@ -182,6 +174,9 @@ ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
 # cleanup
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
+rm -rf ${ROOTFS_PATH}/boot/initramfs*
+rm -rf ${ROOTFS_PATH}/boot/System*
+rm -rf ${ROOTFS_PATH}/boot/config*
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Move persistent data to /data"
@@ -248,7 +243,8 @@ ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 echo ">> Prepare kernel for uboot"
 
 # build uImage
-mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage 
+mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage 
+mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

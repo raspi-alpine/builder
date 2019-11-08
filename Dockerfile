@@ -1,7 +1,9 @@
-FROM debian:buster AS uboot
+FROM debian:buster AS build_base
 
 RUN apt-get update && \
     apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi device-tree-compiler bc
+
+FROM build_base AS uboot
 
 RUN mkdir /uboot_build/ && \
     mkdir /uboot/
@@ -43,6 +45,12 @@ RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
     make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
     cp u-boot.bin /uboot/u-boot_rpi4.bin
 
+FROM build_base AS uboot_tool
+
+ADD ./resources/uboot.c /uboot.c
+
+RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
+
 
 FROM alpine:3.10
 
@@ -70,5 +78,6 @@ RUN cd /genext2fs && \
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/
+COPY --from=uboot_tool /uboot_tool /uboot_tool
 
 WORKDIR /work

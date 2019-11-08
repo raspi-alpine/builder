@@ -19,10 +19,8 @@ current_idx=$(rdev | sed 's#/dev/mmcblk0p\([^ ]*\).*#\1#')
 
 if [ $current_idx -eq 2 ]; then
     echo "Start update for partition B"
-    flash_idx=3
 else
     echo "Start update for partition A"
-    flash_idx=2
 fi
 
 flash_device="/dev/mmcblk0p${flash_idx}"
@@ -33,7 +31,7 @@ gunzip -c ${image_file} | dd of=${flash_device} status=progress
 
 # switch active partition
 mount -o remount,rw /uboot
-fw_setenv boot_partition ${flash_idx}
+/sbin/uboot_tool part_switch
 sync
 mount -o remount,ro /uboot
 

@@ -1,46 +1,106 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
-setenv boot_partition_a 2
-setenv boot_partition_b 3
-setenv boot_limit 2
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+setenv boot_partition_a 0x02
+setenv boot_partition_b 0x03
+setenv boot_limit 0x02
 setenv boot_partition_base "/dev/mmcblk0p"
 
+setenv addr_version 0x10000
+setenv addr_boot_counter 0x10001
+setenv addr_boot_partition 0x10002
 
-# set default values if env not set
-if printenv boot_count; then 
-else 
-  setenv boot_count 1
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# load persistence values
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# clear memory
+mw.b 0x10000 0 0x404
+
+# load uboot file
+fatload mmc 0:1 0x10000 uboot.dat 0x400
+
+# check CRC
+crc32 0x10000 0x3FC 0x10400
+if itest *0x103FC -ne *0x10400; then 
+  echo "invalid CRC -> fallback to default values"
+
+  # default values
+  mw.b ${addr_version} 0x01
+  mw.b ${addr_boot_counter} 0x00
+  mw.b ${addr_boot_partition} ${boot_partition_a}
 fi
 
-if printenv boot_partition; then 
-  # check if valid partition a or b
-  if test ${boot_partition} -ne ${boot_partition_a} && test ${boot_partition} -ne ${boot_partition_b}; then
-    setenv boot_partition ${boot_partition_a}
-  fi
-else 
-  setenv boot_partition ${boot_partition_a}
+# ensure boot partition is valid
+if itest.b *${addr_boot_partition} -ne ${boot_partition_a} && test.b *${addr_boot_partition} -ne ${boot_partition_b}; then
+  mw.b ${addr_boot_partition} ${boot_partition_a}
 fi
 
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# fallback boot
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo "Check fallback boot"
 # switch boot partition if boot count exceed limit
-if test ${boot_count} -ge ${boot_limit}; then
+if itest.b *${addr_boot_counter} -ge ${boot_limit}; then
   echo "!!! Boot limit exceed !!!"
 
-  if test ${boot_partition} -eq ${boot_partition_a}; then
-    setenv boot_partition ${boot_partition_b}
+  if itest *${addr_boot_partition} -eq ${boot_partition_a}; then
+    mv.b ${addr_boot_partition} ${boot_partition_b}
   else
-    setenv boot_partition ${boot_partition_a}
+    mv.b ${addr_boot_partition} ${boot_partition_a}
   fi
-  setenv boot_count 0
+  mw.b ${addr_boot_counter} 0
 
+  setexpr.b boot_partition *${addr_boot_partition}
   echo "Switch active partition to ${boot_partition_base}${boot_partition}"
+else
+  # increase boot_count
+  setexpr.b tmp *${addr_boot_counter} + 1
+  mw.b ${addr_boot_counter} ${tmp}
+
+  setexpr.b boot_partition *${addr_boot_partition}
 fi
 
-# increase boot_count
-setexpr boot_count ${boot_count} + 1
 
-# store settings
-saveenv
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# store persistence values
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+# overwrite version
+mw.b 0x10000 0x01
+
+# calculate crc
+crc32 0x10000 0x3FC 0x103FC
+
+# save to uboot file
+fatwrite mmc 0:1 0x10000 uboot.dat 0x400
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# select kernel
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo "select kernel"
+setenv boot_kernel "/boot/uImage"
+
+# only if new pi a new kernel is required
+setexpr board_new_pi ${board_revision} \& 0x800000
+if test ${board_new_pi} > 0; then
+  echo "new board"
+  # get cpu id from revision
+  setexpr board_cpu ${board_revision} \& 0xF000
+  
+  # at the moment CPU except the oldest need the new kernel
+  if test ${board_cpu} > 0x0000; then
+    setenv boot_kernel "/boot/uImage2"
+  fi
+else
+  echo "old board"
+fi
+echo "Load kernel ${boot_kernel}"
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# boot
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # load bootargs from pi boot loader
 fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
 
@@ -48,7 +108,7 @@ fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
 setexpr bootargs sub " root=[^ ]+" " root=${boot_partition_base}${boot_partition}" "${bootargs}"
 
 # load kernel and boot
-ext4load mmc 0:${boot_partition} ${kernel_addr_r} /boot/uImage
+ext4load mmc 0:${boot_partition} ${kernel_addr_r} ${boot_kernel}
 bootm ${kernel_addr_r} - ${fdt_addr}
 
 reset
