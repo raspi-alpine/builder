@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/sh
 set -e
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -26,6 +26,7 @@ BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux cor
 
 WORK_PATH="/work"
 OUTPUT_PATH="/output"
+INPUT_PATH="/input"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
 BOOTFS_PATH="${WORK_PATH}/boot_fs"
 DATAFS_PATH="${WORK_PATH}/data_fs"
@@ -171,12 +172,6 @@ ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
-
-# cleanup
-rm -rf ${ROOTFS_PATH}/var/cache/apk/*
-rm -rf ${ROOTFS_PATH}/boot/initramfs*
-rm -rf ${ROOTFS_PATH}/boot/System*
-rm -rf ${ROOTFS_PATH}/boot/config*
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Move persistent data to /data"
@@ -328,6 +323,22 @@ EOF
 echo ">> Configure data FS"
 mkdir -p ${DATAFS_PATH}
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Custom modification
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+if [ -f ${INPUT_PATH}/image.sh ]; then
+  . ${INPUT_PATH}/image.sh
+fi
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Cleanup
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+rm -rf ${ROOTFS_PATH}/var/cache/apk/*
+rm -rf ${ROOTFS_PATH}/boot/initramfs*
+rm -rf ${ROOTFS_PATH}/boot/System*
+rm -rf ${ROOTFS_PATH}/boot/config*
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create image
