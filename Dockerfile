@@ -81,3 +81,5 @@ COPY --from=uboot /uboot/ /uboot/
 COPY --from=uboot_tool /uboot_tool /uboot_tool
 
 WORKDIR /work
+
+CMD ["/bin/sh", "/resources/build.sh"]
