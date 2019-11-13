@@ -15,7 +15,7 @@ set -e
 : ${SIZE_ROOT_FS:="200M"}
 : ${SIZE_ROOT_PART:="500M"}
 : ${SIZE_DATA:="20M"}
-: ${IMG_NAME:="alpine-${ALPINE_BRANCH}-sdcard"}
+: ${IMG_NAME:="sdcard"}
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
