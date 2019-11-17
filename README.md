@@ -55,18 +55,21 @@ chroot_exec rc-update add example_daemon default
 The following variables can be used to modify the base behaviour of the image 
 builder.
 
-| Variable              | Default Value                        | Description                      |
-| --------------------- | ------------------------------------ | -------------------------------- |
-| ALPINE_MIRROR         | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download |
-| ALPINE_BRANCH         | 3.10                                 | [Alpine Branch](https://wiki.alpinelinux.org/wiki/Alpine_Linux:Releases) to use for image |
+| Variable              | Default Value                        | Description                                                                                       |
+| --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| ALPINE_BRANCH         | 3.10                                 | [Alpine Branch](https://wiki.alpinelinux.org/wiki/Alpine_Linux:Releases) to use for image         |
+| ALPINE_MIRROR         | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download                                                                  |
+| CUSTOM_IMAGE_SCRIPT   | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
+| DEFAULT_HOSTNAME      | alpine                               | Default hostname                                                                                  |
+| DEFAULT_ROOT_PASSWORD | alpine                               | Default password for root user                                                                    |
 | DEFAULT_TIMEZONE      | Etc/UTC                              | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image |
-| DEFAULT_HOSTNAME      | alpine                               | Default hostname |
-| DEFAULT_ROOT_PASSWORD | alpine                               | Default password for root user |
-| SIZE_BOOT             | 100M                                 | Size of boot partition |
-| SIZE_ROOT_FS          | 200M                                 | Size of root file system |
-| SIZE_ROOT_PART        | 500M                                 | Size of root partition |
-| SIZE_DATA             | 20M                                  | Initial Size of data partition |
-| IMG_NAME              | sdcard                               | Base name of created image file |
+| IMG_NAME              | sdcard                               | Base name of created image file                                                                   |
+| INPUT_PATH            | /input                               | Input directory inside container                                                                  |
+| OUTPUT_PATH           | /output                              | Output directory inside container                                                                 |
+| SIZE_BOOT             | 100M                                 | Size of boot partition                                                                            |
+| SIZE_DATA             | 20M                                  | Initial Size of data partition                                                                    |
+| SIZE_ROOT_FS          | 200M                                 | Size of root file system                                                                          |
+| SIZE_ROOT_PART        | 500M                                 | Size of root partition                                                                            |
 
 ### Update running system
 

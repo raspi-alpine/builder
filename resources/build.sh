@@ -17,6 +17,10 @@ set -e
 : ${SIZE_DATA:="20M"}
 : ${IMG_NAME:="sdcard"}
 
+: ${OUTPUT_PATH:="/output"}
+: ${INPUT_PATH:="/input"}
+: ${CUSTOM_IMAGE_SCRIPT:="image.sh"}
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
@@ -25,8 +29,6 @@ RES_PATH=/resources/
 BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2"
 
 WORK_PATH="/work"
-OUTPUT_PATH="/output"
-INPUT_PATH="/input"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
 BOOTFS_PATH="${WORK_PATH}/boot_fs"
 DATAFS_PATH="${WORK_PATH}/data_fs"
@@ -327,8 +329,8 @@ mkdir -p ${DATAFS_PATH}
 # Custom modification
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [ -f ${INPUT_PATH}/image.sh ]; then
-  . ${INPUT_PATH}/image.sh
+if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
+  . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
