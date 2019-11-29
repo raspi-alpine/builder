@@ -99,7 +99,7 @@ EOF
 
 # prepare network
 chroot_exec rc-update add networking default
-ln -fs /data/etc/interfaces ${ROOTFS_PATH}/etc/network/interfaces
+ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
 
 # run local before network -> local brings up the interface
 sed -i '/^\tneed/ s/$/ local/' ${ROOTFS_PATH}/etc/init.d/networking
@@ -200,8 +200,8 @@ root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
 echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
 
 # interface
-if [ ! -f /data/etc/interfaces ]; then
-cat > /data/etc/interfaces <<EOF2
+if [ ! -f /data/etc/network/interfaces ]; then
+cat > /data/etc/network/interfaces <<EOF2
 auto lo
 iface lo inet loopback
 
