@@ -65,6 +65,7 @@ func SystemDisableSSH() error {
 	return nil
 }
 
+// SystemShutdown start shutdown of system
 func SystemShutdown() error {
 	cmd := exec.Command(systemShutdown)
 	err := cmd.Run()
@@ -74,6 +75,7 @@ func SystemShutdown() error {
 	return nil
 }
 
+// SystemReboot start reboot of system
 func SystemReboot() error {
 	cmd := exec.Command(systemReboot)
 	err := cmd.Run()
