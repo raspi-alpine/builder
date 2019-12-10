@@ -33,6 +33,16 @@ func SystemSetRootPassword(password string) error {
 	return ioutil.WriteFile(systemShadow, []byte(line), os.ModePerm)
 }
 
+// SystemSSHEnabled returns true if server is enabled
+func SystemSSHEnabled() (bool, error) {
+	data, err := ioutil.ReadFile(systemDropbearConfig)
+	if err != nil {
+		return false, fmt.Errorf("failed to read ssh config: %w", err)
+	}
+
+	return strings.Contains(string(data), "127.0.0.1:22"), nil
+}
+
 // SystemEnableSSH server
 func SystemEnableSSH() error {
 	err := ioutil.WriteFile(systemDropbearConfig, []byte("DROPBEAR_OPTS=\"\""), os.ModePerm)

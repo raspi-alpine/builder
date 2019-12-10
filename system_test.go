@@ -34,6 +34,25 @@ func TestSystemSetRootPassword(t *testing.T) {
 	_ = os.Remove(systemShadow)
 }
 
+func TestSystemSSHEnabled(t *testing.T) {
+	ass := assert.New(t)
+
+	_, err := SystemSSHEnabled()
+	ass.EqualError(err, "failed to read ssh config: open test_dropbear: no such file or directory")
+
+	ass.NoError(ioutil.WriteFile(systemDropbearConfig, []byte("test"), os.ModePerm))
+	value, err := SystemSSHEnabled()
+	ass.NoError(err)
+	ass.False(value)
+
+	ass.NoError(ioutil.WriteFile(systemDropbearConfig, []byte("DROPBEAR_OPTS=\"-p 127.0.0.1:22\""), os.ModePerm))
+	value, err = SystemSSHEnabled()
+	ass.NoError(err)
+	ass.True(value)
+
+	_ = os.Remove(systemDropbearConfig)
+}
+
 func TestSystemEnableSSH(t *testing.T) {
 	ass := assert.New(t)
 
