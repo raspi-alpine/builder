@@ -40,7 +40,7 @@ func SystemSSHEnabled() (bool, error) {
 		return false, fmt.Errorf("failed to read ssh config: %w", err)
 	}
 
-	return strings.Contains(string(data), "127.0.0.1:22"), nil
+	return !strings.Contains(string(data), "127.0.0.1:22"), nil
 }
 
 // SystemEnableSSH server

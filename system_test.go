@@ -43,12 +43,12 @@ func TestSystemSSHEnabled(t *testing.T) {
 	ass.NoError(ioutil.WriteFile(systemDropbearConfig, []byte("test"), os.ModePerm))
 	value, err := SystemSSHEnabled()
 	ass.NoError(err)
-	ass.False(value)
+	ass.True(value)
 
 	ass.NoError(ioutil.WriteFile(systemDropbearConfig, []byte("DROPBEAR_OPTS=\"-p 127.0.0.1:22\""), os.ModePerm))
 	value, err = SystemSSHEnabled()
 	ass.NoError(err)
-	ass.True(value)
+	ass.False(value)
 
 	_ = os.Remove(systemDropbearConfig)
 }
