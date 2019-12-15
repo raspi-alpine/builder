@@ -10,6 +10,7 @@ set -e
 : ${DEFAULT_TIMEZONE:="Etc/UTC"}
 : ${DEFAULT_HOSTNAME:="alpine"}
 : ${DEFAULT_ROOT_PASSWORD:="alpine"}
+: ${DEFAULT_DROPBEAR_ENABLED:="true"}
 
 : ${SIZE_BOOT:="100M"}
 : ${SIZE_ROOT_FS:="200M"}
@@ -166,7 +167,6 @@ chmod +x ${ROOTFS_PATH}/etc/local.d/99-uboot.start
 cp ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
 
 
-# TODO configurable
 # dropbear
 chroot_exec apk add dropbear
 chroot_exec rc-update add dropbear
@@ -174,6 +174,10 @@ ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
+
+if [ "$DEFAULT_DROPBEAR_ENABLED" = "true" ]; then
+  echo 'DROPBEAR_OPTS="-p 127.0.0.1:22"' > ${ROOTFS_PATH}/etc/conf.d/dropbear_org
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Move persistent data to /data"
