@@ -17,15 +17,15 @@ var ubootFile = "/uboot/uboot.dat"
 var ubootRemountRW = "mount -o remount,rw /uboot"
 var ubootRemountRO = "mount -o remount,ro /uboot"
 
-var rootPartitionA = "/dev/mmcblk0p1"
-var rootPartitionB = "/dev/mmcblk0p2"
+var rootPartitionA = "/dev/mmcblk0p2"
+var rootPartitionB = "/dev/mmcblk0p3"
 
 // loadUbootDat file to byte array
 func loadUbootDat() ([]byte, error) {
 	defaultData := make([]byte, 1024)
 	defaultData[0] = 1 // file version
 	defaultData[1] = 0 // boot counter
-	defaultData[2] = 1 // boot partition  A=1, B=2
+	defaultData[2] = 2 // boot partition  A=2, B=3
 
 	data, err := ioutil.ReadFile(ubootFile)
 	if err != nil {
@@ -81,19 +81,19 @@ func UBootResetCounter() error {
 	return saveUbootDat(data)
 }
 
-// UBootActive returns the active partition. A=1, B=2
+// UBootActive returns the active partition. A=2, B=3
 func UBootActive() uint8 {
 	data, _ := loadUbootDat()
 	return data[2]
 }
 
-// UBootSetActive sets the active partition. A=1, B=2
+// UBootSetActive sets the active partition. A=2, B=3
 func UBootSetActive(active uint8) error {
 	data, _ := loadUbootDat()
-	if active == 1 {
-		data[2] = 1
-	} else {
+	if active == 2 {
 		data[2] = 2
+	} else {
+		data[2] = 3
 	}
 	return saveUbootDat(data)
 }
@@ -102,7 +102,7 @@ func UBootSetActive(active uint8) error {
 func UpdateSystem(image string) error {
 	data, _ := loadUbootDat()
 	rootPart := rootPartitionA
-	if data[2] == 1 {
+	if data[2] == 2 {
 		rootPart = rootPartitionB
 	}
 
@@ -135,9 +135,9 @@ func UpdateSystem(image string) error {
 	}
 
 	// switch active partition
-	if data[2] == 1 {
-		return UBootSetActive(2)
+	if data[2] == 2 {
+		return UBootSetActive(3)
 	} else {
-		return UBootSetActive(1)
+		return UBootSetActive(2)
 	}
 }

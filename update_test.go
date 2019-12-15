@@ -24,17 +24,21 @@ func init() {
 func TestLoadUbootDat(t *testing.T) {
 	ass := assert.New(t)
 
+	defer func() {
+		_ = os.Remove(ubootFile)
+	}()
+
 	// file missing
 	data, err := loadUbootDat()
 	ass.EqualError(err, "failed to open file: open test_uboot: no such file or directory")
-	ass.Equal([]byte{1, 0, 1}, data[:3])
+	ass.Equal([]byte{1, 0, 2}, data[:3])
 
 	// file with invalid data
 	ass.NoError(ioutil.WriteFile(ubootFile, []byte{}, os.ModePerm))
 
 	data, err = loadUbootDat()
 	ass.EqualError(err, "invalid dat file -> fallback to defaults")
-	ass.Equal([]byte{1, 0, 1}, data[:3])
+	ass.Equal([]byte{1, 0, 2}, data[:3])
 
 	// file with invalid CRC
 	testData := make([]byte, 1024)
@@ -45,7 +49,7 @@ func TestLoadUbootDat(t *testing.T) {
 	ass.NoError(ioutil.WriteFile(ubootFile, testData, os.ModePerm))
 	data, err = loadUbootDat()
 	ass.EqualError(err, "invalid crc -> fallback to defaults")
-	ass.Equal([]byte{1, 0, 1}, data[:3])
+	ass.Equal([]byte{1, 0, 2}, data[:3])
 
 	// file with valid CRC
 	binary.LittleEndian.PutUint32(testData[1020:], 0x982E8B7A)
@@ -54,12 +58,14 @@ func TestLoadUbootDat(t *testing.T) {
 	data, err = loadUbootDat()
 	ass.NoError(err)
 	ass.Equal(testData, data)
-
-	_ = os.Remove(ubootFile)
 }
 
 func TestSaveUbootDat(t *testing.T) {
 	ass := assert.New(t)
+
+	defer func() {
+		_ = os.Remove(ubootFile)
+	}()
 
 	testData := make([]byte, 1024)
 	testData[0] = 1
@@ -72,12 +78,14 @@ func TestSaveUbootDat(t *testing.T) {
 	data, err := ioutil.ReadFile(ubootFile)
 	ass.NoError(err)
 	ass.Equal(testData, data)
-
-	_ = os.Remove(ubootFile)
 }
 
 func TestUBootResetCounter(t *testing.T) {
 	ass := assert.New(t)
+
+	defer func() {
+		_ = os.Remove(ubootFile)
+	}()
 
 	// write test file
 	testData := make([]byte, 1024)
@@ -92,12 +100,14 @@ func TestUBootResetCounter(t *testing.T) {
 	data, err := ioutil.ReadFile(ubootFile)
 	ass.NoError(err)
 	ass.Zero(data[1])
-
-	_ = os.Remove(ubootFile)
 }
 
 func TestUBootActive(t *testing.T) {
 	ass := assert.New(t)
+
+	defer func() {
+		_ = os.Remove(ubootFile)
+	}()
 
 	// write test file
 	testData := make([]byte, 1024)
@@ -108,12 +118,14 @@ func TestUBootActive(t *testing.T) {
 	ass.NoError(ioutil.WriteFile(ubootFile, testData, os.ModePerm))
 
 	ass.Equal(uint8(2), UBootActive())
-
-	_ = os.Remove(ubootFile)
 }
 
 func TestUBootSetActive(t *testing.T) {
 	ass := assert.New(t)
+
+	defer func() {
+		_ = os.Remove(ubootFile)
+	}()
 
 	// write test file
 	testData := make([]byte, 1024)
@@ -127,13 +139,18 @@ func TestUBootSetActive(t *testing.T) {
 
 	data, err := ioutil.ReadFile(ubootFile)
 	ass.NoError(err)
-	ass.Equal(uint8(1), data[2])
-
-	_ = os.Remove(ubootFile)
+	ass.Equal(uint8(3), data[2])
 }
 
 func TestUpdateSystem(t *testing.T) {
 	ass := assert.New(t)
+
+	defer func() {
+		_ = os.Remove("test_image.gz")
+		_ = os.Remove(ubootFile)
+		_ = os.Remove(rootPartitionA)
+		_ = os.Remove(rootPartitionB)
+	}()
 
 	// test uboot file
 	testData := make([]byte, 1024)
@@ -159,21 +176,16 @@ func TestUpdateSystem(t *testing.T) {
 	ass.NoError(gzipWriter.Close())
 	ass.NoError(file.Close())
 
-	ass.NoError(ioutil.WriteFile(rootPartitionA, nil, os.ModePerm))
+	ass.NoError(ioutil.WriteFile(rootPartitionB, nil, os.ModePerm))
 	ass.NoError(UpdateSystem("test_image.gz"))
 
 	// check if image was written
-	data, err := ioutil.ReadFile(rootPartitionA)
+	data, err := ioutil.ReadFile(rootPartitionB)
 	ass.NoError(err)
 	ass.Equal(testImgData, data)
 
 	// check if uboot dat was updated
 	data, err = ioutil.ReadFile(ubootFile)
 	ass.NoError(err)
-	ass.Equal(uint8(1), data[2])
-
-	_ = os.Remove("test_image.gz")
-	_ = os.Remove(ubootFile)
-	_ = os.Remove(rootPartitionA)
-	_ = os.Remove(rootPartitionB)
+	ass.Equal(uint8(3), data[2])
 }

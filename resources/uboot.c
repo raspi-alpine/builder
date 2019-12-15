@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
         data[1] = 0;
 
         // boot partition
-        data[2] = 2; // A=1, B=2
+        data[2] = 2; // A=2, B=3
     }
 
     // handle commands
