@@ -27,7 +27,7 @@ func SystemSetRootPassword(password string) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate hash: %w", err)
 	}
-	line := fmt.Sprintf("root:%s:0:0:::::", hash)
+	line := fmt.Sprintf("root:%s:0:0:::::\n", hash)
 
 	// write shadow file
 	return ioutil.WriteFile(systemShadow, []byte(line), os.ModePerm)
