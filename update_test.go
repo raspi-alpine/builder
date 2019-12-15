@@ -15,8 +15,7 @@ import (
 
 func init() {
 	ubootFile = "test_uboot"
-	ubootRemountRW = "true"
-	ubootRemountRO = "true"
+	mountCommand = "true"
 	rootPartitionA = "test_rootA"
 	rootPartitionB = "test_rootB"
 }

@@ -13,9 +13,10 @@ import (
 	"os/exec"
 )
 
+var mountCommand = "mount"
 var ubootFile = "/uboot/uboot.dat"
-var ubootRemountRW = "mount -o remount,rw /uboot"
-var ubootRemountRO = "mount -o remount,ro /uboot"
+var ubootRemountRW = []string{"-o", "remount,rw", "/uboot"}
+var ubootRemountRO = []string{"-o", "remount,ro", "/uboot"}
 
 var rootPartitionA = "/dev/mmcblk0p2"
 var rootPartitionB = "/dev/mmcblk0p3"
@@ -53,7 +54,7 @@ func saveUbootDat(data []byte) error {
 		crc32.ChecksumIEEE(data[:1020]))
 
 	// remount boot partition - writable
-	cmd := exec.Command(ubootRemountRW)
+	cmd := exec.Command(mountCommand, ubootRemountRW...)
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to remount RW: %w", err)
@@ -66,7 +67,7 @@ func saveUbootDat(data []byte) error {
 	}
 
 	// remount boot partition - readonly
-	cmd = exec.Command(ubootRemountRO)
+	cmd = exec.Command(mountCommand, ubootRemountRO...)
 	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to remount RO: %w", err)
