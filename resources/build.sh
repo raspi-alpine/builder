@@ -196,8 +196,10 @@ if [ ! -f /data/etc/hostname ]; then
 fi
 
 # root password
-root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
-echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
+if [ ! -f /data/etc/shadow ]; then
+  root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
+  echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
+fi
 
 # interface
 mkdir -p /data/etc/network
