@@ -14,7 +14,7 @@ import (
 // system configurations
 var systemShadow = "/data/etc/shadow"
 var systemDropbearConfig = "/data/etc/dropbear/dropbear.conf"
-var systemDropbearRestart = "rc-service dropbear start"
+var systemDropbearRestart = "rc-service dropbear restart"
 var systemShutdown = "poweroff"
 var systemReboot = "reboot"
 
