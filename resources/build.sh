@@ -11,6 +11,7 @@ set -e
 : ${DEFAULT_HOSTNAME:="alpine"}
 : ${DEFAULT_ROOT_PASSWORD:="alpine"}
 : ${DEFAULT_DROPBEAR_ENABLED:="true"}
+: ${UBOOT_COUNTER_RESET_ENABLED:="true"}
 
 : ${SIZE_BOOT:="100M"}
 : ${SIZE_ROOT_FS:="200M"}
@@ -150,9 +151,9 @@ chroot_exec rc-update add ntpd default
 # uboot tools
 cp /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
 
-# TODO REMOVE THIS
-# mark system as booted (should be moved to application)
-cat >${ROOTFS_PATH}/etc/local.d/99-uboot.start <<EOF
+if [ "$UBOOT_COUNTER_RESET_ENABLED" = "true" ]; then
+  # mark system as booted (should be moved to application)
+  cat >${ROOTFS_PATH}/etc/local.d/99-uboot.start <<EOF
 #!/bin/sh
 mount -o remount,rw /uboot
 
@@ -161,7 +162,8 @@ mount -o remount,rw /uboot
 sync
 mount -o remount,ro /uboot
 EOF
-chmod +x ${ROOTFS_PATH}/etc/local.d/99-uboot.start
+  chmod +x ${ROOTFS_PATH}/etc/local.d/99-uboot.start
+fi
 
 # copy helper scripts
 cp ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
