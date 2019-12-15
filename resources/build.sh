@@ -200,6 +200,7 @@ root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
 echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
 
 # interface
+mkdir -p /data/etc/network
 if [ ! -f /data/etc/network/interfaces ]; then
 cat > /data/etc/network/interfaces <<EOF2
 auto lo
