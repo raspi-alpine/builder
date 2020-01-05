@@ -1,10 +1,14 @@
 package alpine_builder
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/GehirnInc/crypt"
@@ -17,6 +21,8 @@ var systemDropbearConfig = "/data/etc/dropbear/dropbear.conf"
 var systemDropbearRestart = "rc-service dropbear restart"
 var systemShutdown = "poweroff"
 var systemReboot = "reboot"
+var systemZoneinfo = "/usr/share/zoneinfo/"
+var systemLocaltimeFile = "/data/etc/localtime"
 
 // SystemSetRootPassword update shadow file
 func SystemSetRootPassword(password string) error {
@@ -93,4 +99,53 @@ func SystemReboot() error {
 		return fmt.Errorf("failed to start system reboot: %w", err)
 	}
 	return nil
+}
+
+// SystemListTimeZones available on system
+func SystemListTimeZones() ([]string, error) {
+	// load zone info tab
+	file, err := os.Open(path.Join(systemZoneinfo, "zone1970.tab"))
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// parse file
+	zones := make([]string, 0)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		lineSplit := strings.Split(line, "\t")
+		if len(lineSplit) < 3 {
+			continue
+		}
+
+		zones = append(zones, strings.TrimSpace(lineSplit[2]))
+	}
+	zones = append(zones, "Etc/UTC")
+
+	sort.Strings(zones)
+	return zones, nil
+}
+
+// SystemSetTimeZone for operating system
+func SystemSetTimeZone(name string) error {
+	if _, err := os.Stat(path.Join(systemZoneinfo, name)); err != nil {
+		return fmt.Errorf("invalid time zone given: %s", name)
+	}
+	_ = os.Remove(systemLocaltimeFile)
+	return os.Symlink(path.Join(systemZoneinfo, name), systemLocaltimeFile)
+}
+
+// SystemGetTimeZone currently set for operating system
+func SystemGetTimeZone() (string, error) {
+	link, err := os.Readlink(systemLocaltimeFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to get local time zone")
+	}
+	return filepath.Rel(systemZoneinfo, link)
 }

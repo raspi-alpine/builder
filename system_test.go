@@ -3,6 +3,7 @@ package alpine_builder
 import (
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 	"testing"
 
@@ -17,6 +18,9 @@ func init() {
 	systemDropbearRestart = "restart_dropbear_command"
 	systemReboot = "reboot_command"
 	systemShutdown = "shutdown_command"
+
+	systemZoneinfo = "zoneinfo/"
+	systemLocaltimeFile = "test_localtime"
 }
 
 func TestSystemSetRootPassword(t *testing.T) {
@@ -91,4 +95,75 @@ func TestSystemShutdown(t *testing.T) {
 
 	ass.EqualError(SystemShutdown(),
 		"failed to start system shutdown: exec: \"shutdown_command\": executable file not found in $PATH")
+}
+
+var zoneTab = `
+#
+#country-
+#codes	coordinates	TZ	comments
+AD	+4230+00131	Europe/Andorra
+AE,OM	+2518+05518	Asia/Dubai
+AQ	-6617+11031	Antarctica/Casey	Casey
+`
+
+func TestSystemListTimeZones(t *testing.T) {
+	ass := assert.New(t)
+
+	_, err := SystemListTimeZones()
+	ass.EqualError(err, "open zoneinfo/zone1970.tab: no such file or directory")
+
+	ass.NoError(os.MkdirAll(systemZoneinfo, os.ModePerm))
+	testZoneTab := path.Join(systemZoneinfo, "zone1970.tab")
+	ass.NoError(ioutil.WriteFile(testZoneTab, []byte(zoneTab), os.ModePerm))
+
+	zones, err := SystemListTimeZones()
+	ass.NoError(err)
+	ass.Equal([]string{
+		"Antarctica/Casey",
+		"Asia/Dubai",
+		"Etc/UTC",
+		"Europe/Andorra",
+	}, zones)
+
+	ass.NoError(os.Remove(testZoneTab))
+	ass.NoError(os.Remove(systemZoneinfo))
+}
+
+func TestSystemSetTimeZone(t *testing.T) {
+	ass := assert.New(t)
+
+	ass.NoError(os.MkdirAll(systemZoneinfo, os.ModePerm))
+	testZone := path.Join(systemZoneinfo, "test")
+	ass.NoError(ioutil.WriteFile(testZone, []byte(""), os.ModePerm))
+
+	ass.EqualError(SystemSetTimeZone("test2"),
+		"invalid time zone given: test2")
+
+	ass.NoError(SystemSetTimeZone("test"))
+	ass.NoError(SystemSetTimeZone("test"))
+
+	ass.NoError(os.Remove(systemLocaltimeFile))
+	ass.NoError(os.Remove(testZone))
+	ass.NoError(os.Remove(systemZoneinfo))
+}
+
+func TestSystemGetTimeZone(t *testing.T) {
+	ass := assert.New(t)
+
+	ass.NoError(os.MkdirAll(systemZoneinfo, os.ModePerm))
+	testZone := path.Join(systemZoneinfo, "test")
+	ass.NoError(ioutil.WriteFile(testZone, []byte(""), os.ModePerm))
+
+	_, err := SystemGetTimeZone()
+	ass.EqualError(err, "failed to get local time zone")
+
+	ass.NoError(os.Symlink(path.Join(systemZoneinfo, "test"), systemLocaltimeFile))
+
+	zone, err := SystemGetTimeZone()
+	ass.NoError(err)
+	ass.Equal("test", zone)
+
+	ass.NoError(os.Remove(systemLocaltimeFile))
+	ass.NoError(os.Remove(testZone))
+	ass.NoError(os.Remove(systemZoneinfo))
 }
