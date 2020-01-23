@@ -177,7 +177,7 @@ ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
-if [ "$DEFAULT_DROPBEAR_ENABLED" = "true" ]; then
+if [ "$DEFAULT_DROPBEAR_ENABLED" != "true" ]; then
   echo 'DROPBEAR_OPTS="-p 127.0.0.1:22"' > ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 fi
 
