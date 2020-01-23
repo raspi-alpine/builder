@@ -57,7 +57,7 @@ builder.
 
 | Variable                    | Default Value                        | Description                                                                                       |
 | --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| ALPINE_BRANCH               | 3.10                                 | [Alpine Branch](https://wiki.alpinelinux.org/wiki/Alpine_Linux:Releases) to use for image         |
+| ALPINE_BRANCH               | 3.11                                 | [Alpine Branch](https://wiki.alpinelinux.org/wiki/Alpine_Linux:Releases) to use for image         |
 | ALPINE_MIRROR               | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download                                                                  |
 | CUSTOM_IMAGE_SCRIPT         | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
 | DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |

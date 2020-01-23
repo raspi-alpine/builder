@@ -54,7 +54,7 @@ ADD ./resources/uboot.c /uboot.c
 RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
 
 
-FROM alpine:3.10
+FROM alpine:3.11
 
 RUN apk update && \
     apk add automake build-base git autoconf confuse-dev linux-headers \

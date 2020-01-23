@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: ${ALPINE_BRANCH:="3.10"}
+: ${ALPINE_BRANCH:="3.11"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 
 : ${DEFAULT_TIMEZONE:="Etc/UTC"}
@@ -279,9 +279,9 @@ wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/s
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4db.elf
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4x.elf
 
-# copy linux kernel and overlays to boot
-cp ${ROOTFS_PATH}/usr/lib/linux-*-rpi2/*.dtb ${BOOTFS_PATH}/
-cp -r ${ROOTFS_PATH}/usr/lib/linux-*-rpi2/overlays ${BOOTFS_PATH}/
+# copy linux device trees and overlays to boot
+cp ${ROOTFS_PATH}/boot/dtbs-rpi/*.dtb ${BOOTFS_PATH}/
+cp -r ${ROOTFS_PATH}/boot/dtbs-rpi/overlays ${BOOTFS_PATH}/
 
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
@@ -350,6 +350,8 @@ rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 rm -rf ${ROOTFS_PATH}/boot/initramfs*
 rm -rf ${ROOTFS_PATH}/boot/System*
 rm -rf ${ROOTFS_PATH}/boot/config*
+rm -rf ${ROOTFS_PATH}/boot/vmlinuz*
+rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create image
