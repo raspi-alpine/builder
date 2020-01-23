@@ -62,6 +62,7 @@ builder.
 | CUSTOM_IMAGE_SCRIPT         | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
 | DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |
 | DEFAULT_HOSTNAME            | alpine                               | Default hostname                                                                                  |
+| DEFAULT_KERNEL_MODULES      | ipv6 af_packet                       | Kernel modules to keep in image                                                                   |
 | DEFAULT_ROOT_PASSWORD       | alpine                               | Default password for root user                                                                    |
 | DEFAULT_TIMEZONE            | Etc/UTC                              | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image |
 | IMG_NAME                    | sdcard                               | Base name of created image file                                                                   |
