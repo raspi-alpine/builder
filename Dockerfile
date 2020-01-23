@@ -10,10 +10,12 @@ RUN mkdir /uboot_build/ && \
 
 WORKDIR /uboot_build/
 
-RUN wget ftp://ftp.denx.de/pub/u-boot/u-boot-2019.10.tar.bz2 && \
-    tar -xjf u-boot-2019.10.tar.bz2
+ENV UBOOT_VERSION=2020.01
 
-WORKDIR /uboot_build/u-boot-2019.10/
+RUN wget http://ftp.denx.de/pub/u-boot/u-boot-${UBOOT_VERSION}.tar.bz2 && \
+    tar -xjf u-boot-${UBOOT_VERSION}.tar.bz2
+
+WORKDIR /uboot_build/u-boot-${UBOOT_VERSION}/
 
 # model a/b/zero
 RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
