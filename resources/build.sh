@@ -28,7 +28,7 @@ set -e
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2 linux-rpi4"
 
 WORK_PATH="/work"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
@@ -77,7 +77,7 @@ cp /usr/share/apk/keys/*.rsa.pub ${ROOTFS_PATH}/etc/apk/keys/
 cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
-apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armhf add $BASE_PACKAGES
+apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armv7 add $BASE_PACKAGES
 
 # add google DNS to enable network access inside chroot
 echo "nameserver 8.8.8.8" > ${ROOTFS_PATH}/etc/resolv.conf
@@ -251,7 +251,7 @@ echo ">> Prepare kernel for uboot"
 # build uImage
 mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage 
 mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
-
+mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS

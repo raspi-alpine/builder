@@ -83,15 +83,24 @@ echo "select kernel"
 setenv boot_kernel "/boot/uImage"
 
 # only if new pi a new kernel is required
+# https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
 setexpr board_new_pi ${board_revision} \& 0x800000
 if test ${board_new_pi} > 0; then
   echo "new board"
   # get cpu id from revision
   setexpr board_cpu ${board_revision} \& 0xF000
   
-  # at the moment CPU except the oldest need the new kernel
-  if test ${board_cpu} > 0x0000; then
+  # BCM2836 (pi2)
+  if test ${board_cpu} == 0x1000; then
     setenv boot_kernel "/boot/uImage2"
+  fi
+  # BCM2837 (pi3)
+  if test ${board_cpu} == 0x2000; then
+    setenv boot_kernel "/boot/uImage2"
+  fi
+  # BCM2711 (pi4)
+  if test ${board_cpu} > 0x3000; then
+    setenv boot_kernel "/boot/uImage4"
   fi
 else
   echo "old board"
