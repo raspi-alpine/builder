@@ -11,10 +11,11 @@ set -e
 : ${DEFAULT_HOSTNAME:="alpine"}
 : ${DEFAULT_ROOT_PASSWORD:="alpine"}
 : ${DEFAULT_DROPBEAR_ENABLED:="true"}
+: ${DEFAULT_KERNEL_MODULES:="ipv6 af_packet"}
 : ${UBOOT_COUNTER_RESET_ENABLED:="true"}
 
 : ${SIZE_BOOT:="100M"}
-: ${SIZE_ROOT_FS:="200M"}
+: ${SIZE_ROOT_FS:="100M"}
 : ${SIZE_ROOT_PART:="500M"}
 : ${SIZE_DATA:="20M"}
 : ${IMG_NAME:="sdcard"}
@@ -252,6 +253,29 @@ echo ">> Prepare kernel for uboot"
 mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage 
 mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
 mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+echo ">> Remove kernel modules"
+cd ${ROOTFS_PATH}/lib/modules
+
+# loop all kernel versions
+for d in * ; do
+  echo "Remove $d"
+
+  # collect modules to keep
+  moduleFiles=$(grep -E "/($(echo $DEFAULT_KERNEL_MODULES | sed "s/ /|/g")).ko:" $d/modules.dep | tr -d : | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
+
+  # copy required modules to tmp dir
+  cd $d
+  cp --parents modules.* ${moduleFiles} ../${d}_tmp
+  cd ..
+
+  # replace original modules dir with new one
+  rm -rf $d
+  mv ${d}_tmp $d
+done
+
+cd ${WORK_PATH}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS
