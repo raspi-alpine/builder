@@ -256,26 +256,32 @@ mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Remove kernel modules"
-cd ${ROOTFS_PATH}/lib/modules
 
-# loop all kernel versions
-for d in * ; do
-  echo "Remove $d"
+if [ "$DEFAULT_KERNEL_MODULES" == "*" ]; then
+  echo "skiped -> keep all modules"
 
-  # collect modules to keep
-  moduleFiles=$(grep -E "/($(echo $DEFAULT_KERNEL_MODULES | sed "s/ /|/g")).ko:" $d/modules.dep | tr -d : | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
+else
+  cd ${ROOTFS_PATH}/lib/modules
 
-  # copy required modules to tmp dir
-  cd $d
-  cp --parents modules.* ${moduleFiles} ../${d}_tmp
-  cd ..
+  # loop all kernel versions
+  for d in * ; do
+    echo "Remove $d"
 
-  # replace original modules dir with new one
-  rm -rf $d
-  mv ${d}_tmp $d
-done
+    # collect modules to keep
+    moduleFiles=$(grep -E "/($(echo $DEFAULT_KERNEL_MODULES | sed "s/ /|/g")).ko:" $d/modules.dep | tr -d : | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
 
-cd ${WORK_PATH}
+    # copy required modules to tmp dir
+    cd $d
+    cp --parents modules.* ${moduleFiles} ../${d}_tmp
+    cd ..
+
+    # replace original modules dir with new one
+    rm -rf $d
+    mv ${d}_tmp $d
+  done
+
+  cd ${WORK_PATH}
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS
