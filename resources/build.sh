@@ -11,7 +11,7 @@ set -e
 : ${DEFAULT_HOSTNAME:="alpine"}
 : ${DEFAULT_ROOT_PASSWORD:="alpine"}
 : ${DEFAULT_DROPBEAR_ENABLED:="true"}
-: ${DEFAULT_KERNEL_MODULES:="ipv6 af_packet"}
+: ${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}
 : ${UBOOT_COUNTER_RESET_ENABLED:="true"}
 
 : ${SIZE_BOOT:="100M"}
@@ -146,6 +146,10 @@ mkdir -p ${ROOTFS_PATH}/var/lock
 
 # time
 chroot_exec rc-update add ntpd default
+
+# kernel modules
+chroot_exec rc-update add modules
+echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
