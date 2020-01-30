@@ -30,8 +30,14 @@ if itest *0x103FC -ne *0x10400; then
   mw.b ${addr_boot_partition} ${boot_partition_a}
 fi
 
+setexpr.b boot_counter *${addr_boot_counter}
+setexpr.b boot_partition *${addr_boot_partition}
+echo "> boot counter:   ${boot_counter}"
+echo "> boot partition: ${boot_partition}"
+
 # ensure boot partition is valid
-if itest.b *${addr_boot_partition} -ne ${boot_partition_a} && test.b *${addr_boot_partition} -ne ${boot_partition_b}; then
+if itest.b *${addr_boot_partition} -ne ${boot_partition_a} && itest.b *${addr_boot_partition} -ne ${boot_partition_b}; then
+  echo "switched to valid partition -> A"
   mw.b ${addr_boot_partition} ${boot_partition_a}
 fi
 
