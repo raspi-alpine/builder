@@ -66,8 +66,8 @@ echo ">> Prepare root FS"
 
 # update local repositories to destination ones to ensure the right packages where installed
 cat >/etc/apk/repositories <<EOF
-${ALPINE_MIRROR}/v${ALPINE_BRANCH}/main
-${ALPINE_MIRROR}/v${ALPINE_BRANCH}/community
+${ALPINE_MIRROR}/${ALPINE_BRANCH}/main
+${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
 
 # copy apk keys to new root (required for initial apk add run)
