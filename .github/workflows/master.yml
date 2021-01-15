@@ -15,7 +15,7 @@ jobs:
       - name: Login to Docker Container Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder
+          name: ${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder/raspi-alpine-builder
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
           registry: ${{ secrets.REGISTRY_HOST }}
