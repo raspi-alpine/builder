@@ -20,7 +20,7 @@ jobs:
           DOCKER_REGISTRY_URL: ${{ secrets.REGISTRY_HOST }}
 
       - name: Build ${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder
-        run: docker build
+        run: docker build -t ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder:latest .
 
       - name: Push node/node to GitHub Container Registry
         uses: actions-hub/docker@master
