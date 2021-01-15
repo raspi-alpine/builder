@@ -13,16 +13,9 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Login to Docker Container Registry
-        uses: actions-hub/docker/login@master
+        uses: elgohr/Publish-Docker-Github-Action@master
         env:
-          DOCKER_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-          DOCKER_REGISTRY_URL: ${{ secrets.REGISTRY_HOST }}
-
-      - name: Build ${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder
-        run: docker build -t ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder:latest .
-
-      - name: Push node/node to GitHub Container Registry
-        uses: actions-hub/docker@master
-        with:
-          args: push ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder:latest
+          name: ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          registry: ${{ secrets.REGISTRY_HOST }}
