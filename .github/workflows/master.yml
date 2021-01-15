@@ -1,0 +1,28 @@
+name: Master
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Login to Docker Container Registry
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          DOCKER_REGISTRY_URL: ${{ secrets.REGISTRY_HOST }}
+
+      - name: Build ${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder
+        run: docker build
+
+      - name: Push node/node to GitHub Container Registry
+        uses: actions-hub/docker@master
+        with:
+          args: push ${{ secrets.REGISTRY_HOST }}/${{ secrets.REGISTRY_USERNAME }}/raspi-alpine-builder:latest
