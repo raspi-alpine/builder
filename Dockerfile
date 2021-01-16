@@ -56,6 +56,8 @@ RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
 
 FROM alpine:3.11
 
+RUN apk add --no-cache strace
+
 RUN apk update && \
     apk add automake build-base git autoconf confuse-dev linux-headers \
             findutils mtools e2fsprogs-extra alpine-sdk dosfstools uboot-tools && \
@@ -84,4 +86,4 @@ COPY --from=uboot_tool /uboot_tool /uboot_tool
 
 WORKDIR /work
 
-CMD ["/bin/sh", "/resources/build.sh"]
+CMD ["strace -f", "/bin/sh", "/resources/build.sh", "2>&1 | less"]
