@@ -86,4 +86,4 @@ COPY --from=uboot_tool /uboot_tool /uboot_tool
 
 WORKDIR /work
 
-CMD ["strace", "-f /bin/sh /resources/build.sh 2>&1"]
+CMD ["/bin/sh", "/resources/build.sh"]
