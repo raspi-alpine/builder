@@ -314,6 +314,11 @@ wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/s
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4db.elf
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4x.elf
 
+ls -la \
+    ${ROOTFS_PATH} \
+    ${ROOTFS_PATH}/boot \
+    ${ROOTFS_PATH}/boot/dtbs-rpi/
+
 # copy linux device trees and overlays to boot
 cp ${ROOTFS_PATH}/boot/dtbs-rpi/*.dtb ${BOOTFS_PATH}/
 cp -r ${ROOTFS_PATH}/boot/dtbs-rpi/overlays ${BOOTFS_PATH}/
