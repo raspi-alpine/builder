@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: ${ALPINE_BRANCH:="3.11"}
+: ${ALPINE_BRANCH:="v3.11"}
 : ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
 
 : ${DEFAULT_TIMEZONE:="Etc/UTC"}
@@ -24,6 +24,7 @@ set -e
 : ${INPUT_PATH:="/input"}
 : ${CUSTOM_IMAGE_SCRIPT:="image.sh"}
 
+ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
@@ -66,8 +67,8 @@ echo ">> Prepare root FS"
 
 # update local repositories to destination ones to ensure the right packages where installed
 cat >/etc/apk/repositories <<EOF
-${ALPINE_MIRROR}/v${ALPINE_BRANCH}/main
-${ALPINE_MIRROR}/v${ALPINE_BRANCH}/community
+${ALPINE_MIRROR}/${ALPINE_BRANCH}/main
+${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
 
 # copy apk keys to new root (required for initial apk add run)
