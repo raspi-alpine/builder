@@ -26,7 +26,7 @@ set -e
 : ${INPUT_PATH:="/input"}
 : ${CUSTOM_IMAGE_SCRIPT:="image.sh"}
 
-ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[^v].*[0-9]/s/^/v/')
+ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
