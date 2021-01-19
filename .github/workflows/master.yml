@@ -34,6 +34,11 @@ jobs:
       # Working Directories
       OUT_DIR: /root/out
     steps:
+      - name: Extract Branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      
       - name: Login to Docker Container Registry
         uses: actions-hub/docker/login@master
         env:
@@ -61,7 +66,7 @@ jobs:
             -e DEFAULT_DROPBEAR_ENABLED=true \
             -e DEFAULT_HOSTNAME=${{ env.PROFILENAME }} \
             -e INPUT_PATH=${{ github.workspace }} \
-            -e IMG_NAME=${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }} \
+            -e IMG_NAME=${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }} \
             ${{ secrets.REGISTRY_HOST }}/robin-rpr/raspi-alpine-builder:latest
       
       - name: Copy Artifacts
@@ -73,12 +78,12 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: |
-            ${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }}
+            ${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }}
           path: |
-            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }}.${{ env.FILE_EXT }}
-            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }}.${{ env.FILE_EXT }}.sha256
-            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }}_update.${{ env.FILE_EXT }}
-            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_version.outputs.version }}-${{ env.ARCH }}_update.${{ env.FILE_EXT }}.sha256
+            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }}.${{ env.FILE_EXT }}
+            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }}.${{ env.FILE_EXT }}.sha256
+            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }}_update.${{ env.FILE_EXT }}
+            ${{ env.OUT_DIR }}/${{ env.PROFILENAME }}-${{ env.TAG }}-${{ steps.extract_branch.outputs.branch }}-${{ env.ARCH }}_update.${{ env.FILE_EXT }}.sha256
           if-no-files-found: error
 
     
