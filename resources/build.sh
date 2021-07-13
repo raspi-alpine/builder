@@ -81,8 +81,8 @@ cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 # initial package installation
 apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armv7 add $BASE_PACKAGES
 
-# add google DNS to enable network access inside chroot
-echo "nameserver 8.8.8.8" > ${ROOTFS_PATH}/etc/resolv.conf
+# Copy host's resolv config
+cp /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Configure root FS"
