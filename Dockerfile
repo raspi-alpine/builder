@@ -58,7 +58,7 @@ FROM alpine:3.14
 
 RUN apk update && \
     apk add automake build-base git autoconf confuse-dev linux-headers sudo \
-            findutils mtools e2fsprogs-extra alpine-sdk dosfstools uboot-tools && \
+            findutils mtools e2fsprogs-extra alpine-sdk dosfstools uboot-tools pigz && \
     rm -rf /var/cache/apk/*
 
 RUN git clone https://github.com/pengutronix/genimage.git /tmp/genimage && \
