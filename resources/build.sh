@@ -316,7 +316,7 @@ wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/s
 
 # copy linux device trees and overlays to boot
 cp ${ROOTFS_PATH}/boot/*-rpi-*.dtb ${BOOTFS_PATH}/
-cp -r ${ROOTFS_PATH}/boot/dtbs-rpi/overlays ${BOOTFS_PATH}/
+cp -r ${ROOTFS_PATH}/boot/overlays ${BOOTFS_PATH}/
 
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
