@@ -317,9 +317,9 @@ wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/s
 # copy linux device trees and overlays to boot
 # determine dtb and overlay path
 DTB_SOURCE_PATH=""
-if compgen -G "${ROOTFS_PATH}/boot/dtbs-rpi/*-rpi-*.dtb" > /dev/null; then
+if find "${ROOTFS_PATH}/boot/dtbs-rpi/" -quit -name "*-rpi-*.dtb" -type f 2>/dev/null; then
   DTB_SOURCE_PATH="${ROOTFS_PATH}/boot/dtbs-rpi"
-elif compgen -G "${ROOTFS_PATH}/boot/*-rpi-*.dtb" > /dev/null; then
+elif find "${ROOTFS_PATH}/boot/" -quit -name "*-rpi-*.dtb" -type f 2>/dev/null; then
   DTB_SOURCE_PATH="${ROOTFS_PATH}/boot"
 else
   echo "Could not determine device trees source path!"
