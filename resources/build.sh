@@ -315,8 +315,28 @@ wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/s
 wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4x.elf
 
 # copy linux device trees and overlays to boot
-cp ${ROOTFS_PATH}/boot/*-rpi-*.dtb ${BOOTFS_PATH}/
-cp -r ${ROOTFS_PATH}/boot/overlays ${BOOTFS_PATH}/
+# determine dtb and overlay path
+DTB_SOURCE_PATH=""
+if compgen -G "${ROOTFS_PATH}/boot/dtbs-rpi/*-rpi-*.dtb" > /dev/null; then
+  DTB_SOURCE_PATH="${ROOTFS_PATH}/boot/dtbs-rpi"
+elif compgen -G "${ROOTFS_PATH}/boot/*-rpi-*.dtb" > /dev/null; then
+  DTB_SOURCE_PATH="${ROOTFS_PATH}/boot"
+else
+  echo "Could not determine device trees source path!"
+  exit 1
+fi
+cp -v ${DTB_SOURCE_PATH}/*-rpi-*.dtb ${BOOTFS_PATH}/
+
+OVERLAY_SOURCE_PATH=""
+if [ -d "${ROOTFS_PATH}/boot/dtbs-rpi/overlays" ]; then
+  OVERLAY_SOURCE_PATH="${ROOTFS_PATH}/boot/dtbs-rpi/overlays"
+elif [ -d "${ROOTFS_PATH}/boot/overlays" ]; then
+  OVERLAY_SOURCE_PATH="${ROOTFS_PATH}/boot/overlays"
+else
+  echo "Could not determine overlay source path!"
+  exit 1
+fi
+cp -vr ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
 
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
