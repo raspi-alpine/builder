@@ -1,0 +1,29 @@
+name: 'docker'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Timestamp
+        run: echo "timestamp=$(date '+%Y%m%d_%H%M%S')" >> $GITHUB_ENV
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/bboehmke/raspi-alpine-builder:${{env.timestamp}},ghcr.io/bboehmke/raspi-alpine-builder:latest
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
