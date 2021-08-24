@@ -74,6 +74,7 @@ ADD ./resources/genext2fs /genext2fs
 
 RUN cd /genext2fs && \
     echo | abuild-keygen -a -i -q && \
+    abuild -F checksum && \
     abuild -F -P /tmp/pkg && \
     apk add /tmp/pkg/$(abuild -A)/genext2fs-1*.apk && \
     rm -rf /tmp/pkg/
