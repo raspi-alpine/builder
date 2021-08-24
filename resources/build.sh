@@ -5,7 +5,7 @@ set -e
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 : ${ALPINE_BRANCH:="v3.14"}
-: ${ALPINE_MIRROR:="http://dl-cdn.alpinelinux.org/alpine"}
+: ${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}
 
 : ${DEFAULT_TIMEZONE:="Etc/UTC"}
 : ${DEFAULT_HOSTNAME:="alpine"}
