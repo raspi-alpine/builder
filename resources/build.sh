@@ -30,7 +30,7 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2 linux-rpi4"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2 linux-rpi4"
 
 WORK_PATH="/work"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
@@ -104,6 +104,8 @@ EOF
 # prepare network
 chroot_exec rc-update add networking default
 ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
+# silence ifconfig-ng eval errors
+sed -E "s/(eval echo .IF_DHCP_HOSTNAME)/\1 2>\/dev\/null/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
 # run local before network -> local brings up the interface
 sed -i '/^\tneed/ s/$/ local/' ${ROOTFS_PATH}/etc/init.d/networking
