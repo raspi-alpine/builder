@@ -104,18 +104,8 @@ EOF
 # prepare network
 chroot_exec rc-update add networking default
 ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
-# silence ifconfig-ng eval errors
-sed -E "s/(eval echo .IF_DHCP_HOSTNAME)/\1 2>\/dev\/null/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
-
-# run local before network -> local brings up the interface
-sed -i '/^\tneed/ s/$/ local/' ${ROOTFS_PATH}/etc/init.d/networking
-
-# bring up eth0 on startup
-cat >${ROOTFS_PATH}/etc/local.d/11-up_eth0.start <<EOF
-#!/bin/sh
-ifconfig eth0 up
-EOF
-chmod +x ${ROOTFS_PATH}/etc/local.d/11-up_eth0.start
+# use hostname in /etc/hostname for dhcp
+sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
 # add script to resize data partition 
 cp ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
@@ -193,50 +183,60 @@ fi
 echo ">> Move persistent data to /data"
 
 # prepare /data
-cat >${ROOTFS_PATH}/etc/local.d/20-data_prepare.start <<EOF
-#!/bin/sh
-mkdir -p /data/etc/
-touch /data/etc/resolv.conf
+cat >${ROOTFS_PATH}/etc/init.d/data_prepare <<EOF
+#!/sbin/openrc-run
 
-# Set time zone
-if [ ! -f /data/etc/timezone ]; then
-  echo "${DEFAULT_TIMEZONE}" > /data/etc/timezone
-  ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} /data/etc/localtime
-fi
+depend()
+{
+    need localmount
+}
 
-# set host name
-if [ ! -f /data/etc/hostname ]; then
-  echo "${DEFAULT_HOSTNAME}" > /data/etc/hostname
-fi
+start()
+{
+    ebegin "Preparing persistent data"
+    mkdir -p /data/etc/
+    touch /data/etc/resolv.conf
 
-# root password
-if [ ! -f /data/etc/shadow ]; then
-  root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
-  echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
-fi
+    # Set time zone
+    if [ ! -f /data/etc/timezone ]; then
+        echo "${DEFAULT_TIMEZONE}" > /data/etc/timezone
+        ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} /data/etc/localtime
+    fi
 
-# interface
-mkdir -p /data/etc/network
-if [ ! -f /data/etc/network/interfaces ]; then
-cat > /data/etc/network/interfaces <<EOF2
+    # set host name
+    if [ ! -f /data/etc/hostname ]; then
+        echo "${DEFAULT_HOSTNAME}" > /data/etc/hostname
+    fi
+
+    # root password
+    if [ ! -f /data/etc/shadow ]; then
+        root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
+        echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
+    fi
+
+    # interface
+    mkdir -p /data/etc/network
+    if [ ! -f /data/etc/network/interfaces ]; then
+        cat > /data/etc/network/interfaces <<EOF2
 auto lo
 iface lo inet loopback
 
 auto eth0
 iface eth0 inet dhcp
 EOF2
-fi
+    fi
 
-# dropbear
-mkdir -p /data/etc/dropbear/
-if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
-  cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
-fi
+    # dropbear
+    mkdir -p /data/etc/dropbear/
+    if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
+        cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
+    fi
 
-mkdir -p /data/root/
-
+    mkdir -p /data/root/
+}
 EOF
-chmod +x ${ROOTFS_PATH}/etc/local.d/20-data_prepare.start
+chmod +x ${ROOTFS_PATH}/etc/init.d/data_prepare
+chroot_exec rc-update add data_prepare
 
 # link root dir
 rmdir ${ROOTFS_PATH}/root
