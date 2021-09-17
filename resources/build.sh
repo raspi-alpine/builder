@@ -107,9 +107,8 @@ ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
 # use hostname in /etc/hostname for dhcp
 sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
-# add script to resize data partition 
-cp ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
-chmod +x ${ROOTFS_PATH}/etc/local.d/90-resizedata.start
+# add script to resize data partition
+install -D ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/sbin/resizedata.sh
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
@@ -147,7 +146,7 @@ echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # uboot tools
-cp /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
+install /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
 
 if [ "$UBOOT_COUNTER_RESET_ENABLED" = "true" ]; then
   # mark system as booted (should be moved to application)
@@ -164,7 +163,7 @@ EOF
 fi
 
 # copy helper scripts
-cp ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
+install ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
 
 
 # dropbear
@@ -193,6 +192,7 @@ depend()
 
 start()
 {
+    /sbin/resizedata.sh
     ebegin "Preparing persistent data"
     mkdir -p /data/etc/
     touch /data/etc/resolv.conf
