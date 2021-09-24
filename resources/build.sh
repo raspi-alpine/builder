@@ -144,6 +144,43 @@ chroot_exec rc-update add modules
 echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# create data FS
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+echo ">> Configure data FS"
+mkdir -p ${DATAFS_PATH}/etc
+
+# set timezone
+echo "${DEFAULT_TIMEZONE}" > ${ROOTFS_PATH}/etc/timezone.alpine-builder
+cp ${ROOTFS_PATH}/etc/timezone.alpine-builder ${DATAFS_PATH}/etc/timezone
+ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} ${DATAFS_PATH}/etc/localtime
+
+# set host name
+echo "${DEFAULT_HOSTNAME}" > ${ROOTFS_PATH}/etc/hostname.alpine-builder
+cp ${ROOTFS_PATH}/etc/hostname.alpine-builder ${DATAFS_PATH}/etc/hostname
+
+# root password
+root_pw=$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
+cp ${ROOTFS_PATH}/etc/shadow ${ROOTFS_PATH}/etc/shadow.alpine-builder
+sed -i "/^root/d" ${ROOTFS_PATH}/etc/shadow.alpine-builder
+echo "root:${root_pw}:0:0:::::" >> ${ROOTFS_PATH}/etc/shadow.alpine-builder
+cp ${ROOTFS_PATH}/etc/shadow.alpine-builder ${DATAFS_PATH}/etc/shadow
+
+# interface
+cat > ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder <<EOF2
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF2
+mkdir -p ${DATAFS_PATH}/etc/network
+cp ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder ${DATAFS_PATH}/etc/network/interfaces
+
+# root folder
+mkdir -p ${DATAFS_PATH}/root/
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # uboot tools
 install /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
@@ -169,6 +206,7 @@ install ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
 # dropbear
 chroot_exec apk add dropbear
 chroot_exec rc-update add dropbear
+mkdir -p ${DATAFS_PATH}/etc/dropbear/
 ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 
 mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
@@ -177,6 +215,8 @@ ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 if [ "$DEFAULT_DROPBEAR_ENABLED" != "true" ]; then
   echo 'DROPBEAR_OPTS="-p 127.0.0.1:22"' > ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 fi
+
+cp ${ROOTFS_PATH}/etc/conf.d/dropbear_org ${DATAFS_PATH}/etc/dropbear/dropbear.conf
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Move persistent data to /data"
@@ -194,45 +234,43 @@ start()
 {
     /sbin/resizedata.sh
     ebegin "Preparing persistent data"
-    mkdir -p /data/etc/
+    if [ ! -d /data/etc ]; then
+        mkdir -p /data/etc
+    fi
     touch /data/etc/resolv.conf
 
-    # Set time zone
+    # check time zone config
     if [ ! -f /data/etc/timezone ]; then
-        echo "${DEFAULT_TIMEZONE}" > /data/etc/timezone
-        ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} /data/etc/localtime
+        cp /etc/timezone.alpine-builder /data/etc/timezone
+        ln -fs /usr/share/zoneinfo/\$(cat /etc/timezone.alpine-builder) /data/etc/localtime
     fi
 
-    # set host name
+    # check host name
     if [ ! -f /data/etc/hostname ]; then
-        echo "${DEFAULT_HOSTNAME}" > /data/etc/hostname
+        cp /etc/hostname.alpine-builder /data/etc/hostname
     fi
 
-    # root password
+    # check root password (shadow)
     if [ ! -f /data/etc/shadow ]; then
-        root_pw=\$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
-        echo "root:\${root_pw}:0:0:::::" > /data/etc/shadow
+        cp /etc/shadow.alpine-builder /data/etc/shadow
     fi
 
-    # interface
-    mkdir -p /data/etc/network
+    # check network config
     if [ ! -f /data/etc/network/interfaces ]; then
-        cat > /data/etc/network/interfaces <<EOF2
-auto lo
-iface lo inet loopback
-
-auto eth0
-iface eth0 inet dhcp
-EOF2
+        mkdir -p /data/etc/network
+        cp /etc/network/interfaces.alpine-builder /data/etc/network/interfaces
     fi
 
     # dropbear
-    mkdir -p /data/etc/dropbear/
     if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
+        mkdir -p /data/etc/dropbear/
         cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
     fi
 
-    mkdir -p /data/root/
+    if [ ! -d /data/root ]; then
+        mkdir -p /data/root
+    fi
+
 }
 EOF
 chmod +x ${ROOTFS_PATH}/etc/init.d/data_prepare
@@ -383,13 +421,6 @@ EOF
 cat >${BOOTFS_PATH}/cmdline.txt <<EOF
 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet
 EOF
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# create data FS
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-echo ">> Configure data FS"
-mkdir -p ${DATAFS_PATH}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Custom modification
