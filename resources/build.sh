@@ -200,7 +200,7 @@ EOF
 fi
 
 # copy helper scripts
-install ${RES_PATH}/scripts/* ${ROOTFS_PATH}/sbin/
+install -t ${ROOTFS_PATH}/sbin ${RES_PATH}/scripts/* 
 
 
 # dropbear
