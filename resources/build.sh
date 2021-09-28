@@ -81,8 +81,8 @@ cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 # initial package installation
 apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armv7 add $BASE_PACKAGES
 
-# Copy host's resolv config
-cp /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
+# Copy host's resolv config for building
+cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Configure root FS"
@@ -280,13 +280,12 @@ chroot_exec rc-update add data_prepare
 rmdir ${ROOTFS_PATH}/root
 ln -s /data/root ${ROOTFS_PATH}/root
 
-# resolv.conf & udhcpc
+# udhcpc & resolv.conf
 mkdir -p ${ROOTFS_PATH}/etc/udhcpc
 cat >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf <<EOF
 RESOLV_CONF=/data/etc/resolv.conf
 
 EOF
-ln -fs /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 # root password
 ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
@@ -433,6 +432,9 @@ fi
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Cleanup
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# create resolv.conf symlink for running system
+ln -fs /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
 rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 rm -rf ${ROOTFS_PATH}/boot/initramfs*
