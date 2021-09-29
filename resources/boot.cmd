@@ -51,9 +51,9 @@ if itest.b *${addr_boot_counter} -ge ${boot_limit}; then
   echo "!!! Boot limit exceed !!!"
 
   if itest *${addr_boot_partition} -eq ${boot_partition_a}; then
-    mv.b ${addr_boot_partition} ${boot_partition_b}
+    mw.b ${addr_boot_partition} ${boot_partition_b}
   else
-    mv.b ${addr_boot_partition} ${boot_partition_a}
+    mw.b ${addr_boot_partition} ${boot_partition_a}
   fi
   mw.b ${addr_boot_counter} 0
 
