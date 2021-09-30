@@ -13,6 +13,7 @@ set -e
 : ${DEFAULT_DROPBEAR_ENABLED:="true"}
 : ${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}
 : ${UBOOT_COUNTER_RESET_ENABLED:="true"}
+: ${ARCH:="armv7"}
 
 : ${SIZE_BOOT:="100M"}
 : ${SIZE_ROOT_FS:="100M"}
@@ -30,7 +31,11 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi2 linux-rpi4"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4"
+
+if [ "$ARCH" != "aarch64" ]; then
+    BASE_PACKAGES="$BASE_PACKAGES linux-rpi2"
+fi
 
 WORK_PATH="/work"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
@@ -79,7 +84,7 @@ cp /usr/share/apk/keys/*.rsa.pub ${ROOTFS_PATH}/etc/apk/keys/
 cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
-apk --root ${ROOTFS_PATH} --update-cache --initdb --arch armv7 add $BASE_PACKAGES
+apk --root ${ROOTFS_PATH} --update-cache --initdb --arch ${ARCH} add $BASE_PACKAGES
 
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
@@ -294,9 +299,14 @@ ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 echo ">> Prepare kernel for uboot"
 
 # build uImage
-mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage 
-mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
-mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage
+
+if [ "$ARCH" != "aarch64" ]; then
+    mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
+    mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+else
+    mkimage -A arm64 -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Remove kernel modules"
@@ -397,7 +407,10 @@ hdmi_group=2
 hdmi_mode=1
 hdmi_mode=87
 hdmi_cvt 800 480 60 6 0 0 0
+EOF
 
+if [ "$ARCH" != "aarch64" ]; then
+cat >>${BOOTFS_PATH}/config.txt <<EOF1
 kernel=u-boot_rpi1.bin
 
 [pi0w]
@@ -415,7 +428,21 @@ kernel=u-boot_rpi4.bin
 [all]
 enable_uart=1
 
-EOF
+EOF1
+
+else
+cat >>${BOOTFS_PATH}/config.txt <<EOF2
+[pi3]
+kernel=u-boot_rpi3-64.bin
+
+[pi4]
+enable_gic=1
+kernel=u-boot_rpi4-64.bin
+[all]
+enable_uart=1
+arm_64bit=1
+EOF2
+fi
 
 cat >${BOOTFS_PATH}/cmdline.txt <<EOF
 console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet
