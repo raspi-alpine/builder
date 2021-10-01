@@ -1,4 +1,4 @@
-FROM debian:buster AS build_base
+FROM debian:bullseye AS build_base
 
 RUN apt-get update && \
     apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu device-tree-compiler bc
