@@ -1,7 +1,7 @@
 FROM debian:bullseye AS build_base
 
 RUN apt-get update && \
-    apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu device-tree-compiler bc
+    apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu device-tree-compiler bc libssl-dev
 
 FROM build_base AS uboot
 
@@ -10,7 +10,7 @@ RUN mkdir /uboot_build/ && \
 
 WORKDIR /uboot_build/
 
-ENV UBOOT_VERSION=2021.07
+ENV UBOOT_VERSION=2021.10
 
 RUN wget http://ftp.denx.de/pub/u-boot/u-boot-${UBOOT_VERSION}.tar.bz2 && \
     tar -xjf u-boot-${UBOOT_VERSION}.tar.bz2
