@@ -31,7 +31,7 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4"
+BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4 rng-tools-extra"
 
 if [ "$ARCH" != "aarch64" ]; then
     BASE_PACKAGES="$BASE_PACKAGES linux-rpi2"
@@ -113,7 +113,7 @@ ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
 sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
 # add script to resize data partition
-install -D ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/sbin/resizedata.sh
+install -D ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/sbin/ab_resizedata
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
@@ -145,8 +145,11 @@ mkdir -p ${ROOTFS_PATH}/var/lock
 chroot_exec rc-update add ntpd default
 
 # kernel modules
-chroot_exec rc-update add modules
+chroot_exec rc-update add modules default
 echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
+
+# rngd service for entropy
+chroot_exec rc-update add rngd default
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create data FS
@@ -210,7 +213,7 @@ install -t ${ROOTFS_PATH}/sbin ${RES_PATH}/scripts/*
 
 # dropbear
 chroot_exec apk add dropbear
-chroot_exec rc-update add dropbear
+chroot_exec rc-update add dropbear default
 mkdir -p ${DATAFS_PATH}/etc/dropbear/
 ln -s /data/etc/dropbear/ ${ROOTFS_PATH}/etc/dropbear
 
@@ -237,7 +240,7 @@ depend()
 
 start()
 {
-    /sbin/resizedata.sh
+    /sbin/ab_resizedata
     ebegin "Preparing persistent data"
     if [ ! -d /data/etc ]; then
         mkdir -p /data/etc
@@ -279,7 +282,7 @@ start()
 }
 EOF
 chmod +x ${ROOTFS_PATH}/etc/init.d/data_prepare
-chroot_exec rc-update add data_prepare
+chroot_exec rc-update add data_prepare default
 
 # link root dir
 rmdir ${ROOTFS_PATH}/root
