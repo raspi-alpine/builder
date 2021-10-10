@@ -205,8 +205,8 @@ EOF
 fi
 
 # copy helper scripts
-install -t ${ROOTFS_PATH}/sbin ${RES_PATH}/scripts/* 
-
+install ${RES_PATH}/scripts/ab_active.sh ${ROOTFS_PATH}/sbin/ab_active
+install ${RES_PATH}/scripts/ab_flash.sh ${ROOTFS_PATH}/sbin/ab_flash
 
 # dropbear
 chroot_exec apk add dropbear
