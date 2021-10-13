@@ -1,3 +1,14 @@
 include:
   - template: Code-Quality.gitlab-ci.yml  
   - template: Security/SAST.gitlab-ci.yml
+  - project: megabyte-labs/ci/gitlab-ci-templates
+    ref: master
+    file: lint/shellcheck.gitlab-ci.yml
+    
+stages:
+- lint
+- build
+- test
+
+shellcheck:
+  allow_failure: true
