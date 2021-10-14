@@ -27,6 +27,9 @@ LAST_PART="${ROOT_DEV}p${LAST_PART_NUM}"
 # unmount last partition
 umount /dev/${LAST_PART}
 
+# check the partition
+e2fsck -p -f /dev/${LAST_PART}
+
 # Get the starting offset of last partition
 PART_START=$(parted /dev/${ROOT_DEV} -ms unit s p | grep "^${LAST_PART_NUM}" | cut -f 2 -d: | sed 's/[^0-9]//g')
 if [ -z "$PART_START" ] ; then
