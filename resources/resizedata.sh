@@ -21,8 +21,8 @@ case "$ROOT_PART" in
 esac
 
 # get last partition
-LAST_PART_NUM=$(parted /dev/"$ROOT_DEV" -ms unit s p | tail -n 1 | cut -f 1 -d:)
-LAST_PART="${ROOT_DEV}p${LAST_PART_NUM}"
+LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
+LAST_PART_NUM=$(echo "$LAST_PART" | tail -c 2)
 
 # unmount last partition
 umount /dev/"$LAST_PART"
@@ -30,7 +30,7 @@ umount /dev/"$LAST_PART"
 # check the partition
 e2fsck -p -f /dev/"$LAST_PART"
 
-growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM"
+growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM" || echo "problem growing partition"
 
 # resize data filesystem then mark done with resize_done file
 resize2fs -p /dev/"$LAST_PART" && logger -t "rc.resizedata" "Root partition successfully resized."
@@ -41,3 +41,4 @@ e2fsck -p -f /dev/"$LAST_PART"
 mount -a
 
 touch /data/resize_done
+
