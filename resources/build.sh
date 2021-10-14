@@ -4,26 +4,26 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: ${ALPINE_BRANCH:="v3.14"}
-: ${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}
+: "${ALPINE_BRANCH:="v3.14"}"
+: "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
-: ${DEFAULT_TIMEZONE:="Etc/UTC"}
-: ${DEFAULT_HOSTNAME:="alpine"}
-: ${DEFAULT_ROOT_PASSWORD:="alpine"}
-: ${DEFAULT_DROPBEAR_ENABLED:="true"}
-: ${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}
-: ${UBOOT_COUNTER_RESET_ENABLED:="true"}
-: ${ARCH:="armv7"}
+: "${DEFAULT_TIMEZONE:="Etc/UTC"}"
+: "${DEFAULT_HOSTNAME:="alpine"}"
+: "${DEFAULT_ROOT_PASSWORD:="alpine"}"
+: "${DEFAULT_DROPBEAR_ENABLED:="true"}"
+: "${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}"
+: "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
+: "${ARCH:="armv7"}"
 
-: ${SIZE_BOOT:="100M"}
-: ${SIZE_ROOT_FS:="100M"}
-: ${SIZE_ROOT_PART:="500M"}
-: ${SIZE_DATA:="20M"}
-: ${IMG_NAME:="sdcard"}
+: "${SIZE_BOOT:="100M"}"
+: "${SIZE_ROOT_FS:="100M"}"
+: "${SIZE_ROOT_PART:="500M"}"
+: "${SIZE_DATA:="20M"}"
+: "${IMG_NAME:="sdcard"}"
 
-: ${OUTPUT_PATH:="/output"}
-: ${INPUT_PATH:="/input"}
-: ${CUSTOM_IMAGE_SCRIPT:="image.sh"}
+: "${OUTPUT_PATH:="/output"}"
+: "${INPUT_PATH:="/input"}"
+: "${CUSTOM_IMAGE_SCRIPT:="image.sh"}"
 
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 
