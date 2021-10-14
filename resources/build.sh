@@ -31,7 +31,7 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata parted ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4 rng-tools-extra"
+BASE_PACKAGES="alpine-base tzdata parted cloud-utils-growpart ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4 rng-tools-extra"
 
 if [ "$ARCH" != "aarch64" ]; then
     BASE_PACKAGES="$BASE_PACKAGES linux-rpi2"
