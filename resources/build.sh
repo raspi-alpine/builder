@@ -84,8 +84,7 @@ cp /usr/share/apk/keys/*.rsa.pub ${ROOTFS_PATH}/etc/apk/keys/
 cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
-apk --root ${ROOTFS_PATH} --update-cache --initdb --arch ${ARCH} add ${BASE_PACKAGES}
-
+eval apk --root "$ROOTFS_PATH" --update-cache --initdb --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
@@ -317,10 +316,7 @@ fi
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Remove kernel modules"
 
-if [ "$DEFAULT_KERNEL_MODULES" == "*" ]; then
-  echo "skiped -> keep all modules"
-
-else
+if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
   cd ${ROOTFS_PATH}/lib/modules
 
   # loop all kernel versions
@@ -341,6 +337,8 @@ else
   done
 
   cd ${WORK_PATH}
+else
+  echo "skiped -> keep all modules"
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
