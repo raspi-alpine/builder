@@ -1,6 +1,7 @@
 include:
   - template: Code-Quality.gitlab-ci.yml  
   - template: Security/SAST.gitlab-ci.yml
+  - template: Jobs/Build.gitlab-ci.yml
   - project: megabyte-labs/ci/gitlab-ci-templates
     ref: master
     file: lint/shellcheck.gitlab-ci.yml
@@ -12,3 +13,17 @@ stages:
 
 shellcheck:
   allow_failure: true
+
+test_build:
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+  stage: test
+  image: docker
+  services:
+  - docker:dind
+  needs:
+    - job: build
+  before_script:
+    - docker info
+  script:
+    - tests/simple-image/build_image.sh
