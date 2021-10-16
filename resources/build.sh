@@ -45,7 +45,7 @@ IMAGE_PATH="${WORK_PATH}/img"
 
 
 # ensure work directory is clean
-rm -rf ${WORK_PATH}/*
+rm -rf ${WORK_PATH:?}/*
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # functions
@@ -57,11 +57,11 @@ chroot_exec() {
 
 make_image() {
     [ -d /tmp/genimage ] && rm -rf /tmp/genimage
-    genimage --rootpath $1 \
+    genimage --rootpath "$1" \
       --tmppath /tmp/genimage \
       --inputpath ${IMAGE_PATH} \
       --outputpath ${IMAGE_PATH} \
-      --config $2
+      --config "$2"
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -84,7 +84,7 @@ cp /usr/share/apk/keys/*.rsa.pub ${ROOTFS_PATH}/etc/apk/keys/
 cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
-apk --root ${ROOTFS_PATH} --update-cache --initdb --arch ${ARCH} add $BASE_PACKAGES
+apk --root ${ROOTFS_PATH} --update-cache --initdb --arch ${ARCH} add ${BASE_PACKAGES}
 
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
@@ -331,13 +331,13 @@ else
     moduleFiles=$(grep -E "/($(echo $DEFAULT_KERNEL_MODULES | sed "s/ /|/g")).ko:" $d/modules.dep | tr -d : | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
 
     # copy required modules to tmp dir
-    cd $d
-    cp --parents modules.* ${moduleFiles} ../${d}_tmp
+    cd "$d"
+    cp --parents modules.* ${moduleFiles} ../"$d"_tmp
     cd ..
 
     # replace original modules dir with new one
-    rm -rf $d
-    mv ${d}_tmp $d
+    rm -rf "$d"
+    mv "$d"_tmp "$d"
   done
 
   cd ${WORK_PATH}
@@ -459,6 +459,7 @@ EOF
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
+# shellcheck source=tests/simple-image/image.sh
   . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
 
