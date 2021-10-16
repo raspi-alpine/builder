@@ -26,4 +26,7 @@ test_build:
   before_script:
     - docker info
   script:
-    - tests/simple-image/build_image.sh
+    - |
+      cd tests/simple-image || exit 1
+      ./build_image.sh
+      ls -lahR ./
