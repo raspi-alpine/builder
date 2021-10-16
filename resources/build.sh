@@ -317,18 +317,20 @@ fi
 echo ">> Remove kernel modules"
 
 if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
-  cd ${ROOTFS_PATH}/lib/modules
+  cd "$ROOTFS_PATH"/lib/modules
 
   # loop all kernel versions
   for d in * ; do
-    echo "Remove $d"
-
-    # collect modules to keep
-    moduleFiles=$(grep -E "/($(echo $DEFAULT_KERNEL_MODULES | sed "s/ /|/g")).ko:" $d/modules.dep | tr -d : | tr ' ' '\n' | sort | uniq | tr '\n' ' ')
+    echo "Removing from $d"
 
     # copy required modules to tmp dir
+    mkdir "$d"_tmp
     cd "$d"
-    cp --parents modules.* ${moduleFiles} ../"$d"_tmp
+    cp modules.* ../"$d"_tmp
+    for m in ${DEFAULT_KERNEL_MODULES} ; do
+      echo "finding: $m"
+      find ./ -name "$m".ko -print -exec cp --parents {} ../"$d"_tmp \;
+    done
     cd ..
 
     # replace original modules dir with new one
@@ -336,7 +338,7 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
     mv "$d"_tmp "$d"
   done
 
-  cd ${WORK_PATH}
+  cd "$WORK_PATH"
 else
   echo "skiped -> keep all modules"
 fi
