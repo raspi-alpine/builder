@@ -85,7 +85,7 @@ fatwrite mmc 0:1 0x10000 uboot.dat 0x400
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # select kernel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo "select kernel"
+echo "selecting kernel"
 setenv boot_kernel "/boot/uImage"
 
 # only if new pi a new kernel is required
@@ -97,16 +97,17 @@ if test ${board_new_pi} > 0; then
   setexpr board_cpu ${board_revision} \& 0xF000
   
   # BCM2836 (pi2)
-  if test ${board_cpu} == 0x1000; then
+  if itest.l ${board_cpu} -eq 0x1000; then
     setenv boot_kernel "/boot/uImage2"
-  fi
+    echo "pi2 detected"
   # BCM2837 (pi3)
-  if test ${board_cpu} == 0x2000; then
+  elif itest.l ${board_cpu} -eq 0x2000; then
     setenv boot_kernel "/boot/uImage2"
-  fi
+    echo "pi3 detected"
   # BCM2711 (pi4)
-  if test ${board_cpu} > 0x3000; then
+  elif itest.l ${board_cpu} -ge 0x3000; then
     setenv boot_kernel "/boot/uImage4"
+    echo "pi4 or greater detected"
   fi
 else
   echo "old board"
