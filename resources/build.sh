@@ -31,10 +31,14 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata cloud-utils-growpart ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi linux-rpi4 rng-tools-extra"
+BASE_PACKAGES="alpine-base tzdata cloud-utils-growpart ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi rng-tools-extra"
 
 if [ "$ARCH" != "aarch64" ]; then
     BASE_PACKAGES="$BASE_PACKAGES linux-rpi2"
+fi
+
+if [ "$ARCH" != "armhf" ]; then
+    BASE_PACKAGES="$BASE_PACKAGES linux-rpi4"
 fi
 
 WORK_PATH="/work"
@@ -308,7 +312,9 @@ mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux 
 
 if [ "$ARCH" != "aarch64" ]; then
     mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
-    mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+    if [ "$ARCH" != "armhf" ]; then
+      mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+    fi
 else
     mkimage -A arm64 -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
 fi
