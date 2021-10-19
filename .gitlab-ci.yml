@@ -29,4 +29,4 @@ test_build:
     - |
       cd tests/simple-image || exit 1
       ./build_image.sh
-      ls -lahR ./
+      ls -lahR ./output

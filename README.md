@@ -73,7 +73,7 @@ builder.
 | SIZE_ROOT_FS                | 200M                                 | Size of root file system                                                                          |
 | SIZE_ROOT_PART              | 500M                                 | Size of root partition                                                                            |
 | UBOOT_COUNTER_RESET_ENABLED | true                                 | True to enable simple boot counter reset service                                                  |
-| ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4)                                                 |
+| ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
 
 ### Update running system
 

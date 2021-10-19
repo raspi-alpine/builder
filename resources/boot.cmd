@@ -102,7 +102,7 @@ if test ${board_new_pi} > 0; then
     echo "pi2 detected"
   # BCM2837 (pi3)
   elif itest.l ${board_cpu} -eq 0x2000; then
-    setenv boot_kernel "/boot/uImage2"
+    setenv boot_kernel "/boot/uImage4"
     echo "pi3 detected"
   # BCM2711 (pi4)
   elif itest.l ${board_cpu} -ge 0x3000; then
