@@ -416,7 +416,7 @@ cat >${BOOTFS_PATH}/config.txt <<EOF
 disable_splash=1
 boot_delay=0
 
-gpu_mem=256
+gpu_mem=16
 gpu_mem_256=64
 
 hdmi_drive=1
