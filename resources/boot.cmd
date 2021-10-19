@@ -50,7 +50,7 @@ echo "Check fallback boot"
 if itest.b *${addr_boot_counter} -ge ${boot_limit}; then
   echo "!!! Boot limit exceed !!!"
 
-  if itest *${addr_boot_partition} -eq ${boot_partition_a}; then
+  if itest.b *${addr_boot_partition} -eq ${boot_partition_a}; then
     mw.b ${addr_boot_partition} ${boot_partition_b}
   else
     mw.b ${addr_boot_partition} ${boot_partition_a}
