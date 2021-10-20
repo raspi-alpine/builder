@@ -402,6 +402,11 @@ cp -vr ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
 
+#there is no uImage4 in armhf
+case "$ARCH" in
+  armhf)  sed "s/uImage4/uImage2/" -i ${RES_PATH}/boot.cmd ;;
+esac
+
 # generate boot script
 mkimage -A arm -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
 
@@ -411,7 +416,7 @@ cat >${BOOTFS_PATH}/config.txt <<EOF
 disable_splash=1
 boot_delay=0
 
-gpu_mem=256
+gpu_mem=16
 gpu_mem_256=64
 
 hdmi_drive=1
