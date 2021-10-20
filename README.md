@@ -12,7 +12,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 * A/B partition schema
   * Simple update of whole system
   * Fallback if update failed
-* Single image for every Raspberry PI
+* Choice of three base image cpu types for targeting every Raspberry PI
 * Read only root filesystem
 
 
@@ -74,6 +74,16 @@ builder.
 | SIZE_ROOT_PART              | 500M                                 | Size of root partition                                                                            |
 | UBOOT_COUNTER_RESET_ENABLED | true                                 | True to enable simple boot counter reset service                                                  |
 | ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
+
+#### ARCH variable
+
+Setting the ARCH variable effects which pi versions the image will run on:
+
+|  ARCH   |  Notes                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------ |
+| armhf   | Runs on PI 0 to PI 3, with all packages from the armhf alpine repository tagerted for that CPU   |
+| armv7   | Runs on PI 2 to PI 4, with all packages from the armv7 alpine repository tagerted for that CPU   |
+| aarch64 | Runs on PI 3 to PI 4, with all packages from the aarch64 alpine repository tagerted for that CPU |
 
 ### Update running system
 
