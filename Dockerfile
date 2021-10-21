@@ -1,7 +1,8 @@
 FROM debian:bullseye AS build_base
 
 RUN apt-get update && \
-    apt-get install -y build-essential git wget bison flex gcc-arm-linux-gnueabi gcc-aarch64-linux-gnu device-tree-compiler bc libssl-dev
+    apt-get install -y bc bison build-essential device-tree-compiler flex \
+	gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi git libssl-dev wget
 
 FROM build_base AS uboot
 
@@ -68,10 +69,8 @@ RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
 
 FROM alpine:3.14
 
-RUN apk update && \
-    apk add automake build-base git autoconf confuse-dev linux-headers sudo \
-            findutils mtools e2fsprogs-extra alpine-sdk dosfstools uboot-tools pigz && \
-    rm -rf /var/cache/apk/*
+RUN apk add --no-cache --upgrade alpine-sdk autoconf automake build-base confuse-dev \
+	dosfstools e2fsprogs-extra findutils git linux-headers mtools pigz sudo uboot-tools
 
 RUN git clone https://github.com/pengutronix/genimage.git /tmp/genimage && \
     cd /tmp/genimage && \
