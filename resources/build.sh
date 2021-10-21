@@ -31,16 +31,8 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
-BASE_PACKAGES="alpine-base tzdata cloud-utils-growpart ifupdown-ng e2fsprogs-extra util-linux coreutils linux-rpi rng-tools-extra"
-
-if [ "$ARCH" != "aarch64" ]; then
-    BASE_PACKAGES="$BASE_PACKAGES linux-rpi2"
-fi
-
-if [ "$ARCH" != "armhf" ]; then
-    BASE_PACKAGES="$BASE_PACKAGES linux-rpi4"
-fi
-
+BASE_PACKAGES="alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
+               ifupdown-ng rng-tools-extra tzdata util-linux"
 WORK_PATH="/work"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
 BOOTFS_PATH="${WORK_PATH}/boot_fs"
@@ -56,7 +48,7 @@ rm -rf ${WORK_PATH:?}/*
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 chroot_exec() {
-    chroot "${ROOTFS_PATH}" "$@" 1>&2
+    chroot "$ROOTFS_PATH" "$@" 1>&2
 }
 
 make_image() {
@@ -67,6 +59,16 @@ make_image() {
       --outputpath ${IMAGE_PATH} \
       --config "$2"
 }
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# arch specific
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+case "$ARCH" in
+  armhf)   BASE_PACKAGES="$BASE_PACKAGES linux-rpi linux-rpi2" ;;
+  armv7)   BASE_PACKAGES="$BASE_PACKAGES linux-rpi2 linux-rpi4" ;;
+  aarch64) BASE_PACKAGES="$BASE_PACKAGES linux-rpi4" ;;
+esac
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create root FS
@@ -308,16 +310,23 @@ ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 echo ">> Prepare kernel for uboot"
 
 # build uImage
-mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi ${ROOTFS_PATH}/boot/uImage
 
+# uImage2 is for armhf and armv7 only
 if [ "$ARCH" != "aarch64" ]; then
-    mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi2 ${ROOTFS_PATH}/boot/uImage2
-    if [ "$ARCH" != "armhf" ]; then
-      mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
-    fi
-else
-    mkimage -A arm64 -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" -d ${ROOTFS_PATH}/boot/vmlinuz-rpi4 ${ROOTFS_PATH}/boot/uImage4
+  mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" \
+   -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
 fi
+
+# there is no uImage4 in armhf
+case "$ARCH" in
+  armhf)   mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" \
+            -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
+           sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd ;;
+  armv7)   A=arm ;;
+  aarch64) A=arm64 ;;
+esac
+[ -n "$A" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 \
+            -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Remove kernel modules"
@@ -402,10 +411,6 @@ cp -vr ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
 
-#there is no uImage4 in armhf
-case "$ARCH" in
-  armhf)  sed "s/uImage4/uImage2/" -i ${RES_PATH}/boot.cmd ;;
-esac
 
 # generate boot script
 mkimage -A arm -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
