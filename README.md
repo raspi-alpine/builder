@@ -142,3 +142,8 @@ The image contains a simple tool that resets the boot counter and switch the
 active partition from the running OS. The sources of the script can be found 
 in the [uboot.c](resources/uboot.c). 
 
+### Logging
+By default syslog is configured to log to the kernel printk buffer so it does
+not create any log files, logs can be read with dmesg.  Which are shown
+along with kernel messages.
+
