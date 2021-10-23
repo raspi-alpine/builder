@@ -156,6 +156,13 @@ echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 # rngd service for entropy
 chroot_exec rc-update add rngd default
 
+# mdev service for device creation amd /dev/stderr etc
+chroot_exec rc-update add mdev default
+
+# log to kernel printk buffer by default (read with dmesg)
+chroot_exec rc-update add syslog default
+echo "SYSLOGD_OPTS=\"-t -K\"" > ${ROOTFS_PATH}/etc/conf.d/syslog
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create data FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
