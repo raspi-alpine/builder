@@ -507,67 +507,23 @@ rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
 echo ">> Create SD card image"
 
 # boot partition
-cat >${WORK_PATH}/genimage_boot.cfg <<EOF
-image boot.vfat {
-  vfat {
-    label = "boot"
-  }
-  size = ${SIZE_BOOT}
-}
-EOF
+m4 -D xFS=vfat -D xIMAGE=boot.xFS -D xLABEL="BOOT" -D xSIZE="$SIZE_BOOT" \
+  "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_boot.cfg
 make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
 
 # root partition
-cat >${WORK_PATH}/genimage_root.cfg <<EOF
-image rootfs.ext4 {
-  ext4 {
-    label = "rootfs"
-  }
-  size = ${SIZE_ROOT_FS}
-}
-EOF
+m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" \
+  "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
 make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
 
 # data partition
-cat >${WORK_PATH}/genimage_data.cfg <<EOF
-image datafs.ext4 {
-  ext4 {
-    label = "data"
-  }
-  size = ${SIZE_DATA}
-}
-EOF
+m4 -D xFS=ext4 -D xIMAGE=datafs.xFS -D xLABEL="data" -D xSIZE="$SIZE_DATA" \
+  "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_data.cfg
 make_image ${DATAFS_PATH} ${WORK_PATH}/genimage_data.cfg
 
 # sd card image
-cat >${WORK_PATH}/genimage_sdcard.cfg <<EOF
-image sdcard.img {
-  hdimage {
-  }
-
-  partition boot {
-    partition-type = 0xC
-    bootable = "true"
-    image = "boot.vfat"
-  }
-
-  partition rootfs_a {
-    partition-type = 0x83
-    image = "rootfs.ext4"
-    size = ${SIZE_ROOT_PART}
-  }
-  partition rootfs_b {
-    partition-type = 0x83
-    image = "rootfs.ext4"
-    size = ${SIZE_ROOT_PART}
-  }
-
-  partition datafs {
-    partition-type = 0x83
-    image = "datafs.ext4"
-  }
-}
-EOF
+m4 -D xSIZE_ROOT="$SIZE_ROOT_PART" \
+  "$RES_PATH"/m4/sdcard.m4 > "$WORK_PATH"/genimage_sdcard.cfg
 make_image ${IMAGE_PATH} ${WORK_PATH}/genimage_sdcard.cfg
 
 echo ">> Compress images"
@@ -579,3 +535,12 @@ pigz -c ${IMAGE_PATH}/rootfs.ext4 > ${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
 cd ${OUTPUT_PATH}/
 sha256sum ${IMG_NAME}.img.gz > ${IMG_NAME}.img.gz.sha256
 sha256sum ${IMG_NAME}_update.img.gz > ${IMG_NAME}_update.img.gz.sha256
+
+echo
+echo ">> Uncompressed Sizes"
+echo "size of uboot partition: $SIZE_BOOT	| size of files on uboot partition:	$(du -sh ${BOOTFS_PATH} | sed "s/\s.*//")"
+echo "size of root partition:  $SIZE_ROOT_PART"
+echo "size of root filesystem: $SIZE_ROOT_FS	| size of files on root filesystem:	$(du -sh ${ROOTFS_PATH} | sed "s/\s.*//")"
+echo "size of data partition:  $SIZE_DATA	| size of files on data partition:	$(du -sh ${DATAFS_PATH} | sed "s/\s.*//")"
+echo
+echo "Finished"
