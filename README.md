@@ -57,7 +57,7 @@ builder.
 
 | Variable                    | Default Value                        | Description                                                                                       |
 | --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| ALPINE_BRANCH               | v3.14                                | [Alpine Branch](https://alpinelinux.org/releases) to use for image         |
+| ALPINE_BRANCH               | v3.14                                | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                |
 | ALPINE_MIRROR               | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download                                                                  |
 | CUSTOM_IMAGE_SCRIPT         | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
 | DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |
@@ -74,6 +74,7 @@ builder.
 | SIZE_ROOT_PART              | 500M                                 | Size of root partition                                                                            |
 | UBOOT_COUNTER_RESET_ENABLED | true                                 | True to enable simple boot counter reset service                                                  |
 | ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
+| RPI_FIRMWARE_BRANCH         | stable                               | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware       |
 
 #### ARCH variable
 

@@ -1,0 +1,53 @@
+#!/sbin/openrc-run
+# shellcheck shell=ash
+
+depend()
+{
+    need localmount
+}
+
+start()
+{
+    /sbin/ab_resizedata
+    # make sure /data is mounted
+    mount -a
+
+    ebegin "Preparing persistent data"
+    if [ ! -d /data/etc ]; then
+        mkdir -p /data/etc
+    fi
+    touch /data/etc/resolv.conf
+
+    # check time zone config
+    if [ ! -f /data/etc/timezone ]; then
+        cp /etc/timezone.alpine-builder /data/etc/timezone
+        ln -fs /usr/share/zoneinfo/"$(cat /etc/timezone.alpine-builder)" /data/etc/localtime
+    fi
+
+    # check host name
+    if [ ! -f /data/etc/hostname ]; then
+        cp /etc/hostname.alpine-builder /data/etc/hostname
+    fi
+
+    # check root password (shadow)
+    if [ ! -f /data/etc/shadow ]; then
+        cp /etc/shadow.alpine-builder /data/etc/shadow
+    fi
+
+    # check network config
+    if [ ! -f /data/etc/network/interfaces ]; then
+        mkdir -p /data/etc/network
+        cp /etc/network/interfaces.alpine-builder /data/etc/network/interfaces
+    fi
+
+    # dropbear
+    if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
+        mkdir -p /data/etc/dropbear/
+        cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
+    fi
+
+    if [ ! -d /data/root ]; then
+        mkdir -p /data/root
+    fi
+
+}

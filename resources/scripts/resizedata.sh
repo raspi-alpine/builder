@@ -31,6 +31,7 @@ umount /dev/"$LAST_PART"
 e2fsck -p -f /dev/"$LAST_PART"
 
 growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM" || echo "problem growing partition"
+partx -u /dev/"$LAST_PART"
 
 # resize data filesystem then mark done with resize_done file
 resize2fs -p /dev/"$LAST_PART" && logger -t "rc.resizedata" "Root partition successfully resized."
