@@ -14,6 +14,7 @@ set -e
 : "${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}"
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${ARCH:="armv7"}"
+: "${RPI_FIRMWARE_BRANCH:="stable"}"
 
 : "${SIZE_BOOT:="100M"}"
 : "${SIZE_ROOT_FS:="100M"}"
@@ -32,7 +33,7 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 RES_PATH=/resources/
 BASE_PACKAGES="alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
-               ifupdown-ng rng-tools-extra tzdata util-linux"
+               ifupdown-ng mkinitfs partx rng-tools-extra tzdata util-linux"
 WORK_PATH="/work"
 ROOTFS_PATH="${WORK_PATH}/root_fs"
 BOOTFS_PATH="${WORK_PATH}/boot_fs"
@@ -65,9 +66,9 @@ make_image() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 case "$ARCH" in
-  armhf)   BASE_PACKAGES="$BASE_PACKAGES linux-rpi linux-rpi2" ;;
-  armv7)   BASE_PACKAGES="$BASE_PACKAGES linux-rpi2 linux-rpi4" ;;
-  aarch64) BASE_PACKAGES="$BASE_PACKAGES linux-rpi4" ;;
+  armhf)   KERNEL_PACKAGES="linux-rpi linux-rpi2" ;;
+  armv7)   KERNEL_PACKAGES="linux-rpi2 linux-rpi4" ;;
+  aarch64) KERNEL_PACKAGES="linux-rpi4" ;;
 esac
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -93,6 +94,9 @@ cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 eval apk --root "$ROOTFS_PATH" --update-cache --initdb --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
+# stop initramfs creation as not used
+echo "disable_trigger=\"YES\"" > ${ROOTFS_PATH}/etc/mkinitfs/mkinitfs.conf
+chroot_exec apk add --no-cache ${KERNEL_PACKAGES}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo ">> Configure root FS"
@@ -118,7 +122,7 @@ ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
 sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
 # add script to resize data partition
-install -D ${RES_PATH}/resizedata.sh ${ROOTFS_PATH}/sbin/ab_resizedata
+install -D ${RES_PATH}/scripts/resizedata.sh ${ROOTFS_PATH}/sbin/ab_resizedata
 
 # mount data and boot partition (root is already mounted)
 cat >${ROOTFS_PATH}/etc/fstab <<EOF
@@ -154,10 +158,10 @@ chroot_exec rc-update add modules default
 echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 
 # rngd service for entropy
-chroot_exec rc-update add rngd default
+chroot_exec rc-update add rngd sysinit
 
 # mdev service for device creation amd /dev/stderr etc
-chroot_exec rc-update add mdev default
+chroot_exec rc-update add mdev sysinit
 
 # log to kernel printk buffer by default (read with dmesg)
 chroot_exec rc-update add syslog default
@@ -207,16 +211,7 @@ install /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
 
 if [ "$UBOOT_COUNTER_RESET_ENABLED" = "true" ]; then
   # mark system as booted (should be moved to application)
-  cat >${ROOTFS_PATH}/etc/local.d/99-uboot.start <<EOF
-#!/bin/sh
-mount -o remount,rw /uboot
-
-/sbin/uboot_tool reset_counter
-
-sync
-mount -o remount,ro /uboot
-EOF
-  chmod +x ${ROOTFS_PATH}/etc/local.d/99-uboot.start
+  install ${RES_PATH}/scripts/99-uboot.sh ${ROOTFS_PATH}/etc/local.d/99-uboot.start
 fi
 
 # copy helper scripts
@@ -242,61 +237,7 @@ cp ${ROOTFS_PATH}/etc/conf.d/dropbear_org ${DATAFS_PATH}/etc/dropbear/dropbear.c
 echo ">> Move persistent data to /data"
 
 # prepare /data
-cat >${ROOTFS_PATH}/etc/init.d/data_prepare <<EOF
-#!/sbin/openrc-run
-
-depend()
-{
-    need localmount
-}
-
-start()
-{
-    /sbin/ab_resizedata
-    # make sure /data is mounted
-    mount -a
-
-    ebegin "Preparing persistent data"
-    if [ ! -d /data/etc ]; then
-        mkdir -p /data/etc
-    fi
-    touch /data/etc/resolv.conf
-
-    # check time zone config
-    if [ ! -f /data/etc/timezone ]; then
-        cp /etc/timezone.alpine-builder /data/etc/timezone
-        ln -fs /usr/share/zoneinfo/\$(cat /etc/timezone.alpine-builder) /data/etc/localtime
-    fi
-
-    # check host name
-    if [ ! -f /data/etc/hostname ]; then
-        cp /etc/hostname.alpine-builder /data/etc/hostname
-    fi
-
-    # check root password (shadow)
-    if [ ! -f /data/etc/shadow ]; then
-        cp /etc/shadow.alpine-builder /data/etc/shadow
-    fi
-
-    # check network config
-    if [ ! -f /data/etc/network/interfaces ]; then
-        mkdir -p /data/etc/network
-        cp /etc/network/interfaces.alpine-builder /data/etc/network/interfaces
-    fi
-
-    # dropbear
-    if [ ! -f /data/etc/dropbear/dropbear.conf ]; then
-        mkdir -p /data/etc/dropbear/
-        cp /etc/conf.d/dropbear_org /data/etc/dropbear/dropbear.conf
-    fi
-
-    if [ ! -d /data/root ]; then
-        mkdir -p /data/root
-    fi
-
-}
-EOF
-chmod +x ${ROOTFS_PATH}/etc/init.d/data_prepare
+install ${RES_PATH}/scripts/data_prepare.sh ${ROOTFS_PATH}/etc/init.d/data_prepare
 chroot_exec rc-update add data_prepare default
 
 # link root dir
@@ -373,23 +314,17 @@ echo ">> Configure boot FS"
 
 # download base firmware
 mkdir -p ${BOOTFS_PATH}
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/bootcode.bin
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_cd.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_db.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup_x.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4cd.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4db.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/fixup4x.dat
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_cd.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_db.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start_x.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4cd.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4db.elf
-wget -P ${BOOTFS_PATH} https://github.com/raspberrypi/firmware/raw/master/boot/start4x.elf
+echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch"
+git clone https://github.com/raspberrypi/firmware --depth 1 \
+  --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
+  --sparse /tmp/firmware/ && \
+  (cd /tmp/firmware/ && \
+   git sparse-checkout add boot/ && \
+   git checkout)
+find /tmp/firmware/boot -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
+   -exec cp {} ${BOOTFS_PATH} \;
+rm -rf /tmp/firmware
+ls -lah ${BOOTFS_PATH}
 
 # copy linux device trees and overlays to boot
 # determine dtb and overlay path
@@ -543,4 +478,4 @@ echo "size of root partition:  $SIZE_ROOT_PART"
 echo "size of root filesystem: $SIZE_ROOT_FS	| size of files on root filesystem:	$(du -sh ${ROOTFS_PATH} | sed "s/\s.*//")"
 echo "size of data partition:  $SIZE_DATA	| size of files on data partition:	$(du -sh ${DATAFS_PATH} | sed "s/\s.*//")"
 echo
-echo "Finished"
+echo ">> Finished <<"
