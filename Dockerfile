@@ -48,17 +48,11 @@ RUN make CROSS_COMPILE=arm-linux-gnueabi- distclean && \
     make CROSS_COMPILE=arm-linux-gnueabi- -j8 u-boot.bin && \
     cp u-boot.bin /uboot/u-boot_rpi4.bin
 
-# model 3 (64 bit)
+# 64 bit
 RUN make CROSS_COMPILE=aarch64-linux-gnu- distclean && \
-    make CROSS_COMPILE=aarch64-linux-gnu- rpi_3_defconfig && \
+    make CROSS_COMPILE=aarch64-linux-gnu- rpi_arm64_defconfig && \
     make CROSS_COMPILE=aarch64-linux-gnu- -j8 u-boot.bin && \
-    cp u-boot.bin /uboot/u-boot_rpi3-64.bin
-
-# model 4 (64 bit)
-RUN make CROSS_COMPILE=aarch64-linux-gnu- distclean && \
-    make CROSS_COMPILE=aarch64-linux-gnu- rpi_4_defconfig && \
-    make CROSS_COMPILE=aarch64-linux-gnu- -j8 u-boot.bin && \
-    cp u-boot.bin /uboot/u-boot_rpi4-64.bin
+    cp u-boot.bin /uboot/u-boot_rpi-64.bin
 
 FROM build_base AS uboot_tool
 

@@ -15,6 +15,7 @@ set -e
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
+: "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
 
 : "${SIZE_BOOT:="100M"}"
 : "${SIZE_ROOT_FS:="100M"}"
@@ -266,14 +267,14 @@ if [ "$ARCH" != "aarch64" ]; then
 fi
 
 # there is no uImage4 in armhf
+A=arm
 case "$ARCH" in
   armhf)   mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" \
             -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
            sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd ;;
-  armv7)   A=arm ;;
   aarch64) A=arm64 ;;
 esac
-[ -n "$A" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 \
+[ "$ARCH" != "armhf" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 \
             -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -353,64 +354,23 @@ cp -vr ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
 
-
 # generate boot script
-mkimage -A arm -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
+mkimage -A "$A" -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
 
-
-# write boot config
-cat >${BOOTFS_PATH}/config.txt <<EOF
-disable_splash=1
-boot_delay=0
-
-gpu_mem=16
-gpu_mem_256=64
-
-hdmi_drive=1
-hdmi_group=2
-hdmi_mode=1
-hdmi_mode=87
-hdmi_cvt 800 480 60 6 0 0 0
-EOF
-
-if [ "$ARCH" != "aarch64" ]; then
-cat >>${BOOTFS_PATH}/config.txt <<EOF1
-kernel=u-boot_rpi1.bin
-
-[pi0w]
-kernel=u-boot_rpi0_w.bin
-
-[pi2]
-kernel=u-boot_rpi2.bin
-
-[pi3]
-kernel=u-boot_rpi3.bin
-
-[pi4]
-kernel=u-boot_rpi4.bin
-
-[all]
-enable_uart=1
-
-EOF1
-
-else
-cat >>${BOOTFS_PATH}/config.txt <<EOF2
-[pi3]
-kernel=u-boot_rpi3-64.bin
-
-[pi4]
-enable_gic=1
-kernel=u-boot_rpi4-64.bin
-[all]
-enable_uart=1
-arm_64bit=1
-EOF2
+M4ARG="-D xARCH=$ARCH"
+if [ -f "$INPUT_PATH"/m4/hdmi.m4 ]; then
+  M4ARG="$M4ARG -D xHDMI=$INPUT_PATH/m4/hdmi.m4"
 fi
 
-cat >${BOOTFS_PATH}/cmdline.txt <<EOF
-console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet
-EOF
+echo "generating config.txt"
+echo "..."
+eval m4 "$M4ARG" "$RES_PATH"/m4/config.txt.m4 > "$BOOTFS_PATH"/config.txt
+cat "$BOOTFS_PATH"/config.txt
+echo "..."
+echo "${CMDLINE}" >${BOOTFS_PATH}/cmdline.txt
+echo "cmdline.txt"
+cat ${BOOTFS_PATH}/cmdline.txt
+echo "..."
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Custom modification
