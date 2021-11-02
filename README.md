@@ -75,6 +75,7 @@ builder.
 | UBOOT_COUNTER_RESET_ENABLED | true                                 | True to enable simple boot counter reset service                                                  |
 | ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
 | RPI_FIRMWARE_BRANCH         | stable                               | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware       |
+| CMDLINE                     | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel                                                               |
 
 #### ARCH variable
 
@@ -85,6 +86,12 @@ Setting the ARCH variable effects which pi versions the image will run on:
 | armhf   | Runs on PI 0 to PI 3, with all packages from the armhf alpine repository tagerted for that CPU   |
 | armv7   | Runs on PI 2 to PI 4, with all packages from the armv7 alpine repository tagerted for that CPU   |
 | aarch64 | Runs on PI 3 to PI 4, with all packages from the aarch64 alpine repository tagerted for that CPU |
+
+#### Customization
+
+As well as the environment variables some files change the building of the image as well.
+
+In the INPUT_PATH if there is an m4 folder with the file hdmi.m4 this will be included instead of the default hdmi section in config.txt, to let the kernel decide hdmi settings just create a blank hdmi.m4 file.
 
 ### Update running system
 
