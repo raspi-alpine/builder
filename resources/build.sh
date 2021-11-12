@@ -162,7 +162,7 @@ echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 chroot_exec rc-update add rngd sysinit
 
 # mdev service for device creation amd /dev/stderr etc
-chroot_exec rc-update add mdev sysinit
+chroot_exec rc-update add mdev default
 
 # log to kernel printk buffer by default (read with dmesg)
 chroot_exec rc-update add syslog default
