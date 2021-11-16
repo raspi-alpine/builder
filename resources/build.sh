@@ -290,7 +290,7 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
     cp modules.* ../"$d"_tmp
     for m in ${DEFAULT_KERNEL_MODULES} ; do
       echo "finding: $m"
-      find ./ -name "$m".ko -print -exec cp --parents {} ../"$d"_tmp \;
+      find ./ -name "${m}.ko*" -print -exec cp --parents {} ../"$d"_tmp \;
     done
     cd ..
 
