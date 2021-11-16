@@ -84,15 +84,12 @@ ${ALPINE_MIRROR}/${ALPINE_BRANCH}/main
 ${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
 
-# copy apk keys to new root (required for initial apk add run)
-mkdir -p ${ROOTFS_PATH}/etc/apk/keys/
-cp /usr/share/apk/keys/*.rsa.pub ${ROOTFS_PATH}/etc/apk/keys/
-
 # copy repositories to new root
+mkdir -p ${ROOTFS_PATH}/etc/apk
 cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
-eval apk --root "$ROOTFS_PATH" --update-cache --initdb --arch "$ARCH" add "$BASE_PACKAGES"
+eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 # stop initramfs creation as not used
