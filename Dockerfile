@@ -1,4 +1,4 @@
-FROM debian:bullseye AS build_base
+FROM debian:bullseye-slim AS build_base
 
 RUN apt-get update && \
     apt-get install -y bc bison build-essential device-tree-compiler flex \
