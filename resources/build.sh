@@ -40,7 +40,16 @@ ROOTFS_PATH="${WORK_PATH}/root_fs"
 BOOTFS_PATH="${WORK_PATH}/boot_fs"
 DATAFS_PATH="${WORK_PATH}/data_fs"
 IMAGE_PATH="${WORK_PATH}/img"
-
+# reset console colours
+ColourOff='\033[0m'
+# regular console colours
+#Red='\033[0;31m'
+Green='\033[0;32m'
+Yellow='\033[0;33m'
+Blue='\033[0;34m'
+#Purple='\033[0;35m'
+Cyan='\033[0;36m'
+#White='\033[0;37m'
 
 # ensure work directory is clean
 rm -rf ${WORK_PATH:?}/*
@@ -62,6 +71,9 @@ make_image() {
       --config "$2"
 }
 
+colour_echo() {
+      printf "%b\n" "${2:-$Green}${1}${ColourOff}"
+}
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # arch specific
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -76,7 +88,7 @@ esac
 # create root FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-echo ">> Prepare root FS"
+colour_echo ">> Prepare root FS"
 
 # update local repositories to destination ones to ensure the right packages where installed
 cat >/etc/apk/repositories <<EOF
@@ -97,7 +109,7 @@ echo "disable_trigger=\"YES\"" > ${ROOTFS_PATH}/etc/mkinitfs/mkinitfs.conf
 chroot_exec apk add --no-cache ${KERNEL_PACKAGES}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo ">> Configure root FS"
+colour_echo ">> Configure root FS"
 
 # Set time zone
 ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone
@@ -169,7 +181,7 @@ echo "SYSLOGD_OPTS=\"-t -K\"" > ${ROOTFS_PATH}/etc/conf.d/syslog
 # create data FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-echo ">> Configure data FS"
+colour_echo ">> Configure data FS"
 mkdir -p ${DATAFS_PATH}/etc
 
 # set timezone
@@ -232,7 +244,7 @@ fi
 cp ${ROOTFS_PATH}/etc/conf.d/dropbear_org ${DATAFS_PATH}/etc/dropbear/dropbear.conf
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo ">> Move persistent data to /data"
+colour_echo ">> Move persistent data to /data"
 
 # prepare /data
 install ${RES_PATH}/scripts/data_prepare.sh ${ROOTFS_PATH}/etc/init.d/data_prepare
@@ -253,7 +265,7 @@ EOF
 ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo ">> Prepare kernel for uboot"
+colour_echo ">> Prepare kernel for uboot"
 
 # build uImage
 
@@ -275,7 +287,7 @@ esac
             -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo ">> Remove kernel modules"
+colour_echo ">> Remove kernel modules"
 
 if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
   cd "$ROOTFS_PATH"/lib/modules
@@ -308,7 +320,7 @@ fi
 # create boot FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-echo ">> Configure boot FS"
+colour_echo ">> Configure boot FS"
 
 # download base firmware
 mkdir -p ${BOOTFS_PATH}
@@ -359,24 +371,26 @@ if [ -f "$INPUT_PATH"/m4/hdmi.m4 ]; then
   M4ARG="$M4ARG -D xHDMI=$INPUT_PATH/m4/hdmi.m4"
 fi
 
-echo "generating config.txt"
-echo "..."
+colour_echo "generating config.txt" "$Cyan"
+colour_echo "..." "$Cyan"
 eval m4 "$M4ARG" "$RES_PATH"/m4/config.txt.m4 > "$BOOTFS_PATH"/config.txt
 cat "$BOOTFS_PATH"/config.txt
-echo "..."
+colour_echo "..." "$Cyan"
 echo "${CMDLINE}" >${BOOTFS_PATH}/cmdline.txt
-echo "cmdline.txt"
+colour_echo "cmdline.txt" "$Cyan"
 cat ${BOOTFS_PATH}/cmdline.txt
-echo "..."
+colour_echo "..." "$Cyan"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Custom modification
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+colour_echo ">> Running user image.sh script" "$Blue"
 if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
 # shellcheck source=tests/simple-image/image.sh
   . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
+colour_echo "   Finished running user images.sh script" "$Blue"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Cleanup
@@ -396,7 +410,7 @@ rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
 # create image
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-echo ">> Create SD card image"
+colour_echo ">> Create SD card image"
 
 # boot partition
 m4 -D xFS=vfat -D xIMAGE=boot.xFS -D xLABEL="BOOT" -D xSIZE="$SIZE_BOOT" \
@@ -418,7 +432,7 @@ m4 -D xSIZE_ROOT="$SIZE_ROOT_PART" \
   "$RES_PATH"/m4/sdcard.m4 > "$WORK_PATH"/genimage_sdcard.cfg
 make_image ${IMAGE_PATH} ${WORK_PATH}/genimage_sdcard.cfg
 
-echo ">> Compress images"
+colour_echo ">> Compress images"
 # copy final image
 pigz -c ${IMAGE_PATH}/sdcard.img > ${OUTPUT_PATH}/${IMG_NAME}.img.gz
 pigz -c ${IMAGE_PATH}/rootfs.ext4 > ${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
@@ -429,10 +443,10 @@ sha256sum ${IMG_NAME}.img.gz > ${IMG_NAME}.img.gz.sha256
 sha256sum ${IMG_NAME}_update.img.gz > ${IMG_NAME}_update.img.gz.sha256
 
 echo
-echo ">> Uncompressed Sizes"
-echo "size of uboot partition: $SIZE_BOOT	| size of files on uboot partition:	$(du -sh ${BOOTFS_PATH} | sed "s/\s.*//")"
-echo "size of root partition:  $SIZE_ROOT_PART"
-echo "size of root filesystem: $SIZE_ROOT_FS	| size of files on root filesystem:	$(du -sh ${ROOTFS_PATH} | sed "s/\s.*//")"
-echo "size of data partition:  $SIZE_DATA	| size of files on data partition:	$(du -sh ${DATAFS_PATH} | sed "s/\s.*//")"
+colour_echo ">> Uncompressed Sizes"
+colour_echo "size of uboot partition: $SIZE_BOOT	| size of files on uboot partition:	$(du -sh ${BOOTFS_PATH} | sed "s/\s.*//")" "$Yellow"
+colour_echo "size of root partition:  $SIZE_ROOT_PART" "$Yellow"
+colour_echo "size of root filesystem: $SIZE_ROOT_FS	| size of files on root filesystem:	$(du -sh ${ROOTFS_PATH} | sed "s/\s.*//")" "$Yellow"
+colour_echo "size of data partition:  $SIZE_DATA	| size of files on data partition:	$(du -sh ${DATAFS_PATH} | sed "s/\s.*//")" "$Yellow"
 echo
-echo ">> Finished <<"
+colour_echo ">> Finished <<"
