@@ -81,11 +81,13 @@ builder.
 
 Setting the ARCH variable effects which pi versions the image will run on:
 
-|  ARCH   |  Notes                                                                                           |
-| ------- | ------------------------------------------------------------------------------------------------ |
-| armhf   | Runs on PI 0 to PI 3, with all packages from the armhf alpine repository tagerted for that CPU   |
-| armv7   | Runs on PI 2 to PI 4, with all packages from the armv7 alpine repository tagerted for that CPU   |
-| aarch64 | Runs on PI 3 to PI 4, with all packages from the aarch64 alpine repository tagerted for that CPU |
+|  Board          |  armhf | armv7 | aarch64 | 
+| --------------- | :----: | :---: | :-----: |
+| pi0             | ✅     |       |         |
+| pi1             | ✅     |       |         |
+| pi2             | ✅     | ✅    |         |
+| pi3, pi0w2      | ✅     | ✅    | ✅      |
+| pi4, pi400, cm4 |        | ✅    | ✅      |
 
 #### Customization
 
