@@ -18,6 +18,9 @@ ifelse(xARCH, `aarch64',
 [pi0w]
 kernel=u-boot_rpi0_w.bin
 
+[pi02]
+kernel=u-boot_rpi3.bin
+
 [pi2]
 kernel=u-boot_rpi2.bin
 

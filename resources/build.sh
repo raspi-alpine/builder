@@ -324,7 +324,7 @@ colour_echo ">> Configure boot FS"
 
 # download base firmware
 mkdir -p ${BOOTFS_PATH}
-echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch"
+colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
 git clone https://github.com/raspberrypi/firmware --depth 1 \
   --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
   --sparse /tmp/firmware/ && \
