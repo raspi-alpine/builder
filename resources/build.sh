@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: "${ALPINE_BRANCH:="v3.14"}"
+: "${ALPINE_BRANCH:="v3.15"}"
 : "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
 : "${DEFAULT_TIMEZONE:="Etc/UTC"}"
@@ -90,15 +90,16 @@ esac
 
 colour_echo ">> Prepare root FS"
 
-# update local repositories to destination ones to ensure the right packages where installed
-cat >/etc/apk/repositories <<EOF
+# update native repositories to ALPINE_MIRROR, leaving version the same
+awk -v repo="$ALPINE_MIRROR" -F'/' '{print repo "\/" $(NF-1) "\/" $NF}' /etc/apk/repositories > /etc/apk/repositories.tmp
+mv -f /etc/apk/repositories.tmp /etc/apk/repositories
+
+# update new root repositories to ensure the right packages are installed
+mkdir -p ${ROOTFS_PATH}/etc/apk
+cat >${ROOTFS_PATH}/etc/apk/repositories <<EOF
 ${ALPINE_MIRROR}/${ALPINE_BRANCH}/main
 ${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
-
-# copy repositories to new root
-mkdir -p ${ROOTFS_PATH}/etc/apk
-cp /etc/apk/repositories ${ROOTFS_PATH}/etc/apk/repositories
 
 # initial package installation
 eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys --arch "$ARCH" add "$BASE_PACKAGES"

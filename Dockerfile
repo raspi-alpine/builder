@@ -61,7 +61,7 @@ ADD ./resources/uboot.c /uboot.c
 RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
 
 
-FROM alpine:3.14
+FROM alpine:3.15
 
 RUN apk add --no-cache --upgrade alpine-sdk autoconf automake build-base confuse-dev \
 	dosfstools e2fsprogs-extra findutils git linux-headers mtools pigz sudo uboot-tools

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # check net and apk working in build environment (installs inside build environment)
-apk add --no-cache m4
+apk add --no-cache pebble
 
 # check net and apk working inside chroot
 # add extra packages inside chroot so correct arch and destination is used
