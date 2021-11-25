@@ -57,7 +57,7 @@ builder.
 
 | Variable                    | Default Value                        | Description                                                                                       |
 | --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| ALPINE_BRANCH               | v3.14                                | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                |
+| ALPINE_BRANCH               | v3.15                                | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                |
 | ALPINE_MIRROR               | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download                                                                  |
 | CUSTOM_IMAGE_SCRIPT         | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
 | DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |
@@ -86,7 +86,7 @@ Setting the ARCH variable effects which pi versions the image will run on:
 | pi0             | ✅     |       |         |
 | pi1             | ✅     |       |         |
 | pi2             | ✅     | ✅    |         |
-| pi3, pi0w2      | ✅     | ✅    | ✅      |
+| pi3, pi0w2, cm3 | ✅     | ✅    | ✅      |
 | pi4, pi400, cm4 |        | ✅    | ✅      |
 
 #### Customization
