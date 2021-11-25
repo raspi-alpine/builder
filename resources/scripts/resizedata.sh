@@ -33,6 +33,7 @@ partx -u /dev/"$LAST_PART"
 # unmount last partition
 umount /dev/"$LAST_PART"
 sync
+
 # resize data filesystem then mark done with resize_done file
 resize2fs -p /dev/"$LAST_PART" && logger -t "rc.resizedata" "Root partition successfully resized."
 
