@@ -14,9 +14,8 @@ start()
 
     ebegin Preparing persistent data
     if [ ! -d /data/etc ]; then
-        mkdir -p /data/etc
         # mount data with tmpfs if cannot create dir
-        if mkdir -p /data/etc; then
+        if ! mkdir -p /data/etc; then
             mount -t tmpfs -o size=12m tmpfs /data
             mkdir -p /data/etc
             ewarn Mounted tmpfs to /data needs manual recovery
