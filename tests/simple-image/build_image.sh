@@ -10,4 +10,4 @@ docker run --rm -v "$PWD":/input -v "$PWD"/output/armhf:/output --env ARCH=armhf
 # test hdmi include
 mkdir -p m4
 echo "# this is included instead of default hdmi" > m4/hdmi.m4
-docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output --env ARCH=aarch64 --env SIZE_ROOT_FS="150M" "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output --env ARCH=aarch64 --env SIZE_ROOT_FS="150M" --env ALPINE_BRANCH="v3.14" "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
