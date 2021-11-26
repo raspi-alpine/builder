@@ -8,11 +8,11 @@ depend()
 
 start()
 {
+    ebegin Preparing persistent data
     /sbin/ab_resizedata
     # make sure /data is mounted
     mount -a
 
-    ebegin Preparing persistent data
     if [ ! -d /data/etc ]; then
         # mount data with tmpfs if cannot create dir
         if ! mkdir -p /data/etc; then
@@ -55,4 +55,5 @@ start()
         mkdir -p /data/root
     fi
 
+    eend 0
 }

@@ -135,20 +135,8 @@ sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/us
 # add script to resize data partition
 install -D ${RES_PATH}/scripts/resizedata.sh ${ROOTFS_PATH}/sbin/ab_resizedata
 
-# mount data and boot partition (root is already mounted)
-cat >${ROOTFS_PATH}/etc/fstab <<EOF
-none             /       ext4    defaults,ro    0       0
-/dev/mmcblk0p1   /uboot  vfat    defaults,ro    0       2
-/dev/mmcblk0p4   /data   ext4    defaults       0       1
-
-proc           /proc        proc   defaults        0     0
-sysfs          /sys         sysfs  defaults        0     0
-devpts         /dev/pts     devpts gid=4,mode=620  0     0
-tmpfs          /dev/shm     tmpfs  defaults        0     0
-tmpfs          /tmp         tmpfs  defaults        0     0
-tmpfs          /run         tmpfs  defaults        0     0
-tmpfs          /var/lock    tmpfs  defaults        0     0
-EOF
+# copy fstab
+install -m 644 ${RES_PATH}/fstab ${ROOTFS_PATH}/etc/fstab
 
 # prepare mount points
 mkdir -p ${ROOTFS_PATH}/uboot
@@ -162,6 +150,10 @@ mkdir -p ${ROOTFS_PATH}/dev/shm
 mkdir -p ${ROOTFS_PATH}/var/lock
 
 # time
+# add ab_clock as pi does not have a hardware clock
+install ${RES_PATH}/scripts/ab_clock.sh ${ROOTFS_PATH}/etc/init.d/ab_clock
+chroot_exec rc-update add ab_clock default
+echo 'clock_file="/data/etc/ab_clock_saved_time"' > ${ROOTFS_PATH}/etc/conf.d/ab_clock
 chroot_exec rc-update add ntpd default
 
 # kernel modules
@@ -184,6 +176,8 @@ echo "SYSLOGD_OPTS=\"-t -K\"" > ${ROOTFS_PATH}/etc/conf.d/syslog
 
 colour_echo ">> Configure data FS"
 mkdir -p ${DATAFS_PATH}/etc
+# save initial time for ab_clock
+touch ${DATAFS_PATH}/etc/ab_clock_saved_time
 
 # set timezone
 echo "${DEFAULT_TIMEZONE}" > ${ROOTFS_PATH}/etc/timezone.alpine-builder
@@ -335,7 +329,6 @@ git clone https://github.com/raspberrypi/firmware --depth 1 \
 find /tmp/firmware/boot -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
    -exec cp {} ${BOOTFS_PATH} \;
 rm -rf /tmp/firmware
-ls -lah ${BOOTFS_PATH}
 
 # copy linux device trees and overlays to boot
 # determine dtb and overlay path
@@ -348,7 +341,7 @@ else
   echo "Could not determine device trees source path!"
   exit 1
 fi
-cp -v ${DTB_SOURCE_PATH}/*-rpi-*.dtb ${BOOTFS_PATH}/
+cp ${DTB_SOURCE_PATH}/*-rpi-*.dtb ${BOOTFS_PATH}/
 
 OVERLAY_SOURCE_PATH=""
 if [ -d "${ROOTFS_PATH}/boot/dtbs-rpi/overlays" ]; then
@@ -359,7 +352,12 @@ else
   echo "Could not determine overlay source path!"
   exit 1
 fi
-cp -vr ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
+cp -r ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
+colour_echo "contents of uboot" "$Cyan"
+ls -C ${BOOTFS_PATH}
+colour_echo "overlays" "$Cyan"
+ls -C "$BOOTFS_PATH"/overlays
+colour_echo "end of overlays" "$Cyan"
 
 # copy u-boot
 cp /uboot/* ${BOOTFS_PATH}/
@@ -374,10 +372,10 @@ fi
 
 colour_echo "generating config.txt" "$Cyan"
 colour_echo "..." "$Cyan"
-eval m4 "$M4ARG" "$RES_PATH"/m4/config.txt.m4 > "$BOOTFS_PATH"/config.txt
-cat "$BOOTFS_PATH"/config.txt
+eval m4 "$M4ARG" ${RES_PATH}/m4/config.txt.m4 > ${BOOTFS_PATH}/config.txt
+cat ${BOOTFS_PATH}/config.txt
 colour_echo "..." "$Cyan"
-echo "${CMDLINE}" >${BOOTFS_PATH}/cmdline.txt
+echo "${CMDLINE}" > ${BOOTFS_PATH}/cmdline.txt
 colour_echo "cmdline.txt" "$Cyan"
 cat ${BOOTFS_PATH}/cmdline.txt
 colour_echo "..." "$Cyan"

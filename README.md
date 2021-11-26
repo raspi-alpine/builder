@@ -107,7 +107,7 @@ running system with the following steps:
 5. Reboot system
 
 > An example implementation can be found in the helper script 
-> [ab_flash](resources/scripts/ab_flash)
+> [ab_flash](resources/scripts/ab_flash.sh)
 
 ## Image structure
 
