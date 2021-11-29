@@ -44,3 +44,4 @@ mount -a
 
 touch /data/resize_done
 
+ebegin "Finished preparing persistent data" 
