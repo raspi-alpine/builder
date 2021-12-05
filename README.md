@@ -25,7 +25,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 
 To generate an empty image simply run:
 ```
-docker run --rm -it -v $PWD/output:/output ghcr.io/bboehmke/raspi-alpine-builder
+docker run --rm -it -v $PWD/output:/output ghcr.io/raspi-alpine/builder
 ```
 
 This will create 2 image files in the directory `$PWD/output/`:
