@@ -48,8 +48,8 @@ jobs:
           platforms: linux/386,linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ steps.docklabel.outputs.repo }}:${{ steps.docklabel.outputs.timestamp }}
-            ${{ steps.docklabel.outputs.repo }}
+            ghcr.io/${{ steps.docklabel.outputs.repo }}:${{ steps.docklabel.outputs.timestamp }}
+            ghcr.io/${{ steps.docklabel.outputs.repo }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
