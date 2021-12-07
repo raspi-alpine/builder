@@ -81,7 +81,7 @@ builder.
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
 | SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
-| SIZE_ROOT_FS                  | 200M                                         | Size of root file system                                                                                                        |
+| SIZE_ROOT_FS                  | 200M                                         | Size of root file system (0 for automatic shrink to content)                                                                    |
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 
