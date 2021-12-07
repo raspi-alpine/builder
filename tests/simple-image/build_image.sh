@@ -2,7 +2,7 @@
 set -e
 
 #increase rootfs size to make room for python
-docker run --rm -v "$PWD":/input -v "$PWD"/output/armv7:/output --env SIZE_ROOT_FS="150M" "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+docker run --rm -v "$PWD":/input -v "$PWD"/output/armv7:/output --env SIZE_ROOT_FS="0" "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
 
 #build for armhf and aarch64 as well
 docker run --rm -v "$PWD":/input -v "$PWD"/output/armhf:/output --env ARCH=armhf --env SIZE_ROOT_FS="150M" "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
