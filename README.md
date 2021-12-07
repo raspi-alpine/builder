@@ -18,6 +18,11 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 
 ## Usage
 
+> **Note:** If you want to build the image on a different architecture then the 
+> destination, you can use [qemu-user-static](https://github.com/multiarch/qemu-user-static):
+>
+> `docker run --privileged --rm multiarch/qemu-user-static --persistent yes`
+
 ### Image Creation
 
 > A simple example for a go application can be found in the [examples/go](examples/go) 
