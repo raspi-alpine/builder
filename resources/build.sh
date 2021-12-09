@@ -103,7 +103,7 @@ ${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
 
 # initial package installation
-eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys --arch "$ARCH" add "$BASE_PACKAGES"
+eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys-stable --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 # stop initramfs creation as not used

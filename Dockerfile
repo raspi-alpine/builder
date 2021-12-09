@@ -60,33 +60,20 @@ ADD ./resources/uboot.c /uboot.c
 
 RUN arm-linux-gnueabi-gcc -Wall -static -static-libgcc -o /uboot_tool /uboot.c
 
+FROM alpine:3.15 as keys
+RUN apk add --no-cache alpine-keys
 
-FROM alpine:3.15
+FROM alpine:edge
 
-RUN apk add --no-cache --upgrade alpine-sdk autoconf automake build-base confuse-dev \
-	dosfstools e2fsprogs-extra findutils git linux-headers mtools pigz sudo uboot-tools
+RUN sed -E -e "s/^(.*community)/\1\n\1/" -e "s/(.*)community/\1testing/" -i /etc/apk/repositories
 
-RUN git clone https://github.com/pengutronix/genimage.git /tmp/genimage && \
-    cd /tmp/genimage && \
-    ./autogen.sh && \
-    ./configure CFLAGS='-g -O0' --prefix=/usr && \
-    make install && \
-    cd && \
-    rm -rf /tmp/genimage
-
-
-ADD ./resources/genext2fs /genext2fs
-
-RUN cd /genext2fs && \
-    echo | abuild-keygen -a -i -q && \
-    abuild -F checksum && \
-    abuild -F -P /tmp/pkg && \
-    apk add /tmp/pkg/$(abuild -A)/genext2fs-1*.apk && \
-    rm -rf /tmp/pkg/
+RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
+	genext2fs genimage git m4 mtools pigz uboot-tools
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/
 COPY --from=uboot_tool /uboot_tool /uboot_tool
+COPY --from=keys /usr/share/apk/keys /usr/share/apk/keys-stable
 
 WORKDIR /work
 
