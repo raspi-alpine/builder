@@ -25,7 +25,7 @@ LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xa
 LAST_PART_NUM=$(echo "$LAST_PART" | tail -c 2)
 
 # check the partition
-e2fsck -p -f /dev/"$LAST_PART"
+e2fsck -p -f /dev/"$LAST_PART" || echo "Non zero result from e2fsck"
 
 growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM" || echo "problem growing partition"
 partx -u /dev/"$LAST_PART"
@@ -44,4 +44,5 @@ mount -a
 
 touch /data/resize_done
 
-ebegin "Finished preparing persistent data" 
+ebegin "Finished preparing persistent data"
+ 
