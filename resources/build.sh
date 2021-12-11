@@ -418,22 +418,22 @@ m4 -D xFS=vfat -D xIMAGE=boot.xFS -D xLABEL="BOOT" -D xSIZE="$SIZE_BOOT" \
 make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
 
 # root partition and shrink to minimum size if desired
-if [ "$SIZE_ROOT_FS" -eq "0" ]
-then
-  colour_echo 'Will shrink rootfs'
-  m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_PART" -D xFEATURES="extents,dir_index" -D xEXTRAARGS="-m 0" \
-    "$RES_PATH"/m4/genimage_ext4.m4 > "$WORK_PATH"/genimage_root.cfg
-  make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
-  resize2fs -M ${IMAGE_PATH}/rootfs.ext4
-  SIZE="$(dumpe2fs -h ${IMAGE_PATH}/rootfs.ext4 | awk -F: '/Block count/{count=$2} /Block size/{size=$2} END{print count*size}')"
-  truncate -s "$SIZE" ${IMAGE_PATH}/rootfs.ext4
-  colour_echo "Shrunk rootfs to $SIZE bytes"
-else
-  colour_echo 'Will not shrink rootfs'
-  m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" \
-    "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
-  make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
-fi
+case "$SIZE_ROOT_FS" in
+  0)
+    colour_echo 'Will shrink rootfs'
+    m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_PART" -D xFEATURES="extents,dir_index" -D xEXTRAARGS="-m 0" \
+      "$RES_PATH"/m4/genimage_ext4.m4 > "$WORK_PATH"/genimage_root.cfg
+    make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
+    resize2fs -M ${IMAGE_PATH}/rootfs.ext4
+    SIZE="$(dumpe2fs -h ${IMAGE_PATH}/rootfs.ext4 | awk -F: '/Block count/{count=$2} /Block size/{size=$2} END{print count*size}')"
+    truncate -s "$SIZE" ${IMAGE_PATH}/rootfs.ext4
+    colour_echo "Shrunk rootfs to $SIZE bytes" ;;
+  *)
+    colour_echo 'Will not shrink rootfs'
+    m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" \
+      "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
+    make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg ;;
+esac
 
 # data partition
 m4 -D xFS=ext4 -D xIMAGE=datafs.xFS -D xLABEL="data" -D xSIZE="$SIZE_DATA" \
