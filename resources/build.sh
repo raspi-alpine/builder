@@ -15,6 +15,7 @@ set -e
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
+: "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
 : "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
 
 : "${SIZE_BOOT:="100M"}"
@@ -320,7 +321,7 @@ colour_echo ">> Configure boot FS"
 # download base firmware
 mkdir -p ${BOOTFS_PATH}
 colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
-git clone https://github.com/raspberrypi/firmware --depth 1 \
+git clone ${RPI_FIRMWARE_GIT} --depth 1 \
   --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
   --sparse /tmp/firmware/ && \
   (cd /tmp/firmware/ && \
