@@ -76,7 +76,7 @@ builder.
 | ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
 | RPI_FIRMWARE_BRANCH         | stable                               | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware       |
 | RPI_FIRMWARE_GIT            | https://github.com/raspberrypi/firmware | Raspberry Pi firmware Repo Mirror                                                              |
-| CMDLINE                     | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel                                                               |
+| CMDLINE                     | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example) |
 
 #### ARCH variable
 
