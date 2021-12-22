@@ -20,8 +20,8 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 
 ### Image Creation
 
-> A simple example for a go application can be found in the [example](example/) 
-> directory.
+> A simple example for a go application can be found in the [examples/go](examples/go) 
+> directory, there is also a node-red one in [examples/node-red](examples/node-red)
 
 To generate an empty image simply run:
 ```

@@ -1,0 +1,742 @@
+[
+    {
+        "id": "18b9d7b31bf87a0a",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "99d59fa4d5e80214",
+        "type": "ui_group",
+        "name": "Default",
+        "tab": "6168798fb9ab5391",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "6168798fb9ab5391",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "3ade38bfeeafc9f4",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "0208694abd63c325",
+        "type": "IND OPT in",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Input1",
+        "stack": "7",
+        "channel": "1",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 690,
+        "y": 100,
+        "wires": [
+            [
+                "d4a2f672af20ca3f"
+            ]
+        ]
+    },
+    {
+        "id": "bb03fced1bb9cdb9",
+        "type": "IND OPT in",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Input2",
+        "stack": "7",
+        "channel": "2",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 690,
+        "y": 160,
+        "wires": [
+            [
+                "c7b30150f13b1231"
+            ]
+        ]
+    },
+    {
+        "id": "65ecedb19b66dc02",
+        "type": "IND OPT in",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Input3",
+        "stack": "7",
+        "channel": "3",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 690,
+        "y": 220,
+        "wires": [
+            [
+                "c31950fc9c7c870f"
+            ]
+        ]
+    },
+    {
+        "id": "d4a2f672af20ca3f",
+        "type": "ui_led",
+        "z": "18b9d7b31bf87a0a",
+        "order": 6,
+        "group": "99d59fa4d5e80214",
+        "width": 0,
+        "height": 0,
+        "label": "Input1",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 840,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "c7b30150f13b1231",
+        "type": "ui_led",
+        "z": "18b9d7b31bf87a0a",
+        "order": 7,
+        "group": "99d59fa4d5e80214",
+        "width": 0,
+        "height": 0,
+        "label": "Input2",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 840,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "c31950fc9c7c870f",
+        "type": "ui_led",
+        "z": "18b9d7b31bf87a0a",
+        "order": 8,
+        "group": "99d59fa4d5e80214",
+        "width": 0,
+        "height": 0,
+        "label": "Input3",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 840,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "7c7b9ac1271608f0",
+        "type": "ui_led",
+        "z": "18b9d7b31bf87a0a",
+        "order": 10,
+        "group": "99d59fa4d5e80214",
+        "width": 0,
+        "height": 0,
+        "label": "Valve4 Opening Status",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#008000",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "",
+        "x": 1430,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "a875c13f074d3372",
+        "type": "inject",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 200,
+        "wires": [
+            [
+                "63835b8484b11e12"
+            ]
+        ]
+    },
+    {
+        "id": "63835b8484b11e12",
+        "type": "trigger",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-1",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "s",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "0208694abd63c325",
+                "bb03fced1bb9cdb9",
+                "65ecedb19b66dc02",
+                "5892e98e9da19972"
+            ]
+        ]
+    },
+    {
+        "id": "5892e98e9da19972",
+        "type": "IND OPT cnt",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Input4",
+        "stack": "7",
+        "channel": "4",
+        "rising": true,
+        "falling": false,
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 690,
+        "y": 280,
+        "wires": [
+            [
+                "96124f28e65cef14"
+            ]
+        ]
+    },
+    {
+        "id": "96124f28e65cef14",
+        "type": "rbe",
+        "z": "18b9d7b31bf87a0a",
+        "name": "FilterInput4",
+        "func": "rbei",
+        "gap": "",
+        "start": "",
+        "inout": "out",
+        "septopics": true,
+        "property": "payload",
+        "topi": "topic",
+        "x": 850,
+        "y": 340,
+        "wires": [
+            [
+                "10fe0e88e2dfdaf7",
+                "65c5062dbe02e919"
+            ]
+        ]
+    },
+    {
+        "id": "a1d66d8b6cc7af0b",
+        "type": "change",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "Input4",
+                "pt": "flow",
+                "to": "1",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "true",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1220,
+        "y": 280,
+        "wires": [
+            [
+                "7c7b9ac1271608f0"
+            ]
+        ]
+    },
+    {
+        "id": "10fe0e88e2dfdaf7",
+        "type": "switch",
+        "z": "18b9d7b31bf87a0a",
+        "name": "ButCheck",
+        "property": "Input4",
+        "propertyType": "flow",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1040,
+        "y": 280,
+        "wires": [
+            [
+                "a1d66d8b6cc7af0b"
+            ],
+            [
+                "bdfb82af2006e98b"
+            ]
+        ]
+    },
+    {
+        "id": "bdfb82af2006e98b",
+        "type": "change",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "Input4",
+                "pt": "flow",
+                "to": "0",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "false",
+                "tot": "bool"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1220,
+        "y": 340,
+        "wires": [
+            [
+                "7c7b9ac1271608f0"
+            ]
+        ]
+    },
+    {
+        "id": "b4bbf31d57f2c891",
+        "type": "inject",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payloadType": "date",
+        "x": 190,
+        "y": 440,
+        "wires": [
+            [
+                "885bbb54a0266678"
+            ]
+        ]
+    },
+    {
+        "id": "3a33c305639adb36",
+        "type": "IND 0-10V out",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "stack": "7",
+        "channel": "1",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 1200,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "38847ec407457bbe",
+        "type": "ui_gauge",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "group": "99d59fa4d5e80214",
+        "order": 11,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "gaugeOutput4",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "2",
+        "max": 10,
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 740,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "35ad6e2d6a6d014a",
+        "type": "function",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Read Flow Variable",
+        "func": "msg.actPos = msg.payload;\ninput = flow.get('Input4');\nif (input == 1){\n    msg.payload = true;\n} else {\n    msg.payload = false;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 580,
+        "wires": [
+            [
+                "7baaed653e7e2e73",
+                "54dd787fa487e366",
+                "c61329f6be0b0001"
+            ]
+        ]
+    },
+    {
+        "id": "885bbb54a0266678",
+        "type": "IND 0-10V in",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "stack": "7",
+        "channel": "1",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 350,
+        "y": 440,
+        "wires": [
+            [
+                "35ad6e2d6a6d014a",
+                "5066dd5910539d59"
+            ]
+        ]
+    },
+    {
+        "id": "7baaed653e7e2e73",
+        "type": "debug",
+        "z": "18b9d7b31bf87a0a",
+        "name": "Button4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "65c5062dbe02e919",
+        "type": "debug",
+        "z": "18b9d7b31bf87a0a",
+        "name": "ButtonChange",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1120,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "5066dd5910539d59",
+        "type": "function",
+        "z": "18b9d7b31bf87a0a",
+        "name": "RangeCheck",
+        "func": "if (msg.payload < 2.2) {\n    msg.payload = 0;\n} else if (msg.payload > 9.9) {\n    msg.payload = 10;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 660,
+        "wires": [
+            [
+                "38847ec407457bbe"
+            ]
+        ]
+    },
+    {
+        "id": "54dd787fa487e366",
+        "type": "debug",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "actPos",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "0c4e8533d05f8682",
+        "type": "ui_switch",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "label": "Output4",
+        "tooltip": "",
+        "group": "99d59fa4d5e80214",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "100",
+        "onvalueType": "num",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "0",
+        "offvalueType": "num",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "",
+        "x": 180,
+        "y": 60,
+        "wires": [
+            [
+                "697da5542dee015c"
+            ]
+        ]
+    },
+    {
+        "id": "697da5542dee015c",
+        "type": "IND OD out",
+        "z": "18b9d7b31bf87a0a",
+        "name": "",
+        "stack": "7",
+        "channel": "4",
+        "payload": "payload",
+        "payloadType": "msg",
+        "x": 410,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c61329f6be0b0001",
+        "type": "function",
+        "z": "18b9d7b31bf87a0a",
+        "name": "SlowOpen",
+        "func": "var valvePos = context.get('valvePos')||0;\nvar actPos = msg.actPos;\nvar minPos = 5;\n\n// msg.payload is true to open or false to close\nif (! msg.payload) {\n    valvePos = 0;\n} else {\n    // if opening and less than minPos then wait until reaches minPos\n    if ( actPos < ( minPos - 0.5 ) ) {\n        valvePos = minPos;\n    } else {\n        // slowly increment valvePos, and limit to 10\n        valvePos += 0.025;\n        // round to 2 decimal places\n        valvePos = Math.floor(valvePos * 100)/100;\n        valvePos = Math.min(valvePos, 10);\n    }\n}\n\ncontext.set('valvePos',valvePos);\nmsg.payload = valvePos;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 830,
+        "y": 580,
+        "wires": [
+            [
+                "3a33c305639adb36"
+            ]
+        ]
+    }
+]
