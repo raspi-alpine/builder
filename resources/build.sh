@@ -447,6 +447,7 @@ make_image ${IMAGE_PATH} ${WORK_PATH}/genimage_sdcard.cfg
 
 colour_echo ">> Compress images"
 # copy final image
+mkdir -p ${OUTPUT_PATH}
 pigz -c ${IMAGE_PATH}/sdcard.img > ${OUTPUT_PATH}/${IMG_NAME}.img.gz
 pigz -c ${IMAGE_PATH}/rootfs.ext4 > ${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
 
