@@ -267,19 +267,19 @@ colour_echo ">> Prepare kernel for uboot"
 
 # uImage2 is for armhf and armv7 only
 if [ "$ARCH" != "aarch64" ]; then
-  mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" \
+  mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
    -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
 fi
 
 # there is no uImage4 in armhf
 A=arm
 case "$ARCH" in
-  armhf)   mkimage -A arm -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 -n "Linux kernel" \
+  armhf)   mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
             -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
            sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd ;;
   aarch64) A=arm64 ;;
 esac
-[ "$ARCH" != "armhf" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00008000 -e 0x00008000 \
+[ "$ARCH" != "armhf" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 \
             -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
