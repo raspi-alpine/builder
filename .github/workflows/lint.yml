@@ -19,5 +19,6 @@ jobs:
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
+          level: info
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-check # report results to github checks.
