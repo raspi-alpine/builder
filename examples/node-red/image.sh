@@ -14,7 +14,7 @@ echo 'dtparam=i2c_arm=on' >> "$BOOTFS_PATH"/config.txt
 
 # enable hardware serial console
 echo 'dtoverlay=miniuart-bt' >> "$BOOTFS_PATH"/config.txt
-sed -e "s/#ttyS0/ttyAMA0/" -e "s/ttyS0/ttyAMA0/" -i "ROOTFS_PATH"/etc/inittab
+sed -e "s/#ttyS0/ttyAMA0/" -e "s/ttyS0/ttyAMA0/" -i "$ROOTFS_PATH"/etc/inittab
 
 # copy script to install python module and node-red and clone megaind-rpi git
 cp "$INPUT_PATH"/install-megaind.sh "$ROOTFS_PATH"/tmp/
