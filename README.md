@@ -63,6 +63,8 @@ builder.
 | DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |
 | DEFAULT_HOSTNAME            | alpine                               | Default hostname                                                                                  |
 | DEFAULT_KERNEL_MODULES      | ipv6 af_packet                       | Kernel modules to keep in image                                                                   |
+| ADDITIONAL_KERNEL_MODULES   | none                                 | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones  |
+| ADDITIONAL_DIR_KERNEL_MODULES | none                               | Directories in kernel modules to include all modules from, eg "w1" for one wire modules       |
 | DEFAULT_ROOT_PASSWORD       | alpine                               | Default password for root user                                                                    |
 | DEFAULT_TIMEZONE            | Etc/UTC                              | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image |
 | IMG_NAME                    | sdcard                               | Base name of created image file                                                                   |

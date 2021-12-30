@@ -44,7 +44,7 @@ IMAGE_PATH="${WORK_PATH}/img"
 # reset console colours
 ColourOff='\033[0m'
 # regular console colours
-#Red='\033[0;31m'
+Red='\033[0;31m'
 Green='\033[0;32m'
 Yellow='\033[0;33m'
 Blue='\033[0;34m'
@@ -283,23 +283,41 @@ esac
             -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-colour_echo ">> Remove kernel modules"
+colour_echo ">> Pruning kernel modules"
 
 if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
   cd "$ROOTFS_PATH"/lib/modules
 
+  # concatenate MODULE variables and remove excess spaces and new lines
+  FIND_MODS="$(echo "${DEFAULT_KERNEL_MODULES} ${ADDITIONAL_KERNEL_MODULES}" | xargs)"
   # loop all kernel versions
   for d in * ; do
-    echo "Removing from $d"
+    echo "Saving from $d"
 
     # copy required modules to tmp dir
     mkdir "$d"_tmp
     cd "$d"
     cp modules.* ../"$d"_tmp
-    for m in ${DEFAULT_KERNEL_MODULES} ; do
-      echo "finding: $m"
-      find ./ -name "${m}.ko*" -print -exec cp --parents {} ../"$d"_tmp \;
+    for m in ${FIND_MODS} ; do
+      colour_echo "finding: $m" "$Cyan"
+      find ./ -type f -name "${m}.ko*" -fprint0 /tmp/found -exec find-deps {} \;
+      [ ! -s /tmp/found ] && colour_echo "  ERR: no module found" "$Red"
     done
+    if [ -n "${ADDITIONAL_DIR_KERNEL_MODULES}" ]; then
+      colour_echo "searching for directories: ${ADDITIONAL_DIR_KERNEL_MODULES}" "$Cyan"
+      for m in ${ADDITIONAL_DIR_KERNEL_MODULES} ; do
+        colour_echo "finding dir: ${m}" "$Cyan"
+        find ./ -type d -fprint0 /tmp/found -name "${m}" -exec find {} -print0 -type f -name "*.ko*" \; | xargs -0 -I_mod find-deps _mod
+        [ ! -s /tmp/found ] && colour_echo "  ERR: dir not found" "$Red"
+      done
+    fi
+    colour_echo "Seleceted modules:" "$Yellow"
+    SAVED_MODS="$(xargs -a /tmp/modules.save | tr -s ' ' '\n' | sort -u | xargs)"
+    for m in ${SAVED_MODS}; do
+      colour_echo "  > ${m}" "$Blue"
+      cp --parents "${m}" ../"$d"_tmp
+    done
+    rm -f /tmp/modules.save /tmp/found
     cd ..
 
     # replace original modules dir with new one

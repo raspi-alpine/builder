@@ -75,6 +75,8 @@ COPY --from=uboot /uboot/ /uboot/
 COPY --from=uboot_tool /uboot_tool /uboot_tool
 COPY --from=keys /usr/share/apk/keys /usr/share/apk/keys-stable
 
+RUN install /resources/scripts/find-deps.sh /usr/local/bin/find-deps
+
 WORKDIR /work
 
 CMD ["/bin/sh", "/resources/build.sh"]
