@@ -440,7 +440,7 @@ case "$SIZE_ROOT_FS" in
   0)
     colour_echo 'Will shrink rootfs'
     m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_PART" -D xFEATURES="extents,dir_index" -D xEXTRAARGS="-m 0" \
-      "$RES_PATH"/m4/genimage_ext4.m4 > "$WORK_PATH"/genimage_root.cfg
+      -D xUSEMKE2FS "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
     make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
     resize2fs -M ${IMAGE_PATH}/rootfs.ext4
     SIZE="$(dumpe2fs -h ${IMAGE_PATH}/rootfs.ext4 | awk -F: '/Block count/{count=$2} /Block size/{size=$2} END{print count*size}')"
@@ -448,13 +448,13 @@ case "$SIZE_ROOT_FS" in
     colour_echo "Shrunk rootfs to $SIZE bytes" ;;
   *)
     colour_echo 'Will not shrink rootfs'
-    m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" \
+    m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" -D xUSEMKE2FS \
       "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
     make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg ;;
 esac
 
 # data partition
-m4 -D xFS=ext4 -D xIMAGE=datafs.xFS -D xLABEL="data" -D xSIZE="$SIZE_DATA" \
+m4 -D xFS=ext4 -D xIMAGE=datafs.xFS -D xLABEL="data" -D xSIZE="$SIZE_DATA" -D xUSEMKE2FS \
   "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_data.cfg
 make_image ${DATAFS_PATH} ${WORK_PATH}/genimage_data.cfg
 
