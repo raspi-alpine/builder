@@ -68,7 +68,7 @@ FROM alpine:edge
 RUN sed -E -e "s/^(.*community)/\1\n\1/" -e "s/(.*)community/\1testing/" -i /etc/apk/repositories
 
 RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
-	genext2fs genimage git m4 mtools pigz u-boot-tools
+	genimage git m4 mtools pigz u-boot-tools
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/
