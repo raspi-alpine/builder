@@ -11,7 +11,7 @@ set -e
 : "${DEFAULT_HOSTNAME:="alpine"}"
 : "${DEFAULT_ROOT_PASSWORD:="alpine"}"
 : "${DEFAULT_DROPBEAR_ENABLED:="true"}"
-: "${DEFAULT_KERNEL_MODULES:="ipv6 af_packet rpi-poe-fan"}"
+: "${DEFAULT_KERNEL_MODULES:="ipv6 af_packet"}"
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
@@ -159,7 +159,6 @@ chroot_exec rc-update add ntpd default
 
 # kernel modules
 chroot_exec rc-update add modules default
-echo "rpi-poe-fan" >> ${ROOTFS_PATH}/etc/modules
 
 # rngd service for entropy
 chroot_exec rc-update add rngd sysinit
