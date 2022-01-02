@@ -18,6 +18,11 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 
 ## Usage
 
+> **Note:** If you want to build the image on a different architecture then the 
+> destination, you can use [qemu-user-static](https://github.com/multiarch/qemu-user-static):
+>
+> `docker run --privileged --rm multiarch/qemu-user-static --persistent yes`
+
 ### Image Creation
 
 > A simple example for a go application can be found in the [examples/go](examples/go) 
@@ -55,30 +60,30 @@ chroot_exec rc-update add example_daemon default
 The following variables can be used to modify the base behaviour of the image 
 builder.
 
-| Variable                    | Default Value                        | Description                                                                                       |
-| --------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| ALPINE_BRANCH               | v3.15                                | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                |
-| ALPINE_MIRROR               | http://dl-cdn.alpinelinux.org/alpine | Mirror used for package download                                                                  |
-| CUSTOM_IMAGE_SCRIPT         | image.sh                             | Name of script for image customizations (relative to input dir)                                   |
-| DEFAULT_DROPBEAR_ENABLED    | true                                 | True to enable SSH server by default                                                              |
-| DEFAULT_HOSTNAME            | alpine                               | Default hostname                                                                                  |
-| DEFAULT_KERNEL_MODULES      | ipv6 af_packet                       | Kernel modules to keep in image                                                                   |
-| ADDITIONAL_KERNEL_MODULES   | none                                 | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones  |
-| ADDITIONAL_DIR_KERNEL_MODULES | none                               | Directories in kernel modules to include all modules from, eg "w1" for one wire modules       |
-| DEFAULT_ROOT_PASSWORD       | alpine                               | Default password for root user                                                                    |
-| DEFAULT_TIMEZONE            | Etc/UTC                              | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image |
-| IMG_NAME                    | sdcard                               | Base name of created image file                                                                   |
-| INPUT_PATH                  | /input                               | Input directory inside container                                                                  |
-| OUTPUT_PATH                 | /output                              | Output directory inside container                                                                 |
-| SIZE_BOOT                   | 100M                                 | Size of boot partition                                                                            |
-| SIZE_DATA                   | 20M                                  | Initial Size of data partition                                                                    |
-| SIZE_ROOT_FS                | 200M                                 | Size of root file system                                                                          |
-| SIZE_ROOT_PART              | 500M                                 | Size of root partition                                                                            |
-| UBOOT_COUNTER_RESET_ENABLED | true                                 | True to enable simple boot counter reset service                                                  |
-| ARCH                        | armv7                                | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4)|
-| RPI_FIRMWARE_BRANCH         | stable                               | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware       |
-| RPI_FIRMWARE_GIT            | https://github.com/raspberrypi/firmware | Raspberry Pi firmware Repo Mirror                                                              |
-| CMDLINE                     | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example) |
+| Variable                      | Default Value                                | Description                                                                                                                     |
+| ----------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| ADDITIONAL_DIR_KERNEL_MODULES | none                                         | Directories in kernel modules to include all modules from, eg "w1" for one wire modules                                         |
+| ADDITIONAL_KERNEL_MODULES     | none                                         | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones                    |
+| ALPINE_BRANCH                 | v3.15                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
+| ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
+| ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
+| CMDLINE                       | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
+| CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir)                                                                 |
+| DEFAULT_DROPBEAR_ENABLED      | true                                         | True to enable SSH server by default                                                                                            |
+| DEFAULT_HOSTNAME              | alpine                                       | Default hostname                                                                                                                |
+| DEFAULT_KERNEL_MODULES        | ipv6 af_packet                               | Kernel modules to keep in image                                                                                                 |
+| DEFAULT_ROOT_PASSWORD         | alpine                                       | Default password for root user                                                                                                  |
+| DEFAULT_TIMEZONE              | Etc/UTC                                      | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image                               |
+| IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
+| INPUT_PATH                    | /input                                       | Input directory inside container                                                                                                |
+| OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
+| RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware                                     |
+| RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
+| SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
+| SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
+| SIZE_ROOT_FS                  | 200M                                         | Size of root file system (0 for automatic shrink to content)                                                                    |
+| SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
+| UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 
 #### ARCH variable
 
