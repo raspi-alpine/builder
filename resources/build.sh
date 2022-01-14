@@ -16,7 +16,7 @@ set -e
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
-: "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/mmcblk0p2 rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
+: "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/root rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
 
 : "${SIZE_BOOT:="100M"}"
 : "${SIZE_ROOT_FS:="100M"}"
