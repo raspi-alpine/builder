@@ -11,7 +11,7 @@ set -e
 : "${DEFAULT_HOSTNAME:="alpine"}"
 : "${DEFAULT_ROOT_PASSWORD:="alpine"}"
 : "${DEFAULT_DROPBEAR_ENABLED:="true"}"
-: "${DEFAULT_KERNEL_MODULES:="ipv6 af_packet"}"
+: "${DEFAULT_KERNEL_MODULES:=""}"
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
@@ -282,54 +282,6 @@ esac
             -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-colour_echo ">> Pruning kernel modules"
-
-if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
-  cd "$ROOTFS_PATH"/lib/modules
-
-  # concatenate MODULE variables and remove excess spaces and new lines
-  FIND_MODS="$(echo "${DEFAULT_KERNEL_MODULES} ${ADDITIONAL_KERNEL_MODULES}" | xargs)"
-  # loop all kernel versions
-  for d in * ; do
-    echo "Saving from $d"
-
-    # copy required modules to tmp dir
-    mkdir "$d"_tmp
-    cd "$d"
-    cp modules.* ../"$d"_tmp
-    for m in ${FIND_MODS} ; do
-      colour_echo "finding: $m" "$Cyan"
-      find ./ -type f -name "${m}.ko*" -fprint0 /tmp/found -exec find-deps {} \;
-      [ ! -s /tmp/found ] && colour_echo "  ERR: no module found" "$Red"
-    done
-    if [ -n "${ADDITIONAL_DIR_KERNEL_MODULES}" ]; then
-      colour_echo "searching for directories: ${ADDITIONAL_DIR_KERNEL_MODULES}" "$Cyan"
-      for m in ${ADDITIONAL_DIR_KERNEL_MODULES} ; do
-        colour_echo "finding dir: ${m}" "$Cyan"
-        find ./ -type d -fprint0 /tmp/found -name "${m}" -exec find {} -print0 -type f -name "*.ko*" \; | xargs -0 -I_mod find-deps _mod
-        [ ! -s /tmp/found ] && colour_echo "  ERR: dir not found" "$Red"
-      done
-    fi
-    colour_echo "Seleceted modules:" "$Yellow"
-    SAVED_MODS="$(xargs -a /tmp/modules.save | tr -s ' ' '\n' | sort -u | xargs)"
-    for m in ${SAVED_MODS}; do
-      colour_echo "  > ${m}" "$Blue"
-      cp --parents "${m}" ../"$d"_tmp
-    done
-    rm -f /tmp/modules.save /tmp/found
-    cd ..
-
-    # replace original modules dir with new one
-    rm -rf "$d"
-    mv "$d"_tmp "$d"
-  done
-
-  cd "$WORK_PATH"
-else
-  echo "skiped -> keep all modules"
-fi
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -408,6 +360,67 @@ if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
   . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
 colour_echo "   Finished running user images.sh script" "$Blue"
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Check which modules are needed
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+colour_echo ">> Pruning kernel modules"
+
+echo "Checking for modules in /etc/modules /etc/modules-load.d /usr/lib/modules-load.d"
+
+find-mods ${ROOTFS_PATH}/etc/modules
+find ${ROOTFS_PATH}/etc/modules-load.d -name '*.conf' -exec find-mods {} \;
+find ${ROOTFS_PATH}/usr/lib/modules-load.d -name '*.conf' -exec find-mods {} \;
+if [ -f /tmp/modules.save ]; then
+  LOAD_MODS="$(cat /tmp/modules.save)"
+  rm /tmp/modules.save
+fi
+
+if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
+  cd "$ROOTFS_PATH"/lib/modules
+
+  # concatenate MODULE variables and remove excess spaces and new lines
+  FIND_MODS="$(echo "${DEFAULT_KERNEL_MODULES} ${ADDITIONAL_KERNEL_MODULES} ${LOAD_MODS}" | xargs)"
+  # loop all kernel versions
+  for d in * ; do
+    echo "Saving from $d"
+
+    # copy required modules to tmp dir
+    mkdir "$d"_tmp
+    cd "$d"
+    cp modules.* ../"$d"_tmp
+    for m in ${FIND_MODS} ; do
+      colour_echo "finding: $m" "$Cyan"
+      find ./ -type f -name "${m}.ko*" -fprint0 /tmp/found -exec find-deps {} \;
+      [ ! -s /tmp/found ] && colour_echo "  ERR: no module found" "$Red"
+    done
+    if [ -n "${ADDITIONAL_DIR_KERNEL_MODULES}" ]; then
+      colour_echo "searching for directories: ${ADDITIONAL_DIR_KERNEL_MODULES}" "$Cyan"
+      for m in ${ADDITIONAL_DIR_KERNEL_MODULES} ; do
+        colour_echo "finding dir: ${m}" "$Cyan"
+        find ./ -type d -fprint0 /tmp/found -name "${m}" -exec find {} -print0 -type f -name "*.ko*" \; | xargs -0 -I_mod find-deps _mod
+        [ ! -s /tmp/found ] && colour_echo "  ERR: dir not found" "$Red"
+      done
+    fi
+    colour_echo "Seleceted modules:" "$Yellow"
+    SAVED_MODS="$(xargs -a /tmp/modules.save | tr -s ' ' '\n' | sort -u | xargs)"
+    for m in ${SAVED_MODS}; do
+      colour_echo "  > ${m}" "$Blue"
+      cp --parents "${m}" ../"$d"_tmp
+    done
+    rm -f /tmp/modules.save /tmp/found
+    cd ..
+
+    # replace original modules dir with new one
+    rm -rf "$d"
+    mv "$d"_tmp "$d"
+  done
+
+  cd "$WORK_PATH"
+else
+  echo "skiped -> keep all modules"
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Cleanup
