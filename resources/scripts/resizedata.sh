@@ -24,6 +24,11 @@ esac
 LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
 LAST_PART_NUM=$(echo "$LAST_PART" | tail -c 2)
 
+# unmount and check last partition
+umount /dev/"$LAST_PART"
+e2fsck -p -f /dev/"$LAST_PART"
+mount /dev/"$LAST_PART"
+
 growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM" || echo "problem growing partition"
 partx -u /dev/"$LAST_PART"
 

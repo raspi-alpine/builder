@@ -4,6 +4,7 @@
 depend()
 {
     need localmount
+    before networking
 }
 
 start()
