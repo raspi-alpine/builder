@@ -91,11 +91,22 @@ Setting the ARCH variable effects which pi versions the image will run on:
 
 |  Board          |  armhf | armv7 | aarch64 | 
 | --------------- | :----: | :---: | :-----: |
-| pi0             | ✅      |       |         |
-| pi1             | ✅      |       |         |
-| pi2             | ✅      | ✅     |         |
-| pi3, pi0w2, cm3 | ✅      |  ✅    |  ✅      |
-| pi4, pi400, cm4 |        |  ✅    |  ✅      |
+| pi0             | ✅     |       |         |
+| pi1             | ✅     |       |         |
+| pi2             | ✅     | ✅    |         |
+| pi3, pi0w2, cm3 | ✅     | ✅    | ✅      |
+| pi4, pi400, cm4 |        | ✅    | ✅      |
+
+### Kernel Modules
+
+There are three environment variables for selecting which kernel modules to keep.
+
+* DEFAULT_KERNEL_MODULES (Base modules, should not normally be changed unless * to keep all modules)
+* ADDITIONAL_KERNEL_MODULES (Extra modules that are not in a `.conf` file for loading)
+* ADDITIONAL_DIR_KERNEL_MODULES (keep all modules in subdirectory of kernel modules)
+
+Along with these `/etc/modules` is checked, `/etc/modules-load.d` and `/usr/lib/modules-load.d`
+are checked for `.conf` files.  Any modules in these files are kept as well.
 
 #### Customization
 
