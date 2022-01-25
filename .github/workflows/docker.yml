@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          platforms: linux/386,linux/amd64,linux/arm64
+          platforms: linux/386,linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           push: true
           tags: |
             ghcr.io/${{ steps.docklabel.outputs.repo }}:${{ steps.docklabel.outputs.timestamp }}
