@@ -3,31 +3,19 @@ FROM docker.io/alpine:$DVER AS uboot-base
 
 RUN apk add --no-cache curl
 
-COPY resources/scripts/latest-pkg.sh /usr/local/bin/latest-pkg
+COPY resources/scripts/gitlab_packages.sh /usr/local/bin/gitlab_packages
 
 FROM uboot-base AS uboot
 
 # Project ID for raspi-alpine/crosscompile-uboot
 RUN PROJ_ID="32838267" \
-&&  V="$(latest-pkg "$PROJ_ID")" \
-&&  F="u-boot-blob-$V.tar.bz2" \
-&&  wget "https://gitlab.com/api/v4/projects/$PROJ_ID/packages/generic/uboot/$V/$F" \
-&&  wget "https://gitlab.com/api/v4/projects/$PROJ_ID/packages/generic/uboot/$V/$F.sha256" \
-&&  sha256sum -c "$F.sha256" \
-&&  mkdir uboot \
-&&  tar -xvjf "$F" -C uboot
+&& gitlab_packages -p "$PROJ_ID" -a u-boot-blob -d uboot
 
 FROM uboot-base as uboot_tool
 
 # Project ID for raspi-alpine/crosscompile-uboot-tool
 RUN PROJ_ID="33098050" \
-&&  V="$(latest-pkg "$PROJ_ID")" \
-&&  F="uboot-tool-$V.tar.bz2" \
-&&  echo "Fetching version: $V, with name $F" \
-&&  wget "https://gitlab.com/api/v4/projects/$PROJ_ID/packages/generic/uboot-tool/$V/$F" \
-&&  wget "https://gitlab.com/api/v4/projects/$PROJ_ID/packages/generic/uboot-tool/$V/$F.sha256" \
-&&  sha256sum -c "$F.sha256" \
-&&  tar -xvjf "$F"
+&&  gitlab_packages -p "$PROJ_ID" -a uboot-tool
 
 FROM docker.io/alpine:$DVER as keys
 RUN apk add --no-cache alpine-keys
