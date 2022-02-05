@@ -30,5 +30,5 @@ test_build:
   script:
     - |
       cd tests/simple-image || exit 1
-      ./build_image.sh
+      ./build_image.sh -i "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
       ls -lahR ./output
