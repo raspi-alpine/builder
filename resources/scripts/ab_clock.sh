@@ -17,17 +17,17 @@ start()
 {
 	ebegin "Setting the local clock based on last shutdown time"
 	# need to mount data to read save file
-	mount /data
+	mount /data || MOUNTED="YES"
 	swclock "$clock_file"
-	umount /data
+	[ -z "$MOUNTED" ] && umount /data
 	eend 0
 }
 
 stop()
 {
 	ebegin "Saving the shutdown time"
-	mount /data
+	mount /data || MOUNTED="YES"
 	swclock --save "$clock_file"
-	umount /data
+	[ -z "$MOUNTED" ] && umount /data
 	eend 0
 }

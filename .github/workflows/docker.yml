@@ -50,8 +50,6 @@ jobs:
           tags: |
             ghcr.io/${{ steps.docklabel.outputs.repo }}:${{ steps.docklabel.outputs.timestamp }}
             ghcr.io/${{ steps.docklabel.outputs.repo }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
