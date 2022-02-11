@@ -163,7 +163,7 @@ chroot_exec rc-update add modules default
 # rngd service for entropy
 chroot_exec rc-update add rngd sysinit
 
-# mdev service for device creation amd /dev/stderr etc
+# mdev service for device creation and /dev/stderr etc
 chroot_exec rc-update add mdev default
 
 # log to kernel printk buffer by default (read with dmesg)
