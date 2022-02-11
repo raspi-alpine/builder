@@ -15,10 +15,7 @@ if [ -z "$ROOT_PART" ] ; then
 fi
 
 # extract root device name
-case "$ROOT_PART" in
-  mmcblk0*) ROOT_DEV=mmcblk0 ;;
-  sda*)     ROOT_DEV=sda ;;
-esac
+ROOT_DEV=$(echo "$ROOT_PART" | sed -E 's+(.*)p.*+\1+')
 
 # get last partition
 LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
