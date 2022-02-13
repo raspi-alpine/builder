@@ -8,6 +8,7 @@ clock_file=${clock_file:-/etc/rc.conf}
 depend()
 {
 	provide clock
+	need dev
 	keyword -docker -lxc -openvz -prefix -systemd-nspawn -uml -vserver -xenu
 }
 
