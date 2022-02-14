@@ -67,6 +67,7 @@ builder.
 | ALPINE_BRANCH                 | v3.15                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
 | ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
+| CACHE_PATH                    | none                                         | Path inside container for cache (needs a volume mounting to it), if set firmware and apk files are saved as restored.           |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir)                                                                 |
 | DEFAULT_DROPBEAR_ENABLED      | true                                         | True to enable SSH server by default                                                                                            |
@@ -77,7 +78,7 @@ builder.
 | IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
 | INPUT_PATH                    | /input                                       | Input directory inside container                                                                                                |
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
-| RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware                                     |
+| RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
 | SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |

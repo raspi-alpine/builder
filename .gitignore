@@ -3,3 +3,4 @@ test_*
 tmp/
 tests/simple-image/m4/
 tests/simple-image/output/
+tests/simple-image/cache/
