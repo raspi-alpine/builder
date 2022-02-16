@@ -21,7 +21,7 @@ cp "$INPUT_PATH"/install-megaind.sh "$ROOTFS_PATH"/tmp/
 git clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git "$ROOTFS_PATH"/tmp/megaind-rpi
 
 # install deps and add avahi to default runlevel
-chroot_exec apk add --no-cache python3 py3-smbus yarn htop dropbear-scp avahi dbus
+chroot_exec apk add python3 py3-smbus yarn htop dropbear-scp avahi dbus
 chroot_exec rc-update add avahi-daemon default
 # set avahi name to DEFAULT_HOSTNAME value
 sed "s/#host-name.*/host-name=${DEFAULT_HOSTNAME}/" -i "$ROOTFS_PATH"/etc/avahi/avahi-daemon.conf
@@ -49,7 +49,7 @@ rm -rf "$ROOTFS_PATH"/data/"$NME"
 ls -lah "$ROOTFS_PATH"
 
 # wifi stuff
-chroot_exec apk add --no-cache wireless-tools wpa_supplicant
+chroot_exec apk add wireless-tools wpa_supplicant
 chroot_exec rc-update add wpa_supplicant default
 echo "brcmfmac" >> "$ROOTFS_PATH"/etc/modules
 

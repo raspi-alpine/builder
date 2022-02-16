@@ -45,13 +45,13 @@ fi
 if [ -n "$ARMHF" ]; then
   docker run --rm -v "$PWD":/input -v "$PWD"/output/armhf:/output \
     --env ARCH=armhf --env SIZE_ROOT_FS="150M" --env ALPINE_BRANCH="edge" \
-    --env ADDITIONAL_DIR_KERNEL_MODULES="w1" "$IMG"
+    --env ADDITIONAL_DIR_KERNEL_MODULES="w1" --env RPI_FIRMWARE_BRANCH="alpine" "$IMG"
 fi
 
 # test hdmi include, test env file with CMDLINE environment variable
 if [ -n "$ARMV8" ]; then
   mkdir -p m4
   echo "# this is included instead of default hdmi" > m4/hdmi.m4
-  docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output \
+  docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output -v "$PWD"/cache:/cache \
     --env-file=builder.env "$IMG"
 fi

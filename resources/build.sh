@@ -26,6 +26,7 @@ set -e
 
 : "${OUTPUT_PATH:="/output"}"
 : "${INPUT_PATH:="/input"}"
+: "${CACHE_PATH:=""}"
 : "${CUSTOM_IMAGE_SCRIPT:="image.sh"}"
 
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
@@ -75,6 +76,23 @@ make_image() {
 colour_echo() {
       printf "%b\n" "${2:-$Green}${1}${ColourOff}"
 }
+
+download_firmware() {
+  DPATH=${CACHE_PATH:=/tmp}
+  if [ -n "${CACHE_PATH}" ] && [ -d "${CACHE_PATH}/firmware" ]; then
+    colour_echo "   Using cached firmware..." "$Cyan"
+  else
+    # download base firmware
+    colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
+    git clone ${RPI_FIRMWARE_GIT} --depth 1 \
+      --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
+      --sparse "$DPATH"/firmware/ && \
+      (cd "$DPATH"/firmware/ && \
+       git sparse-checkout add boot/ && \
+       git checkout)
+  fi
+}
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # arch specific
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -83,6 +101,10 @@ case "$ARCH" in
   armhf)   KERNEL_PACKAGES="linux-rpi linux-rpi2" ;;
   armv7)   KERNEL_PACKAGES="linux-rpi2 linux-rpi4" ;;
   aarch64) KERNEL_PACKAGES="linux-rpi4" ;;
+esac
+
+case ${RPI_FIRMWARE_BRANCH} in
+  alpine) KERNEL_PACKAGES="$KERNEL_PACKAGES raspberrypi-bootloader raspberrypi-bootloader-cutdown" ;;
 esac
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -102,13 +124,23 @@ ${ALPINE_MIRROR}/${ALPINE_BRANCH}/main
 ${ALPINE_MIRROR}/${ALPINE_BRANCH}/community
 EOF
 
+# copy cache
+if [ -n "${CACHE_PATH}" ]; then
+  mkdir -p ${ROOTFS_PATH}/etc/apk/cache
+  if [ -d ${CACHE_PATH}/${ARCH}/apk ]; then
+    colour_echo "Restoring apk cache" "$Cyan"
+    cp ${CACHE_PATH}/${ARCH}/apk/*.apk ${ROOTFS_PATH}/etc/apk/cache
+    cp ${CACHE_PATH}/${ARCH}/apk/*.gz ${ROOTFS_PATH}/etc/apk/cache
+  fi
+fi
+
 # initial package installation
 eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys-stable --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 # stop initramfs creation as not used
 echo "disable_trigger=\"YES\"" > ${ROOTFS_PATH}/etc/mkinitfs/mkinitfs.conf
-chroot_exec apk add --no-cache ${KERNEL_PACKAGES}
+eval chroot_exec apk add "$KERNEL_PACKAGES"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 colour_echo ">> Configure root FS"
@@ -287,18 +319,15 @@ esac
 
 colour_echo ">> Configure boot FS"
 
-# download base firmware
 mkdir -p ${BOOTFS_PATH}
-colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
-git clone ${RPI_FIRMWARE_GIT} --depth 1 \
-  --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
-  --sparse /tmp/firmware/ && \
-  (cd /tmp/firmware/ && \
-   git sparse-checkout add boot/ && \
-   git checkout)
-find /tmp/firmware/boot -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
-   -exec cp {} ${BOOTFS_PATH} \;
-rm -rf /tmp/firmware
+case ${RPI_FIRMWARE_BRANCH} in
+  alpine) FPATH="${ROOTFS_PATH}/boot" ;;
+  *)  download_firmware
+      FPATH="$DPATH/firmware/boot" ;;
+esac
+
+find "$FPATH" -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
+  -exec cp {} ${BOOTFS_PATH} \;
 
 # copy linux device trees and overlays to boot
 # determine dtb and overlay path
@@ -426,6 +455,15 @@ fi
 # Cleanup
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+# save cache
+if [ -d "${ROOTFS_PATH}/etc/apk/cache" ]; then
+  mkdir -p ${CACHE_PATH}/${ARCH}/apk/
+  colour_echo "Saving apk cache" "$Cyan"
+  cp ${ROOTFS_PATH}/etc/apk/cache/*.apk ${CACHE_PATH}/${ARCH}/apk
+  cp ${ROOTFS_PATH}/etc/apk/cache/*.gz ${CACHE_PATH}/${ARCH}/apk
+  rm -rf ${ROOTFS_PATH}/etc/apk/cache
+fi
+
 # create resolv.conf symlink for running system
 ln -fs /data/etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 
@@ -435,6 +473,9 @@ rm -rf ${ROOTFS_PATH}/boot/System*
 rm -rf ${ROOTFS_PATH}/boot/config*
 rm -rf ${ROOTFS_PATH}/boot/vmlinuz*
 rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
+rm -f ${ROOTFS_PATH}/boot/fixup*.dat
+rm -f ${ROOTFS_PATH}/boot/start*.elf
+rm -f ${ROOTFS_PATH}/boot/bootcode.bin
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create image
