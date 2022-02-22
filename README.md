@@ -75,6 +75,7 @@ builder.
 | DEFAULT_KERNEL_MODULES        | ipv6 af_packet                               | Kernel modules to keep in image                                                                                                 |
 | DEFAULT_ROOT_PASSWORD         | alpine                                       | Default password for root user                                                                                                  |
 | DEFAULT_TIMEZONE              | Etc/UTC                                      | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image                               |
+| DEV                           | mdev                                         | Device manager to use, can be mdev or eudev                                                                                     |
 | IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
 | INPUT_PATH                    | /input                                       | Input directory inside container                                                                                                |
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |

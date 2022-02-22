@@ -17,6 +17,7 @@ set -e
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
 : "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/root rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
+: "${DEV:="mdev"}"
 
 : "${SIZE_BOOT:="100M"}"
 : "${SIZE_ROOT_FS:="100M"}"
@@ -135,6 +136,7 @@ if [ -n "${CACHE_PATH}" ]; then
 fi
 
 # initial package installation
+[ ${DEV} = "eudev" ] && BASE_PACKAGES="$BASE_PACKAGES eudev"
 eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys-stable --arch "$ARCH" add "$BASE_PACKAGES"
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
@@ -195,8 +197,16 @@ chroot_exec rc-update add modules default
 # rngd service for entropy
 chroot_exec rc-update add rngd sysinit
 
-# mdev service for device creation and /dev/stderr etc
-chroot_exec rc-update add mdev default
+# device manager service for device creation and /dev/stderr etc
+case ${DEV} in
+  eudev) chroot_exec setup-udev -n
+         install ${RES_PATH}/scripts/ab_root.sh ${ROOTFS_PATH}/etc/init.d/ab_root
+         chroot_exec rc-update add ab_root default
+         if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
+           DEFAULT_KERNEL_MODULES="$DEFAULT_KERNEL_MODULES uio bcm2835-mmal-vchiq brcmutil cfg80211 videobuf2-vmalloc videobuf2-dma-contig v4l2-mem2mem"
+         fi ;;
+  *)     chroot_exec rc-update add mdev default ;;
+esac
 
 # log to kernel printk buffer by default (read with dmesg)
 chroot_exec rc-update add syslog default
@@ -322,8 +332,8 @@ colour_echo ">> Configure boot FS"
 mkdir -p ${BOOTFS_PATH}
 case ${RPI_FIRMWARE_BRANCH} in
   alpine) FPATH="${ROOTFS_PATH}/boot" ;;
-  *)  download_firmware
-      FPATH="$DPATH/firmware/boot" ;;
+  *)      download_firmware
+          FPATH="$DPATH/firmware/boot" ;;
 esac
 
 find "$FPATH" -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
