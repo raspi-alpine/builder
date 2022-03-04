@@ -15,7 +15,7 @@ if [ -z "$ROOT_PART" ] ; then
 fi
 
 # extract root device name
-ROOT_DEV=$(echo "$ROOT_PART" | sed -E 's+(.*)p.*+\1+')
+ROOT_DEV=$(echo "$ROOT_PART" | sed -E -e "s+(.*)[0-9]+\1+" -e "s+(.*)p+\1+")
 
 # get last partition
 LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
@@ -31,7 +31,7 @@ partx -u /dev/"$LAST_PART"
 
 # unmount last partition
 umount /dev/"$LAST_PART"
-sync
+e2fsck -p -f /dev/"$LAST_PART"
 
 # resize data filesystem then mark done with resize_done file
 resize2fs -p /dev/"$LAST_PART" && logger -t "rc.resizedata" "Root partition successfully resized."

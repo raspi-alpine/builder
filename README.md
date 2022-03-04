@@ -14,6 +14,8 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
   * Fallback if update failed
 * Choice of three base image cpu types for targeting every Raspberry PI
 * Read only root filesystem
+* Optional caching during build
+* Boot from SD Card or USB (PI2B to PI4)
 
 
 ## Usage
@@ -34,8 +36,8 @@ docker run --rm -it -v $PWD/output:/output ghcr.io/raspi-alpine/builder
 ```
 
 This will create 2 image files in the directory `$PWD/output/`:
-* `alpine.img.gz`: complete SD card image for the raspberry
-* `alpine_update.img.gz`: image of root partition to update running raspberry
+* `sdcard.img.gz`: complete SD card image for the raspberry
+* `sdcard_update.img.gz`: image of root partition to update running raspberry
 
 > For each image a *.sha256 file will be generated to validate integrity.
 
@@ -67,7 +69,7 @@ builder.
 | ALPINE_BRANCH                 | v3.15                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
 | ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
-| CACHE_PATH                    | none                                         | Path inside container for cache (needs a volume mounting to it), if set firmware and apk files are saved as restored.           |
+| CACHE_PATH                    | none                                         | Path inside container for cache (needs a volume mounting to it unless in input or output path), if set firmware and apk files are saved as restored.           |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir)                                                                 |
 | DEFAULT_DROPBEAR_ENABLED      | true                                         | True to enable SSH server by default                                                                                            |
@@ -79,6 +81,7 @@ builder.
 | IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
 | INPUT_PATH                    | /input                                       | Input directory inside container                                                                                                |
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
+| PI3USB                        | unset                                        | If set then `program_usb_boot_mode=1` is added to the end of `/boot/config.txt`.  See [examples/pi3-usb](examples/pi3-usb)      |
 | RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
 | SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
@@ -138,7 +141,7 @@ The image contains 4 partitions:
 
 1. **Boot:** (Size: `SIZE_BOOT`) \
    Contains boot loader and boot configuration
-    
+
 2. **Root A:** (Size: `SIZE_ROOT_PART`) \
    Contains complete root filesystem including all required kernels
 
@@ -171,7 +174,25 @@ switch the active partition if the active one will not start.
 
 The image contains a simple tool that resets the boot counter and switch the 
 active partition from the running OS. The sources of the script can be found 
-in the [uboot.c](resources/uboot.c). 
+in the [uboot.c](resources/uboot.c).
+
+#### USB booting and partition labels
+
+To enable USB boot on PI4 raspberry pi imager is used to create an SD card image
+to update the bootloader: https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#pi4
+
+The Raspberry Pi 3B+ supports USB mass storage boot out of the box.
+
+On a PI2B to PI3B if you need to enable USB booting set the `PI3USB` environment variable to Yes,
+or manually add to `config.txt` in `image.sh`, or with a separate SD Card (see [examples/pi3-usb](examples/pi3-usb).
+More info is here: https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#raspberry-pi-2b-3a-3b-cm-3-3-zero-2-w
+
+As to set them to usb boot an SD Card is required first, so it might be desirable to use a separate SD Card to do this.
+
+The system will boot off SD card as a priority, but the `/data` and `/uboot` partitions are mounted by label.
+So if a USB stick is present as well with a paritions labeled `data` and `BOOT`
+these are likely to be mounted instead of the ones on the SD Card.
+So the the partitions you do not wish to use should have the label changed, eg. with `e2label`.
 
 ### Logging
 By default syslog is configured to log to the kernel printk buffer so it does

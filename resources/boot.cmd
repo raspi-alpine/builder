@@ -4,11 +4,24 @@
 setenv boot_partition_a 0x02
 setenv boot_partition_b 0x03
 setenv boot_limit 0x02
-setenv boot_partition_base "/dev/mmcblk0p"
 
 setenv addr_version 0x10000
 setenv addr_boot_counter 0x10001
 setenv addr_boot_partition 0x10002
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# check for mmc/usb
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+version
+if test -e mmc 0:1 boot.scr; then
+  setenv boot_partition_base "/dev/mmcblk0p"
+  setenv boot_dev mmc
+else
+  setenv boot_partition_base "/dev/sda"
+  setenv boot_dev usb
+fi
+echo "booting from: ${boot_dev}"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # load persistence values
@@ -17,7 +30,7 @@ setenv addr_boot_partition 0x10002
 mw.b 0x10000 0 0x404
 
 # load uboot file
-fatload mmc 0:1 0x10000 uboot.dat 0x400
+fatload ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 
 # check CRC
 crc32 0x10000 0x3FC 0x10400
@@ -71,7 +84,6 @@ fi
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # store persistence values
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 # overwrite version
 mw.b 0x10000 0x01
 
@@ -79,7 +91,7 @@ mw.b 0x10000 0x01
 crc32 0x10000 0x3FC 0x103FC
 
 # save to uboot file
-fatwrite mmc 0:1 0x10000 uboot.dat 0x400
+fatwrite ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -114,6 +126,7 @@ else
 fi
 echo "Load kernel ${boot_kernel}"
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # boot
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -124,7 +137,7 @@ fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
 setexpr bootargs sub " root=[^ ]+" " root=${boot_partition_base}${boot_partition}" "${bootargs}"
 
 # load kernel and boot
-ext4load mmc 0:${boot_partition} ${kernel_addr_r} ${boot_kernel}
+ext4load ${boot_dev} 0:${boot_partition} ${kernel_addr_r} ${boot_kernel}
 bootm ${kernel_addr_r} - ${fdt_addr}
 
 reset
