@@ -15,7 +15,7 @@ cd "$(dirname "$image_file")"
 sha256sum -c "$image_file".sha256
 
 # get current mounted partition index
-current_idx=$(rdev | sed -E 's+.*p(.*)\s.*+\1+')
+current_idx=$(rdev | cut -d' ' -f1 | grep -Eo '[0-9]+$')
 
 # get current uboot partition index
 uboot_idx=$(uboot_tool part_current)
@@ -30,8 +30,12 @@ else
     flash_idx=2
 fi
 
-fdev="$(rdev | sed -E 's+(.*)p.*+\1+')"
-flash_device="${fdev}p${flash_idx}"
+fdev="$(rdev | cut -d' ' -f1 | sed -E -e 's+(.*)[0-9]+\1+')"
+fdiv=$(echo "$fdev" | awk '{print substr($0,length($0),1)}')
+[ "$fdiv" = "p" ] || fdiv=""
+fdev=$(echo "$fdev" | sed -E 's+(.*)p.*+\1+')
+flash_device="${fdev}${fdiv}${flash_idx}"
+echo "Flashing: $flash_device"
 
 # flash device
 gunzip -c "$image_file" | dd of="$flash_device" status=progress bs=1MB iflag=fullblock

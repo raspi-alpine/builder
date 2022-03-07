@@ -5,7 +5,8 @@ apk add --no-cache pebble
 
 # check net and apk working inside chroot
 # add extra packages inside chroot so correct arch and destination is used
-chroot_exec apk add python3 zerotier-one
+# dropbear-scp is needed to use scp with dropbear
+chroot_exec apk add dropbear-scp python3 zerotier-one
 
 install "$INPUT_PATH"/hello.sh "$ROOTFS_PATH"/etc/local.d/hello.start
 

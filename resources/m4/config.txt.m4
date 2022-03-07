@@ -35,3 +35,4 @@ enable_uart=1
 ifelse(xARCH, `aarch64',
 `arm_64bit=1
 enable_gic=1')
+ifelse(len(xPI3USB), 0,, `program_usb_boot_mode=1')

@@ -4,3 +4,5 @@ tmp/
 tests/simple-image/m4/
 tests/simple-image/output/
 tests/simple-image/cache/
+sdcard.img.gz*
+sdcard_update.img.gz*
