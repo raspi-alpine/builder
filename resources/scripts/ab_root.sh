@@ -13,7 +13,6 @@ depend()
 start()
 {
 	ebegin "Setting /dev/root symlink"
-	ROOTDEV="$(sed -e "s/.*root=//" -e "s/\s.*//" /proc/cmdline)"
-	ln -fs "$ROOTDEV" /dev/root
+	ln -fs "$(ab_bootparam root)" /dev/root
 	eend 0
 }
