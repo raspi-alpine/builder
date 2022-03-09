@@ -69,7 +69,7 @@ builder.
 | ALPINE_BRANCH                 | v3.15                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
 | ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
-| CACHE_PATH                    | none                                         | Path inside container for cache (needs a volume mounting to it unless in input or output path), if set firmware and apk files are saved as restored.           |
+| CACHE_PATH                    | none                                         | Cache directory inside container (needs volume mounting unless in input|output path), if set firmware and apk files are cached  |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir)                                                                 |
 | DEFAULT_DROPBEAR_ENABLED      | true                                         | True to enable SSH server by default                                                                                            |

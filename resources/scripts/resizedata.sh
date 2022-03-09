@@ -5,27 +5,21 @@ if [ -f /data/resize_done ]; then
   return 0
 fi
 
-logger -t "rc.resizedata" "Expanding root partition"
-
-# detect root partition device
-ROOT_PART=$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')
-if [ -z "$ROOT_PART" ] ; then
-  log_warning_msg "unable to detect root partition device"
-  return 1
-fi
+logger -t "rc.resizedata" "Expanding data partition"
 
 # extract root device name
-ROOT_DEV=$(echo "$ROOT_PART" | sed -E -e "s+(.*)[0-9]+\1+" -e "s+(.*)p+\1+")
+ROOT_DEV=$(basename "$(ab_bootparam root)" | grep -o '.*[^0-9]')
 
 # get last partition
 LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
-LAST_PART_NUM=$(echo "$LAST_PART" | tail -c 2)
+LAST_PART_NUM=$(echo "$LAST_PART" | grep -Eo '[0-9]+$')
 
 # unmount and check last partition
 umount /dev/"$LAST_PART"
 e2fsck -p -f /dev/"$LAST_PART"
 mount /dev/"$LAST_PART"
 
+ROOT_DEV=$(echo "$ROOT_DEV" | grep -o '.*[^p]')
 growpart /dev/"$ROOT_DEV" "$LAST_PART_NUM" || echo "problem growing partition"
 partx -u /dev/"$LAST_PART"
 

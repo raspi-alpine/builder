@@ -262,6 +262,7 @@ if [ "$UBOOT_COUNTER_RESET_ENABLED" = "true" ]; then
 fi
 
 # copy helper scripts
+install ${RES_PATH}/scripts/ab_bootparam.sh ${ROOTFS_PATH}/sbin/ab_bootparam
 install ${RES_PATH}/scripts/ab_active.sh ${ROOTFS_PATH}/sbin/ab_active
 install ${RES_PATH}/scripts/ab_flash.sh ${ROOTFS_PATH}/sbin/ab_flash
 

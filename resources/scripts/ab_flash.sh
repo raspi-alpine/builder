@@ -30,11 +30,8 @@ else
     flash_idx=2
 fi
 
-fdev="$(rdev | cut -d' ' -f1 | sed -E -e 's+(.*)[0-9]+\1+')"
-fdiv=$(echo "$fdev" | awk '{print substr($0,length($0),1)}')
-[ "$fdiv" = "p" ] || fdiv=""
-fdev=$(echo "$fdev" | sed -E 's+(.*)p.*+\1+')
-flash_device="${fdev}${fdiv}${flash_idx}"
+fdev="$(ab_bootparam root | grep -o '.*[^0-9]')"
+flash_device="${fdev}${flash_idx}"
 echo "Flashing: $flash_device"
 
 # flash device
