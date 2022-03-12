@@ -16,9 +16,12 @@ jobs:
       - name: Check out Git repository
         uses: actions/checkout@v2
 
-      - name: shellcheck
-        uses: reviewdog/action-shellcheck@v1
+      - name: Run the sh-checker
+        uses: luizm/action-sh-checker@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHELLCHECK_OPTS: --severity=info
+          SHFMT_OPTS: -i 2 -ci -d
         with:
-          level: info
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-check # report results to github checks.
+          sh_checker_comment: true
+          sh_checker_checkbashisms_enable: true
