@@ -7,4 +7,4 @@ echo "$1" | grep -q "\.ko" || exit 0
 SAVE="/tmp/modules.save"
 MOD="$(echo "$1" | sed "s/.\///")"
 echo "  > $MOD"
-grep "^$MOD" ./modules.dep | sed "s/://" >> "$SAVE"
+grep "^$MOD" ./modules.dep | sed "s/://" >>"$SAVE"

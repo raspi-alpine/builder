@@ -11,7 +11,7 @@ logger -t "rc.resizedata" "Expanding data partition"
 ROOT_DEV=$(basename "$(ab_bootparam root)" | grep -o '.*[^0-9]')
 
 # get last partition
-LAST_PART=$(grep  "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
+LAST_PART=$(grep "$ROOT_DEV" /proc/partitions | tail -1 | awk '{print $4}' | xargs)
 LAST_PART_NUM=$(echo "$LAST_PART" | grep -Eo '[0-9]+$')
 
 # unmount and check last partition

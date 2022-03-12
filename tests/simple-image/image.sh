@@ -11,7 +11,7 @@ chroot_exec apk add dropbear-scp python3 zerotier-one
 install "$INPUT_PATH"/hello.sh "$ROOTFS_PATH"/etc/local.d/hello.start
 
 # load i2c module
-echo 'i2c-dev' > "$ROOTFS_PATH"/etc/modules-load.d/i2c.conf
+echo 'i2c-dev' >"$ROOTFS_PATH"/etc/modules-load.d/i2c.conf
 
 # load wifi module
-echo "brcmfmac" >> "$ROOTFS_PATH"/etc/modules
+echo "brcmfmac" >>"$ROOTFS_PATH"/etc/modules
