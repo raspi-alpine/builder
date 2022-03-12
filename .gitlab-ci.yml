@@ -13,6 +13,14 @@ stages:
 - build
 - test
 
+checkbashisms:
+  image: alpine:latest
+  stage: lint
+  before_script:
+    - apk add checkbashisms
+  script:
+    - find ./ -type f -name "*.sh" -exec checkbashisms -f {} \;
+
 shellcheck:
   allow_failure: true
 
