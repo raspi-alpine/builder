@@ -462,7 +462,7 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
         [ ! -s /tmp/found ] && colour_echo "  ERR: dir not found" "$Red"
       done
     fi
-    colour_echo "Seleceted modules:" "$Yellow"
+    colour_echo "Selected modules:" "$Yellow"
     SAVED_MODS="$(xargs -a /tmp/modules.save | tr -s ' ' '\n' | sort -u | xargs)"
     for m in ${SAVED_MODS}; do
       colour_echo "  > ${m}" "$Blue"
@@ -478,7 +478,7 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
 
   cd "$WORK_PATH"
 else
-  echo "skiped -> keep all modules"
+  echo "skipped -> keep all modules"
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

@@ -1,7 +1,7 @@
-ARG DVER=3.15
-FROM docker.io/alpine:$DVER AS uboot-base
+ARG ALPINE_VER=3.15
+FROM docker.io/alpine:$ALPINE_VER AS uboot-base
 
-RUN apk add --no-cache curl
+RUN apk add curl
 
 COPY resources/scripts/gitlab_packages.sh /usr/local/bin/gitlab_packages
 
@@ -17,14 +17,14 @@ FROM uboot-base as uboot_tool
 RUN PROJ_ID="33098050" \
 &&  gitlab_packages -p "$PROJ_ID" -a uboot-tool
 
-FROM docker.io/alpine:$DVER as keys
-RUN apk add --no-cache alpine-keys
+FROM docker.io/alpine:$ALPINE_VER as keys
+RUN apk add alpine-keys
 
 FROM docker.io/alpine:edge
 
 RUN sed -E -e "s/^(.*community)/\1\n\1/" -e "s/(.*)community/\1testing/" -i /etc/apk/repositories
 
-RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
+RUN apk add --upgrade dosfstools e2fsprogs-extra findutils \
 	genimage git m4 mtools pigz u-boot-tools
 
 ADD ./resources /resources

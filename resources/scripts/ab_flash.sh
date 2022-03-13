@@ -39,7 +39,7 @@ gunzip -c "$image_file" | dd of="$flash_device" status=progress bs=2MB iflag=ful
 
 # switch active partition if needed
 if [ "$current_idx" != "$uboot_idx" ]; then
-  echo "U-boot partion already set to inactive partition"
+  echo "U-boot partition already set to inactive partition"
 else
   mount -o remount,rw /uboot
   /sbin/uboot_tool part_switch

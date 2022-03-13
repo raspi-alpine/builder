@@ -10,7 +10,7 @@ usage() {
   echo "           -p pulls newest version of the image before running"
   echo "           -f builds armhf section"
   echo "           -7 builds armv7 section"
-  echo "           -8 builds arm8 (arm64) section"
+  echo "           -8 builds armv8 (arm64) section"
   echo
   echo "           if -f -7 or -8 is not used all sections are built"
   exit 1
