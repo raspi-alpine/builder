@@ -216,7 +216,7 @@ case ${DEV} in
     fi
     ;;
   *)
-    chroot_exec rc-update add mdev default
+    chroot_exec rc-update add mdev sysinit
     ;;
 esac
 
