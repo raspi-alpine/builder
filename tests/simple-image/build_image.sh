@@ -1,22 +1,22 @@
 #!/bin/sh
 set -e
 
-usage()
-{
+cd $(dirname "$0")
+
+usage() {
   echo
   echo "Usage: build_image.sh -i IMAGE [-f|-7|-8] [-p]"
   echo "           -i is the docker image to use for the build"
   echo "           -p pulls newest version of the image before running"
   echo "           -f builds armhf section"
   echo "           -7 builds armv7 section"
-  echo "           -8 builds arm8 (arm64) section"
+  echo "           -8 builds armv8 (arm64) section"
   echo
   echo "           if -f -7 or -8 is not used all sections are built"
   exit 1
 }
 
-while getopts "i:f78p" OPTS
-do
+while getopts "i:f78p" OPTS; do
   case ${OPTS} in
     i) IMG=${OPTARG} ;;
     f) ARMHF="true" ;;
@@ -51,7 +51,7 @@ fi
 # test hdmi include, test env file with CMDLINE environment variable
 if [ -n "$ARMV8" ]; then
   mkdir -p m4
-  echo "# this is included instead of default hdmi" > m4/hdmi.m4
+  echo "# this is included instead of default hdmi" >m4/hdmi.m4
   docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output -v "$PWD"/cache:/cache \
     --env-file=builder.env "$IMG"
 fi

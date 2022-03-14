@@ -1,8 +1,7 @@
 #!/bin/sh
 set -e
 
-usage()
-{
+usage() {
   echo
   echo "Usage: gitlab_packages -p PROJECT -a ARTIFACT [-d DESTINATION -v VERSION -e EXTENSION]"
   echo "           if -d is not used the current working directory is used"
@@ -12,30 +11,26 @@ usage()
   exit 1
 }
 
-get_info()
-{
+get_info() {
   curl -s -o - https://gitlab.com/api/v4/projects/"$1"/packages | xargs | tr ',' '\n'
 }
 
-get_proj_name()
-{
+get_proj_name() {
   get_info "$1" | grep name | head -n1 | cut -d':' -f2
 }
 
-latest_pkg()
-{
-   get_info "$1" | grep version | sed "s/v.*n.//" | sort | tail -n1
+latest_pkg() {
+  get_info "$1" | grep version | sed "s/v.*n.//" | sort | tail -n1
 }
 
-while getopts "p:a:d:v:e:" OPTS
-do
+while getopts "p:a:d:v:e:" OPTS; do
   case ${OPTS} in
     p) PROJ=${OPTARG} ;;
     a) ARTI=${OPTARG} ;;
     d) DEST=${OPTARG} ;;
     v) VER=${OPTARG} ;;
     e) EXT=${OPTARG} ;;
-    *) usage ;;  
+    *) usage ;;
   esac
 done
 

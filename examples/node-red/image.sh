@@ -9,11 +9,11 @@ install "$INPUT_PATH"/99-zzstartup.start "$ROOTFS_PATH"/etc/local.d/99-zzstartup
 sed "s/NME=.*/NME=\"$NME\"/" -i "$ROOTFS_PATH"/etc/local.d/99-zzstartup.start
 
 # enable i2c
-echo 'i2c-dev' > "$ROOTFS_PATH"/etc/modules-load.d/i2c.conf
-echo 'dtparam=i2c_arm=on' >> "$BOOTFS_PATH"/config.txt
+echo 'i2c-dev' >"$ROOTFS_PATH"/etc/modules-load.d/i2c.conf
+echo 'dtparam=i2c_arm=on' >>"$BOOTFS_PATH"/config.txt
 
 # enable hardware serial console
-echo 'dtoverlay=miniuart-bt' >> "$BOOTFS_PATH"/config.txt
+echo 'dtoverlay=miniuart-bt' >>"$BOOTFS_PATH"/config.txt
 sed -e "s/#ttyS0/ttyAMA0/" -e "s/ttyS0/ttyAMA0/" -i "$ROOTFS_PATH"/etc/inittab
 
 # copy script to install python module and node-red and clone megaind-rpi git
@@ -51,9 +51,9 @@ ls -lah "$ROOTFS_PATH"
 # wifi stuff
 chroot_exec apk add wireless-tools wpa_supplicant
 chroot_exec rc-update add wpa_supplicant default
-echo "brcmfmac" >> "$ROOTFS_PATH"/etc/modules
+echo "brcmfmac" >>"$ROOTFS_PATH"/etc/modules
 
-cat >> "$ROOTFS_PATH"/etc/network/interfaces.alpine-builder <<EOF
+cat >>"$ROOTFS_PATH"/etc/network/interfaces.alpine-builder <<EOF
 
 auto wlan0
 iface wlan0 inet dhcp

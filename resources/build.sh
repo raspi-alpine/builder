@@ -62,20 +62,20 @@ rm -rf ${WORK_PATH:?}/*
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 chroot_exec() {
-    chroot "$ROOTFS_PATH" "$@" 1>&2
+  chroot "$ROOTFS_PATH" "$@" 1>&2
 }
 
 make_image() {
-    [ -d /tmp/genimage ] && rm -rf /tmp/genimage
-    genimage --rootpath "$1" \
-      --tmppath /tmp/genimage \
-      --inputpath ${IMAGE_PATH} \
-      --outputpath ${IMAGE_PATH} \
-      --config "$2"
+  [ -d /tmp/genimage ] && rm -rf /tmp/genimage
+  genimage --rootpath "$1" \
+    --tmppath /tmp/genimage \
+    --inputpath ${IMAGE_PATH} \
+    --outputpath ${IMAGE_PATH} \
+    --config "$2"
 }
 
 colour_echo() {
-      printf "%b\n" "${2:-$Green}${1}${ColourOff}"
+  printf "%b\n" "${2:-$Green}${1}${ColourOff}"
 }
 
 download_firmware() {
@@ -87,10 +87,10 @@ download_firmware() {
     colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
     git clone ${RPI_FIRMWARE_GIT} --depth 1 \
       --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
-      --sparse "$DPATH"/firmware/ && \
-      (cd "$DPATH"/firmware/ && \
-       git sparse-checkout add boot/ && \
-       git checkout)
+      --sparse "$DPATH"/firmware/ &&
+      (cd "$DPATH"/firmware/ &&
+        git sparse-checkout add boot/ &&
+        git checkout)
   fi
 }
 
@@ -99,13 +99,21 @@ download_firmware() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 case "$ARCH" in
-  armhf)   KERNEL_PACKAGES="linux-rpi linux-rpi2" ;;
-  armv7)   KERNEL_PACKAGES="linux-rpi2 linux-rpi4" ;;
-  aarch64) KERNEL_PACKAGES="linux-rpi4" ;;
+  armhf)
+    KERNEL_PACKAGES="linux-rpi linux-rpi2"
+    ;;
+  armv7)
+    KERNEL_PACKAGES="linux-rpi2 linux-rpi4"
+    ;;
+  aarch64)
+    KERNEL_PACKAGES="linux-rpi4"
+    ;;
 esac
 
 case ${RPI_FIRMWARE_BRANCH} in
-  alpine) KERNEL_PACKAGES="$KERNEL_PACKAGES raspberrypi-bootloader raspberrypi-bootloader-cutdown" ;;
+  alpine)
+    KERNEL_PACKAGES="$KERNEL_PACKAGES raspberrypi-bootloader raspberrypi-bootloader-cutdown"
+    ;;
 esac
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -115,7 +123,7 @@ esac
 colour_echo ">> Prepare root FS"
 
 # update native repositories to ALPINE_MIRROR, leaving version the same
-awk -v repo="$ALPINE_MIRROR" -F'/' '{print repo "\/" $(NF-1) "\/" $NF}' /etc/apk/repositories > /etc/apk/repositories.tmp
+awk -v repo="$ALPINE_MIRROR" -F'/' '{print repo "\/" $(NF-1) "\/" $NF}' /etc/apk/repositories >/etc/apk/repositories.tmp
 mv -f /etc/apk/repositories.tmp /etc/apk/repositories
 
 # update new root repositories to ensure the right packages are installed
@@ -141,7 +149,7 @@ eval apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk
 # Copy host's resolv config for building
 cp -L /etc/resolv.conf ${ROOTFS_PATH}/etc/resolv.conf
 # stop initramfs creation as not used
-echo "disable_trigger=\"YES\"" > ${ROOTFS_PATH}/etc/mkinitfs/mkinitfs.conf
+echo "disable_trigger=\"YES\"" >${ROOTFS_PATH}/etc/mkinitfs/mkinitfs.conf
 eval chroot_exec apk add "$KERNEL_PACKAGES"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -188,7 +196,7 @@ mkdir -p ${ROOTFS_PATH}/var/lock
 # add ab_clock as pi does not have a hardware clock
 install ${RES_PATH}/scripts/ab_clock.sh ${ROOTFS_PATH}/etc/init.d/ab_clock
 chroot_exec rc-update add ab_clock default
-echo 'clock_file="/data/etc/ab_clock_saved_time"' > ${ROOTFS_PATH}/etc/conf.d/ab_clock
+echo 'clock_file="/data/etc/ab_clock_saved_time"' >${ROOTFS_PATH}/etc/conf.d/ab_clock
 chroot_exec rc-update add ntpd default
 
 # kernel modules
@@ -199,18 +207,22 @@ chroot_exec rc-update add rngd sysinit
 
 # device manager service for device creation and /dev/stderr etc
 case ${DEV} in
-  eudev) chroot_exec setup-udev -n
-         install ${RES_PATH}/scripts/ab_root.sh ${ROOTFS_PATH}/etc/init.d/ab_root
-         chroot_exec rc-update add ab_root default
-         if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
-           DEFAULT_KERNEL_MODULES="$DEFAULT_KERNEL_MODULES uio bcm2835-mmal-vchiq brcmutil cfg80211 videobuf2-vmalloc videobuf2-dma-contig v4l2-mem2mem"
-         fi ;;
-  *)     chroot_exec rc-update add mdev default ;;
+  eudev)
+    chroot_exec setup-udev -n
+    install ${RES_PATH}/scripts/ab_root.sh ${ROOTFS_PATH}/etc/init.d/ab_root
+    chroot_exec rc-update add ab_root default
+    if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
+      DEFAULT_KERNEL_MODULES="$DEFAULT_KERNEL_MODULES uio bcm2835-mmal-vchiq brcmutil cfg80211 videobuf2-vmalloc videobuf2-dma-contig v4l2-mem2mem"
+    fi
+    ;;
+  *)
+    chroot_exec rc-update add mdev default
+    ;;
 esac
 
 # log to kernel printk buffer by default (read with dmesg)
 chroot_exec rc-update add syslog default
-echo "SYSLOGD_OPTS=\"-t -K\"" > ${ROOTFS_PATH}/etc/conf.d/syslog
+echo "SYSLOGD_OPTS=\"-t -K\"" >${ROOTFS_PATH}/etc/conf.d/syslog
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create data FS
@@ -222,23 +234,23 @@ mkdir -p ${DATAFS_PATH}/etc
 touch ${DATAFS_PATH}/etc/ab_clock_saved_time
 
 # set timezone
-echo "${DEFAULT_TIMEZONE}" > ${ROOTFS_PATH}/etc/timezone.alpine-builder
+echo "${DEFAULT_TIMEZONE}" >${ROOTFS_PATH}/etc/timezone.alpine-builder
 cp ${ROOTFS_PATH}/etc/timezone.alpine-builder ${DATAFS_PATH}/etc/timezone
 ln -fs /usr/share/zoneinfo/${DEFAULT_TIMEZONE} ${DATAFS_PATH}/etc/localtime
 
 # set host name
-echo "${DEFAULT_HOSTNAME}" > ${ROOTFS_PATH}/etc/hostname.alpine-builder
+echo "${DEFAULT_HOSTNAME}" >${ROOTFS_PATH}/etc/hostname.alpine-builder
 cp ${ROOTFS_PATH}/etc/hostname.alpine-builder ${DATAFS_PATH}/etc/hostname
 
 # root password
 root_pw=$(mkpasswd -m sha-512 -s "${DEFAULT_ROOT_PASSWORD}")
 cp ${ROOTFS_PATH}/etc/shadow ${ROOTFS_PATH}/etc/shadow.alpine-builder
 sed -i "/^root/d" ${ROOTFS_PATH}/etc/shadow.alpine-builder
-echo "root:${root_pw}:0:0:::::" >> ${ROOTFS_PATH}/etc/shadow.alpine-builder
+echo "root:${root_pw}:0:0:::::" >>${ROOTFS_PATH}/etc/shadow.alpine-builder
 cp ${ROOTFS_PATH}/etc/shadow.alpine-builder ${DATAFS_PATH}/etc/shadow
 
 # interface
-cat > ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder <<EOF2
+cat >${ROOTFS_PATH}/etc/network/interfaces.alpine-builder <<EOF2
 auto lo
 iface lo inet loopback
 
@@ -276,7 +288,7 @@ mv ${ROOTFS_PATH}/etc/conf.d/dropbear ${ROOTFS_PATH}/etc/conf.d/dropbear_org
 ln -s /data/etc/dropbear/dropbear.conf ${ROOTFS_PATH}/etc/conf.d/dropbear
 
 if [ "$DEFAULT_DROPBEAR_ENABLED" != "true" ]; then
-  echo 'DROPBEAR_OPTS="-p 127.0.0.1:22"' > ${ROOTFS_PATH}/etc/conf.d/dropbear_org
+  echo 'DROPBEAR_OPTS="-p 127.0.0.1:22"' >${ROOTFS_PATH}/etc/conf.d/dropbear_org
 fi
 
 cp ${ROOTFS_PATH}/etc/conf.d/dropbear_org ${DATAFS_PATH}/etc/dropbear/dropbear.conf
@@ -310,19 +322,23 @@ colour_echo ">> Prepare kernel for uboot"
 # uImage2 is for armhf and armv7 only
 if [ "$ARCH" != "aarch64" ]; then
   mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-   -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
+    -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
 fi
 
 # there is no uImage4 in armhf
 A=arm
 case "$ARCH" in
-  armhf)   mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-            -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
-           sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd ;;
-  aarch64) A=arm64 ;;
+  armhf)
+    mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
+      -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
+    sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd
+    ;;
+  aarch64)
+    A=arm64
+    ;;
 esac
 [ "$ARCH" != "armhf" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 \
-            -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
+  -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS
@@ -332,9 +348,13 @@ colour_echo ">> Configure boot FS"
 
 mkdir -p ${BOOTFS_PATH}
 case ${RPI_FIRMWARE_BRANCH} in
-  alpine) FPATH="${ROOTFS_PATH}/boot" ;;
-  *)      download_firmware
-          FPATH="$DPATH/firmware/boot" ;;
+  alpine)
+    FPATH="${ROOTFS_PATH}/boot"
+    ;;
+  *)
+    download_firmware
+    FPATH="$DPATH/firmware/boot"
+    ;;
 esac
 
 find "$FPATH" -maxdepth 1 -type f \( -name "*.dat" -o -name "*.elf" -o -name "*.bin" \) \
@@ -381,10 +401,10 @@ fi
 
 colour_echo "generating config.txt" "$Cyan"
 colour_echo "..." "$Cyan"
-eval m4 "$M4ARG" ${RES_PATH}/m4/config.txt.m4 > ${BOOTFS_PATH}/config.txt
+eval m4 "$M4ARG" ${RES_PATH}/m4/config.txt.m4 >${BOOTFS_PATH}/config.txt
 cat ${BOOTFS_PATH}/config.txt
 colour_echo "..." "$Cyan"
-echo "${CMDLINE}" > ${BOOTFS_PATH}/cmdline.txt
+echo "${CMDLINE}" >${BOOTFS_PATH}/cmdline.txt
 colour_echo "cmdline.txt" "$Cyan"
 cat ${BOOTFS_PATH}/cmdline.txt
 colour_echo "..." "$Cyan"
@@ -395,7 +415,7 @@ colour_echo "..." "$Cyan"
 
 colour_echo ">> Running user image.sh script" "$Blue"
 if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
-# shellcheck source=tests/simple-image/image.sh
+  # shellcheck source=tests/simple-image/image.sh
   . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
 colour_echo "   Finished running user images.sh script" "$Blue"
@@ -422,27 +442,27 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
   # concatenate MODULE variables and remove excess spaces and new lines
   FIND_MODS="$(echo "${DEFAULT_KERNEL_MODULES} ${ADDITIONAL_KERNEL_MODULES} ${LOAD_MODS}" | xargs)"
   # loop all kernel versions
-  for d in * ; do
+  for d in *; do
     echo "Saving from $d"
 
     # copy required modules to tmp dir
     mkdir "$d"_tmp
     cd "$d"
     cp modules.* ../"$d"_tmp
-    for m in ${FIND_MODS} ; do
+    for m in ${FIND_MODS}; do
       colour_echo "finding: $m" "$Cyan"
       find ./ -type f -name "${m}.ko*" -fprint0 /tmp/found -exec find-deps {} \;
       [ ! -s /tmp/found ] && colour_echo "  ERR: no module found" "$Red"
     done
     if [ -n "${ADDITIONAL_DIR_KERNEL_MODULES}" ]; then
       colour_echo "searching for directories: ${ADDITIONAL_DIR_KERNEL_MODULES}" "$Cyan"
-      for m in ${ADDITIONAL_DIR_KERNEL_MODULES} ; do
+      for m in ${ADDITIONAL_DIR_KERNEL_MODULES}; do
         colour_echo "finding dir: ${m}" "$Cyan"
         find ./ -type d -fprint0 /tmp/found -name "${m}" -exec find {} -print0 -type f -name "*.ko*" \; | xargs -0 -I_mod find-deps _mod
         [ ! -s /tmp/found ] && colour_echo "  ERR: dir not found" "$Red"
       done
     fi
-    colour_echo "Seleceted modules:" "$Yellow"
+    colour_echo "Selected modules:" "$Yellow"
     SAVED_MODS="$(xargs -a /tmp/modules.save | tr -s ' ' '\n' | sort -u | xargs)"
     for m in ${SAVED_MODS}; do
       colour_echo "  > ${m}" "$Blue"
@@ -458,7 +478,7 @@ if [ "$DEFAULT_KERNEL_MODULES" != "*" ]; then
 
   cd "$WORK_PATH"
 else
-  echo "skiped -> keep all modules"
+  echo "skipped -> keep all modules"
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -495,7 +515,7 @@ colour_echo ">> Create SD card image"
 
 # boot partition
 m4 -D xFS=vfat -D xIMAGE=boot.xFS -D xLABEL="BOOT" -D xSIZE="$SIZE_BOOT" \
-  "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_boot.cfg
+  "$RES_PATH"/m4/genimage.m4 >"$WORK_PATH"/genimage_boot.cfg
 make_image ${BOOTFS_PATH} ${WORK_PATH}/genimage_boot.cfg
 
 # root partition and shrink to minimum size if desired
@@ -503,38 +523,40 @@ case "$SIZE_ROOT_FS" in
   0)
     colour_echo 'Will shrink rootfs'
     m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_PART" -D xFEATURES="extents,dir_index" -D xEXTRAARGS="-m 0" \
-      -D xUSEMKE2FS "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
+      -D xUSEMKE2FS "$RES_PATH"/m4/genimage.m4 >"$WORK_PATH"/genimage_root.cfg
     make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
     resize2fs -fM ${IMAGE_PATH}/rootfs.ext4
     resize2fs -fM ${IMAGE_PATH}/rootfs.ext4
-    colour_echo "Shrunk rootfs to $(du -h ${IMAGE_PATH}/rootfs.ext4 | cut -f1)" ;;
+    colour_echo "Shrunk rootfs to $(du -h ${IMAGE_PATH}/rootfs.ext4 | cut -f1)"
+    ;;
   *)
     colour_echo 'Will not shrink rootfs'
     m4 -D xFS=ext4 -D xIMAGE=rootfs.xFS -D xLABEL="rootfs" -D xSIZE="$SIZE_ROOT_FS" -D xUSEMKE2FS \
-      "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_root.cfg
-    make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg ;;
+      "$RES_PATH"/m4/genimage.m4 >"$WORK_PATH"/genimage_root.cfg
+    make_image ${ROOTFS_PATH} ${WORK_PATH}/genimage_root.cfg
+    ;;
 esac
 
 # data partition
 m4 -D xFS=ext4 -D xIMAGE=datafs.xFS -D xLABEL="data" -D xSIZE="$SIZE_DATA" -D xUSEMKE2FS \
-  "$RES_PATH"/m4/genimage.m4 > "$WORK_PATH"/genimage_data.cfg
+  "$RES_PATH"/m4/genimage.m4 >"$WORK_PATH"/genimage_data.cfg
 make_image ${DATAFS_PATH} ${WORK_PATH}/genimage_data.cfg
 
 # sd card image
 m4 -D xSIZE_ROOT="$SIZE_ROOT_PART" \
-  "$RES_PATH"/m4/sdcard.m4 > "$WORK_PATH"/genimage_sdcard.cfg
+  "$RES_PATH"/m4/sdcard.m4 >"$WORK_PATH"/genimage_sdcard.cfg
 make_image ${IMAGE_PATH} ${WORK_PATH}/genimage_sdcard.cfg
 
 colour_echo ">> Compress images"
 # copy final image
 mkdir -p ${OUTPUT_PATH}
-pigz -c ${IMAGE_PATH}/sdcard.img > ${OUTPUT_PATH}/${IMG_NAME}.img.gz
-pigz -c ${IMAGE_PATH}/rootfs.ext4 > ${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
+pigz -c ${IMAGE_PATH}/sdcard.img >${OUTPUT_PATH}/${IMG_NAME}.img.gz
+pigz -c ${IMAGE_PATH}/rootfs.ext4 >${OUTPUT_PATH}/${IMG_NAME}_update.img.gz
 
 # create checksums
 cd ${OUTPUT_PATH}/
-sha256sum ${IMG_NAME}.img.gz > ${IMG_NAME}.img.gz.sha256
-sha256sum ${IMG_NAME}_update.img.gz > ${IMG_NAME}_update.img.gz.sha256
+sha256sum ${IMG_NAME}.img.gz >${IMG_NAME}.img.gz.sha256
+sha256sum ${IMG_NAME}_update.img.gz >${IMG_NAME}_update.img.gz.sha256
 
 echo
 colour_echo ">> Uncompressed Sizes"

@@ -4,17 +4,36 @@ include:
   - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
-  - project: container-email/resources/gitlab-templates
-    ref: main
-    file: shellcheck.yml
 
 stages:
 - lint
 - build
 - test
 
+checkbashisms:
+  image: alpine:latest
+  stage: lint
+  before_script:
+    - apk add checkbashisms
+  script:
+    - find ./ -type f -name "*.sh" -exec checkbashisms -f {} \;
+
 shellcheck:
+  image: koalaman/shellcheck-alpine:stable
+  stage: lint
+  before_script:
+    - shellcheck --version
+  script:
+    - find ./ -type f -name "*.sh" -exec shellcheck {} \;
   allow_failure: true
+
+shfmt:
+  image: mvdan/shfmt:latest-alpine
+  stage: lint
+  before_script:
+    - shfmt -version
+  script:
+    - shfmt -i 2 -ci -d .
 
 test_build:
   variables:
@@ -29,7 +48,6 @@ test_build:
     - docker info
   script:
     - |
-      cd tests/simple-image || exit 1
-      ./build_image.sh -i "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
-      ls -lahR ./cache
-      ls -lahR ./output
+      tests/simple-image/build_image.sh -i "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+      ls -lahR tests/simple-image/cache
+      ls -lahR tests/simple-image/output
