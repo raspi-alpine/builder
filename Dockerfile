@@ -1,7 +1,7 @@
 ARG ALPINE_VER=3.15
 FROM docker.io/alpine:$ALPINE_VER AS uboot-base
 
-RUN apk add curl
+RUN apk add --no-cache curl
 
 COPY resources/scripts/gitlab_packages.sh /usr/local/bin/gitlab_packages
 
@@ -24,7 +24,7 @@ FROM docker.io/alpine:edge
 
 RUN sed -E -e "s/^(.*community)/\1\n\1/" -e "s/(.*)community/\1testing/" -i /etc/apk/repositories
 
-RUN apk add --upgrade dosfstools e2fsprogs-extra findutils \
+RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
 	genimage git m4 mtools pigz u-boot-tools
 
 ADD ./resources /resources

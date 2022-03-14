@@ -29,7 +29,7 @@ echo "booting from: ${boot_dev}"
 # clear memory
 mw.b 0x10000 0 0x404
 
-# load file from /uboot
+# load saved boot data file /uboot/uboot.dat
 fatload ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 
 # check CRC
@@ -90,7 +90,7 @@ mw.b 0x10000 0x01
 # calculate crc
 crc32 0x10000 0x3FC 0x103FC
 
-# save to file to /uboot
+# save boot data to /uboot/uboot.dat
 fatwrite ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 
 
