@@ -23,6 +23,7 @@ else
 fi
 echo "booting from: ${boot_dev}"
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # load persistence values
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -98,7 +99,7 @@ fatwrite ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 # select kernel
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 echo "selecting kernel"
-setenv boot_kernel "/boot/uImage"
+setenv boot_kernel "/boot/vmlinuz-rpi"
 
 # only if new pi a new kernel is required
 # https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
@@ -110,15 +111,15 @@ if test ${board_new_pi} > 0; then
   
   # BCM2836 (pi2)
   if itest.l ${board_cpu} -eq 0x1000; then
-    setenv boot_kernel "/boot/uImage2"
+    setenv boot_kernel "/boot/vmlinuz-rpi2"
     echo "pi2 detected"
   # BCM2837 (pi3)
   elif itest.l ${board_cpu} -eq 0x2000; then
-    setenv boot_kernel "/boot/uImage4"
+    setenv boot_kernel "/boot/vmlinuz-rpi4"
     echo "pi3 detected"
   # BCM2711 (pi4)
   elif itest.l ${board_cpu} -ge 0x3000; then
-    setenv boot_kernel "/boot/uImage4"
+    setenv boot_kernel "/boot/vmlinuz-rpi4"
     echo "pi4 or greater detected"
   fi
 else
@@ -138,6 +139,10 @@ setexpr bootargs sub " root=[^ ]+" " root=${boot_partition_base}${boot_partition
 
 # load kernel and boot
 ext4load ${boot_dev} 0:${boot_partition} ${kernel_addr_r} ${boot_kernel}
-bootm ${kernel_addr_r} - ${fdt_addr}
 
+# 32bit does not have booti
+booti ${kernel_addr_r} - ${fdt_addr}
+bootz ${kernel_addr_r} - ${fdt_addr}
+
+sleep 3
 reset

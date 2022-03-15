@@ -101,12 +101,15 @@ download_firmware() {
 case "$ARCH" in
   armhf)
     KERNEL_PACKAGES="linux-rpi linux-rpi2"
+    A=arm
     ;;
   armv7)
     KERNEL_PACKAGES="linux-rpi2 linux-rpi4"
+    A=arm
     ;;
   aarch64)
     KERNEL_PACKAGES="linux-rpi4"
+    A=arm64
     ;;
 esac
 
@@ -315,32 +318,6 @@ EOF
 ln -fs /data/etc/shadow ${ROOTFS_PATH}/etc/shadow
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-colour_echo ">> Prepare kernel for uboot"
-
-# build uImage
-
-# uImage2 is for armhf and armv7 only
-if [ "$ARCH" != "aarch64" ]; then
-  mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-    -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
-fi
-
-# there is no uImage4 in armhf
-A=arm
-case "$ARCH" in
-  armhf)
-    mkimage -A arm -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-      -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
-    sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd
-    ;;
-  aarch64)
-    A=arm64
-    ;;
-esac
-[ "$ARCH" != "armhf" ] && mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 \
-  -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # create boot FS
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -501,7 +478,6 @@ rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 rm -rf ${ROOTFS_PATH}/boot/initramfs*
 rm -rf ${ROOTFS_PATH}/boot/System*
 rm -rf ${ROOTFS_PATH}/boot/config*
-rm -rf ${ROOTFS_PATH}/boot/vmlinuz*
 rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
 rm -f ${ROOTFS_PATH}/boot/fixup*.dat
 rm -f ${ROOTFS_PATH}/boot/start*.elf
