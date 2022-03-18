@@ -501,7 +501,6 @@ rm -rf ${ROOTFS_PATH}/var/cache/apk/*
 rm -rf ${ROOTFS_PATH}/boot/initramfs*
 rm -rf ${ROOTFS_PATH}/boot/System*
 rm -rf ${ROOTFS_PATH}/boot/config*
-rm -rf ${ROOTFS_PATH}/boot/vmlinuz*
 rm -rf ${ROOTFS_PATH}/boot/dtbs-rpi*
 rm -f ${ROOTFS_PATH}/boot/fixup*.dat
 rm -f ${ROOTFS_PATH}/boot/start*.elf
