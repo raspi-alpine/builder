@@ -16,27 +16,32 @@ echo 'dtparam=i2c_arm=on' >>"$BOOTFS_PATH"/config.txt
 echo 'dtoverlay=miniuart-bt' >>"$BOOTFS_PATH"/config.txt
 sed -e "s/#ttyS0/ttyAMA0/" -e "s/ttyS0/ttyAMA0/" -i "$ROOTFS_PATH"/etc/inittab
 
-# copy script to install python module and node-red and clone megaind-rpi git
-cp "$INPUT_PATH"/install-megaind.sh "$ROOTFS_PATH"/tmp/
-git clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git "$ROOTFS_PATH"/tmp/megaind-rpi
-
 # install deps and add avahi to default runlevel
-chroot_exec apk add python3 py3-smbus yarn htop dropbear-scp avahi dbus
+chroot_exec apk add avahi dbus dropbear-scp htop npm python3 py3-smbus
 chroot_exec rc-update add avahi-daemon default
 # set avahi name to DEFAULT_HOSTNAME value
 sed "s/#host-name.*/host-name=${DEFAULT_HOSTNAME}/" -i "$ROOTFS_PATH"/etc/avahi/avahi-daemon.conf
 
 # add deps needed for building
-chroot_exec apk add --virtual .build-deps build-base py3-setuptools linux-headers python3-dev
-# create user to run node-red
-chroot_exec addgroup "$NME" 2>/dev/null
-chroot_exec adduser -D -h /data/"$NME" --gecos "mega user" --ingroup "$NME" "$NME" 2>/dev/null
+chroot_exec apk add --virtual .build-deps build-base linux-headers python3-dev py3-setuptools
 
-# make the megaind app
-chroot_exec make -C /tmp/megaind-rpi install
-# run the python and node-red install script
-chroot_exec /tmp/install-megaind.sh
-# remove build deps
+# cache the git repo with megaind-rpi source if not downloaded
+ab_cache -p ${ROOTFS_PATH}/tmp/megaind-rpi -s git -a "clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git ${ROOTFS_PATH}/tmp/megaind-rpi"
+
+# don't cache the python install use -c to copy to chroot before running
+chroot_exec -c ${INPUT_PATH}/cache-scripts/install-megaind-python.sh
+
+# cache the node_modules directory
+ab_cache -c -p ${ROOTFS_PATH}/usr/local/lib/node_modules -s ${INPUT_PATH}/cache-scripts/install-node-red.sh
+# the node* symlinks are in a different directory but built with previous step
+ab_cache -p "${ROOTFS_PATH}/usr/local/bin/node*"
+
+# cache the megaind command after building
+ab_cache -c -p "${ROOTFS_PATH}/usr/local/bin/megaind" -s ${INPUT_PATH}/cache-scripts/install-megaind.sh
+
+# create user to run node-red
+chroot_exec adduser -D -g "Mega User" -h /data/"$NME" "$NME" "$NME"
+
 chroot_exec apk del .build-deps
 chroot_exec rm -rf /tmp/*
 

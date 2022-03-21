@@ -35,24 +35,23 @@ ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-RES_PATH=/resources/
 BASE_PACKAGES="alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
                ifupdown-ng mkinitfs partx rng-tools-extra tzdata util-linux"
 WORK_PATH="/work"
-ROOTFS_PATH="${WORK_PATH}/root_fs"
-BOOTFS_PATH="${WORK_PATH}/boot_fs"
-DATAFS_PATH="${WORK_PATH}/data_fs"
 IMAGE_PATH="${WORK_PATH}/img"
-# reset console colours
-ColourOff='\033[0m'
-# regular console colours
-Red='\033[0;31m'
-Green='\033[0;32m'
-Yellow='\033[0;33m'
-Blue='\033[0;34m'
-#Purple='\033[0;35m'
-Cyan='\033[0;36m'
-#White='\033[0;37m'
+export RES_PATH=/resources/
+export INPUT_PATH
+export ROOTFS_PATH="${WORK_PATH}/root_fs"
+export BOOTFS_PATH="${WORK_PATH}/boot_fs"
+export DATAFS_PATH="${WORK_PATH}/data_fs"
+
+# console colours (default Green)
+Red='-Red'
+Yellow='-Yellow'
+Blue='-Blue'
+#Purple='-Purple'
+Cyan='-Cyan'
+#White='-White'
 
 # ensure work directory is clean
 rm -rf ${WORK_PATH:?}/*
@@ -61,10 +60,6 @@ rm -rf ${WORK_PATH:?}/*
 # functions
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-chroot_exec() {
-  chroot "$ROOTFS_PATH" "$@" 1>&2
-}
-
 make_image() {
   [ -d /tmp/genimage ] && rm -rf /tmp/genimage
   genimage --rootpath "$1" \
@@ -72,26 +67,6 @@ make_image() {
     --inputpath ${IMAGE_PATH} \
     --outputpath ${IMAGE_PATH} \
     --config "$2"
-}
-
-colour_echo() {
-  printf "%b\n" "${2:-$Green}${1}${ColourOff}"
-}
-
-download_firmware() {
-  DPATH=${CACHE_PATH:=/tmp}
-  if [ -n "${CACHE_PATH}" ] && [ -d "${CACHE_PATH}/firmware" ]; then
-    colour_echo "   Using cached firmware..." "$Cyan"
-  else
-    # download base firmware
-    colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" "$Cyan"
-    git clone ${RPI_FIRMWARE_GIT} --depth 1 \
-      --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
-      --sparse "$DPATH"/firmware/ &&
-      (cd "$DPATH"/firmware/ &&
-        git sparse-checkout add boot/ &&
-        git checkout)
-  fi
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -352,8 +327,12 @@ case ${RPI_FIRMWARE_BRANCH} in
     FPATH="${ROOTFS_PATH}/boot"
     ;;
   *)
-    download_firmware
-    FPATH="$DPATH/firmware/boot"
+    if [ ! -z ${CACHE_PATH} ]; then
+      ab_cache -p /tmp/firmware -s ${RES_PATH}scripts/cache-scripts/download_firmware.sh -a "-r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}"
+    else
+      ${RES_PATH}scripts/cache-scripts/download_firmware.sh -r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}
+    fi
+    FPATH="/tmp/firmware/boot"
     ;;
 esac
 

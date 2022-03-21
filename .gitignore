@@ -4,5 +4,7 @@ tmp/
 tests/simple-image/m4/
 tests/simple-image/output/
 tests/simple-image/cache/
+examples/node-red/input/m4
+examples/node-red/input/build_cache
 sdcard.img.gz*
 sdcard_update.img.gz*

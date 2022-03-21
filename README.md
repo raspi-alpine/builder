@@ -119,6 +119,15 @@ As well as the environment variables some files change the building of the image
 
 In the INPUT_PATH if there is an m4 folder with the file hdmi.m4 this will be included instead of the default hdmi section in config.txt, to let the kernel decide hdmi settings just create a blank hdmi.m4 file.
 
+#### Caching the build
+
+If CACHE_PATH is set apk files and firmware are saved there, there is also a command `ab_cache` which can be used
+to cache files or directories.  These can be created with a single command, or a script which is run if the cache 
+archive is missing.  Files can have wildards, see [examples/node-red](examples/node-red).  If a script is used
+and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.  A checksum is not   
+saved if no command/script is given, or if the script/command is outside INPUT_PATH or RES_PATH.  In which case the
+the cache archive needs to be deleted to build it again.
+
 ### Update running system
 
 The system can be updated without a complete flash of the SD card from the 
