@@ -60,6 +60,7 @@ else
         eval chroot_exec "$SCRIPT" "$ARGS"
       fi
     else
+      # run script outside of chroot if -c not passed
       eval "$SCRIPT" "$ARGS"
     fi
   fi
@@ -77,5 +78,6 @@ else
       grep -v " $SCRIPT" "$_CHECKSUMS" >/tmp/cache.list && mv /tmp/cache.list "$_CHECKSUMS"
       sha3sum "$SCRIPT" >>"$_CHECKSUMS"
     fi
+    rm -f /tmp/cache.list
   )
 fi
