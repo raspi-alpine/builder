@@ -26,6 +26,19 @@ jobs:
           echo "Flags:     ${{ steps.buildx.outputs.flags }}"
           echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
 
+      - name: Get Description
+        id: get-info
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            const commits = ${{ toJSON(github.event.commits) }}
+            let all_commits="📜 This release includes the following changes 📜\n"
+            for (const commit of commits) {
+              all_commits=all_commits.concat("📘 Commit: ",commit.id,'\n',commit.message,'\n','\n');
+            }
+            return all_commits
+
       - name: Docker label info
         id: docklabel
         run: |
@@ -50,6 +63,9 @@ jobs:
           tags: |
             ghcr.io/${{ steps.docklabel.outputs.repo }}:${{ steps.docklabel.outputs.timestamp }}
             ghcr.io/${{ steps.docklabel.outputs.repo }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.docklabel.outputs.sha }}
+            org.opencontainers.image.description=${{ steps.get-info.outputs.result }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
