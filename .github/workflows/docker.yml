@@ -33,9 +33,9 @@ jobs:
           result-encoding: string
           script: |
             const commits = ${{ toJSON(github.event.commits) }}
-            let all_commits="📜 This release includes the following changes 📜\n"
+            let all_commits="📜This image includes some of the following changes📜  "
             for (const commit of commits) {
-              all_commits=all_commits.concat("📘 Commit: ",commit.id,'\n',commit.message,'\n','\n');
+              all_commits=all_commits.concat('📘', commit.message.split('\n')[0], ' ');
             }
             return all_commits
 

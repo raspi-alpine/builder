@@ -14,6 +14,4 @@ Bluetooth is disabled to activate the hardware serial port, a login is started o
 
 AVAHI is started with the DEFAULT_HOSTNAME set in `megaind.env` so it can be accessed with that name instead of an ip address.
 
-Yarn is used to install node-red, and npm is not installed so new modules cannot be installed from the web interface of node-red.  As npm gives the error `npm ERR! Exit handler never called!` when trying to install node-red.
-
 The default password for root is set in `megaind.env` which should be changed.
