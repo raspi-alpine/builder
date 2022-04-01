@@ -371,8 +371,10 @@ colour_echo "end of overlays" "$Cyan"
 
 # copy u-boot
 if [ "$UBOOT_SILENT" != "true" ]; then
+  colour_echo "copy uboot binaries" "$Cyan"
   cp /uboot/* ${BOOTFS_PATH}/
 else
+  colour_echo "copy uboot-silent binaries" "$Cyan"
   cp /uboot-silent/* ${BOOTFS_PATH}/
 fi
 
