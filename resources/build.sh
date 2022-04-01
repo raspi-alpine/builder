@@ -13,6 +13,7 @@ set -e
 : "${DEFAULT_DROPBEAR_ENABLED:="true"}"
 : "${DEFAULT_KERNEL_MODULES:=""}"
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
+: "${UBOOT_SILENT:="false"}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
@@ -369,7 +370,11 @@ ls -C "$BOOTFS_PATH"/overlays
 colour_echo "end of overlays" "$Cyan"
 
 # copy u-boot
-cp /uboot/* ${BOOTFS_PATH}/
+if [ "$UBOOT_SILENT" != "true" ]; then
+  cp /uboot/* ${BOOTFS_PATH}/
+else
+  cp /uboot-silent/* ${BOOTFS_PATH}/
+fi
 
 # generate boot script
 mkimage -A "$A" -T script -C none -n "Boot script" -d ${RES_PATH}/boot.cmd ${BOOTFS_PATH}/boot.scr
