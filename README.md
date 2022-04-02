@@ -89,7 +89,7 @@ builder.
 | SIZE_ROOT_FS                  | 200M                                         | Size of root file system (0 for automatic shrink to content)                                                                    |
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
-| UBOOT_SILENT                  | false                                        | True to use uboot configured to be silent without output to console or serial port                                              |
+| UBOOT_PACKAGE                 | none                                         | Leave empty to use default package, or use 'silent' for uboot package without output to console or serial port                  |
 
 #### ARCH variable
 
