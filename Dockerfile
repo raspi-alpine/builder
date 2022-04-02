@@ -9,7 +9,8 @@ FROM uboot-base AS uboot
 
 # Project ID for raspi-alpine/crosscompile-uboot
 RUN PROJ_ID="32838267" \
-&&  gitlab_packages -p "$PROJ_ID" -a u-boot-blob -d uboot
+&&  gitlab_packages -p "$PROJ_ID" -a u-boot-blob -d uboot \
+&&  gitlab_packages -p "$PROJ_ID" -a u-boot-silent-blob -d uboot-silent
 
 FROM uboot-base as uboot_tool
 
@@ -29,6 +30,7 @@ RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/
+COPY --from=uboot /uboot-silent/ /uboot-silent/
 COPY --from=uboot_tool /uboot_tool /uboot_tool
 COPY --from=keys /usr/share/apk/keys /usr/share/apk/keys-stable
 
