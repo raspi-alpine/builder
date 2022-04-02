@@ -370,7 +370,7 @@ ls -C "$BOOTFS_PATH"/overlays
 colour_echo "end of overlays" "$Cyan"
 
 # copy u-boot
-if [ -n "${UBOOT_PACKAGE}" ] UBOOT_POSTFIX="-${UBOOT_PACKAGE}"
+[ -n "${UBOOT_PACKAGE}" ] && UBOOT_POSTFIX="-${UBOOT_PACKAGE}"
 colour_echo "copy uboot${UBOOT_POSTFIX} binaries" "$Cyan"
 cp /uboot${UBOOT_POSTFIX}/* ${BOOTFS_PATH}/
 
