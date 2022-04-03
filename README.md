@@ -209,3 +209,5 @@ By default syslog is configured to log to the kernel printk buffer so it does
 not create any log files, logs can be read with dmesg.  Which are shown
 along with kernel messages.
 
+### Matrix Room
+For questions you can also join our Matrix room [#raspi-alpine:matrix.org](https://matrix.to/#/#raspi-alpine:matrix.org) from any Matrix home server.
