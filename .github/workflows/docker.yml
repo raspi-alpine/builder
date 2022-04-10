@@ -33,13 +33,15 @@ jobs:
           result-encoding: string
           script: |
             const commits = ${{ toJSON(github.event.commits) }}
-            let all_commits="📜This image includes some of the following changes📜  "
+            let all_commits="Latest changes-"
             for (const commit of commits) {
               let normString = commit.message.split('\n')[0];
               normString = normString.replace(/(['"])/g, "");
-              all_commits=all_commits.concat('📘', normString, ' ');
-            }
-            return all_commits
+              if (!normString.startsWith("Merge branch")) {
+                all_commits=all_commits.concat(' >', normString, '<');
+              }
+            } 
+            return all_commits.substring(0, 253)
 
       - name: Docker label info
         id: docklabel
@@ -68,6 +70,7 @@ jobs:
           labels: |
             org.opencontainers.image.revision=${{ steps.docklabel.outputs.sha }}
             org.opencontainers.image.description=${{ steps.get-info.outputs.result }}
+            org.opencontainers.image.licenses="Apache-2.0"
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
