@@ -23,7 +23,7 @@ done
 
 # find colour number
 for col in ${Colours_Name}; do
-  [ "$col" == "$COLOUR" ] && break
+  [ "$col" = "$COLOUR" ] && break
   Index=$((Index + 1))
 done
 

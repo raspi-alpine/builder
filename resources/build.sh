@@ -328,7 +328,7 @@ case ${RPI_FIRMWARE_BRANCH} in
     FPATH="${ROOTFS_PATH}/boot"
     ;;
   *)
-    if [ ! -z ${CACHE_PATH} ]; then
+    if [ -n "${CACHE_PATH}" ]; then
       ab_cache -p /tmp/firmware -s ${RES_PATH}scripts/cache-scripts/download_firmware.sh -a "-r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}"
     else
       ${RES_PATH}scripts/cache-scripts/download_firmware.sh -r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}
@@ -397,7 +397,7 @@ colour_echo "..." "$Cyan"
 
 colour_echo ">> Running user image.sh script" "$Blue"
 if [ -f ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT} ]; then
-  # shellcheck source=tests/simple-image/image.sh
+  # shellcheck source=/dev/null
   . ${INPUT_PATH}/${CUSTOM_IMAGE_SCRIPT}
 fi
 colour_echo "   Finished running user images.sh script" "$Blue"

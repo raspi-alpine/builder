@@ -26,18 +26,18 @@ sed "s/#host-name.*/host-name=${DEFAULT_HOSTNAME}/" -i "$ROOTFS_PATH"/etc/avahi/
 chroot_exec apk add --virtual .build-deps build-base linux-headers python3-dev py3-setuptools
 
 # cache the git repo with megaind-rpi source if not downloaded
-ab_cache -p ${ROOTFS_PATH}/tmp/megaind-rpi -s git -a "clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git ${ROOTFS_PATH}/tmp/megaind-rpi"
+ab_cache -p "${ROOTFS_PATH}"/tmp/megaind-rpi -s git -a "clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git ${ROOTFS_PATH}/tmp/megaind-rpi"
 
 # don't cache the python install use -c to copy to chroot before running
-chroot_exec -c ${INPUT_PATH}/cache-scripts/install-megaind-python.sh
+chroot_exec -c "${INPUT_PATH}"/cache-scripts/install-megaind-python.sh
 
 # cache the node_modules directory
-ab_cache -c -p ${ROOTFS_PATH}/usr/local/lib/node_modules -s ${INPUT_PATH}/cache-scripts/install-node-red.sh
+ab_cache -c -p "${ROOTFS_PATH}"/usr/local/lib/node_modules -s "${INPUT_PATH}"/cache-scripts/install-node-red.sh
 # the node* symlinks are in a different directory but built with previous step
 ab_cache -p "${ROOTFS_PATH}/usr/local/bin/node*"
 
 # cache the megaind command after building
-ab_cache -c -p "${ROOTFS_PATH}/usr/local/bin/megaind" -s ${INPUT_PATH}/cache-scripts/install-megaind.sh
+ab_cache -c -p "${ROOTFS_PATH}"/usr/local/bin/megaind -s "${INPUT_PATH}"/cache-scripts/install-megaind.sh
 
 # create user to run node-red
 chroot_exec adduser -D -g "Mega User" -h /data/"$NME" "$NME" "$NME"

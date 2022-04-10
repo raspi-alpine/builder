@@ -25,7 +25,7 @@ done
 if [ -z "$SCRIPT" ] || [ -z "$CABPATH" ]; then
   usage
 fi
-[ -z ${CACHE_PATH} ] && echo "CACHE_PATH is not set" && usage
+[ -z "${CACHE_PATH}" ] && echo "CACHE_PATH is not set" && usage
 
 _DIRNAME=$(dirname "$CABPATH")
 _CNAME=$(basename "$CABPATH")
@@ -65,12 +65,12 @@ else
     fi
   fi
 
-  mkdir -p $(dirname "$_LOCAL_CACHE")
+  mkdir -p "$(dirname "$_LOCAL_CACHE")"
   colour_echo "  creating cache archive  $_LOCAL_CACHE" -Red
   (
     cd "$_DIRNAME"
     # use ls to get names to allow for wildcards
-    ls -1d ${_CNAME} >/tmp/cache.list
+    ls -1d "$_CNAME" >/tmp/cache.list
     tar -cf "$_LOCAL_CACHE" -I pigz -T /tmp/cache.list
     # store checksum if in script is in input or res path
     if [ -n "$_DO_CHECKSUM" ]; then

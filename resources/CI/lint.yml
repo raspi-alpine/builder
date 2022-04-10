@@ -1,0 +1,26 @@
+# lint stage
+
+checkbashisms:
+  image: alpine:latest
+  stage: lint
+  before_script:
+    - apk add --no-cache checkbashisms
+  script:
+    - find ./ -type f -name "*.sh" -exec checkbashisms -f {} \;
+
+shellcheck:
+  image: koalaman/shellcheck-alpine:stable
+  stage: lint
+  before_script:
+    - shellcheck --version
+  script:
+    - find ./ -type f -name "*.sh" -exec shellcheck {} \;
+  allow_failure: true
+
+shfmt:
+  image: mvdan/shfmt:latest-alpine
+  stage: lint
+  before_script:
+    - shfmt -version
+  script:
+    - shfmt -i 2 -ci -d .
