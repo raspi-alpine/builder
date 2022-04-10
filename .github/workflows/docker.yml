@@ -35,7 +35,9 @@ jobs:
             const commits = ${{ toJSON(github.event.commits) }}
             let all_commits="📜This image includes some of the following changes📜  "
             for (const commit of commits) {
-              all_commits=all_commits.concat('📘', commit.message.split('\n')[0], ' ');
+              let normString = commit.message.split('\n')[0];
+              normString = normString.replace(/(['"])/g, "");
+              all_commits=all_commits.concat('📘', normString, ' ');
             }
             return all_commits
 
