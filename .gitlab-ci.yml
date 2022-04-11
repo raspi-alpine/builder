@@ -1,39 +1,15 @@
 include:
   - template: Code-Quality.gitlab-ci.yml
-  - template: Jobs/Build.gitlab-ci.yml
   - template: Security/Container-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
-
+  - local: resources/CI/lint.yml
+  - local: resources/CI/buildx.yml
+  
 stages:
 - lint
 - build
 - test
-
-checkbashisms:
-  image: alpine:latest
-  stage: lint
-  before_script:
-    - apk add checkbashisms
-  script:
-    - find ./ -type f -name "*.sh" -exec checkbashisms -f {} \;
-
-shellcheck:
-  image: koalaman/shellcheck-alpine:stable
-  stage: lint
-  before_script:
-    - shellcheck --version
-  script:
-    - find ./ -type f -name "*.sh" -exec shellcheck {} \;
-  allow_failure: true
-
-shfmt:
-  image: mvdan/shfmt:latest-alpine
-  stage: lint
-  before_script:
-    - shfmt -version
-  script:
-    - shfmt -i 2 -ci -d .
 
 test_build:
   variables:
@@ -41,7 +17,7 @@ test_build:
   stage: test
   image: docker
   services:
-  - docker:dind
+    - docker:dind
   needs:
     - job: build
   before_script:

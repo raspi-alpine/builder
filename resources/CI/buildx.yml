@@ -1,0 +1,29 @@
+# build and push test image with docker buildx
+# for amd64 and aarch64
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  BUILDER_IMAGE: "docker"
+
+.installBuildx: &installBuildx
+  - apk add --no-cache docker-cli-buildx
+  - docker version
+  - docker buildx version
+  - docker buildx create --use
+
+.loginGitLab: &loginGitLab
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+build:
+  image: "$BUILDER_IMAGE"
+  variables:
+    IMAGE: "$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG"
+  stage: build
+  before_script:
+    - *installBuildx
+    - *loginGitLab
+  script:
+    - docker buildx build --push --platform "linux/amd64,linux/arm64" -t "$IMAGE" -t "$IMAGE:$CI_COMMIT_SHA" .

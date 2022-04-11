@@ -22,8 +22,8 @@ done
 # download base firmware
 colour_echo "   Getting firmware from ${RPI_FIRMWARE_BRANCH} branch" -Cyan
 
-git clone ${RPI_FIRMWARE_GIT} --depth 1 \
-  --branch ${RPI_FIRMWARE_BRANCH} --filter=blob:none \
+git clone "$RPI_FIRMWARE_GIT" --depth 1 \
+  --branch "$RPI_FIRMWARE_BRANCH" --filter=blob:none \
   --sparse /tmp/firmware/
 (
   cd /tmp/firmware/
