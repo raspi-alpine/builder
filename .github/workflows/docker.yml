@@ -69,8 +69,7 @@ jobs:
             ghcr.io/${{ steps.docklabel.outputs.repo }}
           labels: |
             org.opencontainers.image.revision=${{ steps.docklabel.outputs.sha }}
-            org.opencontainers.image.description="Create minimal Linux images based on Alpine Linux
-for the Raspberry PI"
+            org.opencontainers.image.description="Create minimal Linux images based on Alpine Linux for the Raspberry PI"
             org.opencontainers.image.licenses="Apache-2.0"
 
       - name: Image digest
