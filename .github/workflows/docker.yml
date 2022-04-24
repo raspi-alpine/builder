@@ -6,7 +6,22 @@ on:
       - master
 
 jobs:
+  skip_ci:
+    runs-on: ubuntu-latest
+    # Map the output to the job's outputs
+    outputs:
+      canSkip: ${{ steps.check.outputs.canSkip }}
+    steps:
+      - id: check
+        uses: Legorooj/skip-ci@main
+        # with:
+        #   pattern: MyCustomRegExPattern
+        #   token: ${{ github.token }}
   docker:
+    # Wait for the skip_ci job to run
+    needs: skip_ci
+    # And only run the build if canSkip isn't 'true'.
+    if: ${{ needs.skip_ci.outputs.canSkip != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
