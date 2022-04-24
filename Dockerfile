@@ -19,6 +19,9 @@ RUN PROJ_ID="33098050" \
 &&  gitlab_packages -p "$PROJ_ID" -a uboot-tool
 
 FROM docker.io/alpine:$ALPINE_VER as keys
+LABEL org.opencontainers.image.description Create minimal Linux images based on Alpine Linux for the Raspberry PI
+LABEL org.opencontainers.image.licenses Apache-2.0
+
 RUN apk add alpine-keys
 
 FROM docker.io/alpine:edge
