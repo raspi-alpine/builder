@@ -21,9 +21,10 @@ build:
   image: "$BUILDER_IMAGE"
   variables:
     IMAGE: "$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG"
+    PLATFORMS: linux/amd64,linux/arm64
   stage: build
   before_script:
     - *installBuildx
     - *loginGitLab
   script:
-    - docker buildx build --push --platform "linux/amd64,linux/arm64" -t "$IMAGE" -t "$IMAGE:$CI_COMMIT_SHA" .
+    - docker buildx build --push --platform "$PLATFORMS" -t "$IMAGE" -t "$IMAGE:$CI_COMMIT_SHA" .
