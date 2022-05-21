@@ -8,20 +8,31 @@ on:
 jobs:
   skip_ci:
     runs-on: ubuntu-latest
-    # Map the output to the job's outputs
+    # Map the job output to 'skip'
     outputs:
-      canSkip: ${{ steps.check.outputs.canSkip }}
+      skip: ${{ steps.check_skip.outputs.result }}
     steps:
-      - id: check
-        uses: Legorooj/skip-ci@main
-        # with:
-        #   pattern: MyCustomRegExPattern
-        #   token: ${{ github.token }}
+      - name: Check For Skip
+        id: check_skip
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            let res = 'run';
+            const commits = ${{ toJSON(github.event.commits) }};
+            for (const commit of commits) {
+              console.log( commit );
+              if (commit.message.includes("[skip actions]") || commit.message.includes("[skip ci]")) {
+                res = 'skip';
+              }
+            }
+            return res;
+
   docker:
     # Wait for the skip_ci job to run
     needs: skip_ci
     # And only run the build if canSkip isn't 'true'.
-    if: ${{ needs.skip_ci.outputs.canSkip != 'true' }}
+    if: ${{ needs.skip_ci.outputs.skip != 'skip' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,23 +51,6 @@ jobs:
           echo "Status:    ${{ steps.buildx.outputs.status }}"
           echo "Flags:     ${{ steps.buildx.outputs.flags }}"
           echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
-
-      - name: Get Description
-        id: get-info
-        uses: actions/github-script@v6
-        with:
-          result-encoding: string
-          script: |
-            const commits = ${{ toJSON(github.event.commits) }}
-            let all_commits="Latest changes-"
-            for (const commit of commits) {
-              let normString = commit.message.split('\n')[0];
-              normString = normString.replace(/(['"])/g, "");
-              if (!normString.startsWith("Merge branch")) {
-                all_commits=all_commits.concat(' >', normString, '<');
-              }
-            } 
-            return all_commits.substring(0, 253)
 
       - name: Docker label info
         id: docklabel
