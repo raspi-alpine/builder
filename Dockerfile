@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.15
+ARG ALPINE_VER=3.16
 FROM docker.io/alpine:$ALPINE_VER AS uboot-base
 
 RUN apk add --no-cache curl
@@ -24,9 +24,7 @@ LABEL org.opencontainers.image.licenses Apache-2.0
 
 RUN apk add alpine-keys
 
-FROM docker.io/alpine:edge
-
-RUN sed -E -e "s/^(.*community)/\1\n\1/" -e "s/(.*)community/\1testing/" -i /etc/apk/repositories
+FROM docker.io/alpine:3.16
 
 RUN apk add --no-cache --upgrade dosfstools e2fsprogs-extra findutils \
 	genimage git m4 mtools pigz tar u-boot-tools
