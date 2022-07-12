@@ -90,6 +90,8 @@ builder.
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 | UBOOT_PACKAGE                 | none                                         | Leave empty to use default package, or use 'silent' for uboot package without output to console or serial port                  |
+| UBOOT_PROJ_ID                 | ID for raspi-alpine/crosscompile-uboot       | Set to the project ID of another gitlab repo to use u-boot artifacts from                                                       |
+| UBOOT_VESRION                 | unset (latest)                               | Change which version of u-boot to use                                                                                           |
 
 #### ARCH variable
 
@@ -125,7 +127,7 @@ In the INPUT_PATH if there is an m4 folder with the file hdmi.m4 this will be in
 If CACHE_PATH is set apk files and firmware are saved there, there is also a command `ab_cache` which can be used
 to cache files or directories.  These can be created with a single command, or a script which is run if the cache 
 archive is missing.  Files can have wildards, see [examples/node-red](examples/node-red).  If a script is used
-and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.  A checksum is not   
+and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.  A checksum is not
 saved if no command/script is given, or if the script/command is outside INPUT_PATH or RES_PATH.  In which case the
 the cache archive needs to be deleted to build it again.
 
@@ -185,6 +187,9 @@ switch the active partition if the active one will not start.
 The image contains a simple tool that resets the boot counter and switch the 
 active partition from the running OS. The sources of the script can be found 
 in the [uboot.c](resources/uboot.c).
+
+By default the latest version of u-boot is used.  The version, package, and repo the
+artifacts are downloaded from can be changed with the UBOOT_* [config variables](#config-variables).
 
 #### USB booting and partition labels
 

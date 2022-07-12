@@ -14,6 +14,9 @@ set -e
 : "${DEFAULT_KERNEL_MODULES:=""}"
 : "${UBOOT_COUNTER_RESET_ENABLED:="true"}"
 : "${UBOOT_PACKAGE:=""}"
+# Project ID for raspi-alpine/crosscompile-uboot
+: "${UBOOT_PROJ_ID:=$DEFAULT_UBOOT_PROJ_ID}"
+: "${UBOOT_VERSION:=""}"
 : "${ARCH:="armv7"}"
 : "${RPI_FIRMWARE_BRANCH:="stable"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
@@ -328,11 +331,7 @@ case ${RPI_FIRMWARE_BRANCH} in
     FPATH="${ROOTFS_PATH}/boot"
     ;;
   *)
-    if [ -n "${CACHE_PATH}" ]; then
-      ab_cache -p /tmp/firmware -s ${RES_PATH}scripts/cache-scripts/download_firmware.sh -a "-r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}"
-    else
-      ${RES_PATH}scripts/cache-scripts/download_firmware.sh -r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}
-    fi
+    ab_cache -p /tmp/firmware -s ${RES_PATH}scripts/cache-scripts/download_firmware.sh -a "-r ${RPI_FIRMWARE_GIT} -b ${RPI_FIRMWARE_BRANCH}"
     FPATH="/tmp/firmware/boot"
     ;;
 esac
@@ -369,8 +368,23 @@ colour_echo "overlays" "$Cyan"
 ls -C "$BOOTFS_PATH"/overlays
 colour_echo "end of overlays" "$Cyan"
 
-# copy u-boot
+# download u-boot if needed
 [ -n "${UBOOT_PACKAGE}" ] && UBOOT_POSTFIX="-${UBOOT_PACKAGE}"
+
+if [ -n "${UBOOT_VERSION}" ]; then
+  _UV="-v ${UBOOT_VERSION}"
+  colour_echo "checking u-boot version" "$Cyan"
+  if ! _GITLAB_VERSION="$(gitlab_packages -p ${UBOOT_PROJ_ID} -l)"; then
+    colour_echo "Problem checking version" "$Red"
+    echo "$_GITLAB_VERSION"
+    exit 1
+  fi
+  [ "${UBOOT_VERSION}" != "$_GITLAB_VERSION" ] && UB_DOWNLOAD="YES"
+fi
+if [ "${UBOOT_PROJ_ID}" != "$DEFAULT_UBOOT_PROJ_ID" ] || [ -n "$UB_DOWNLOAD" ]; then
+  ab_cache -p /uboot${UBOOT_POSTFIX} -s gitlab_packages -a "$_UV -p ${UBOOT_PROJ_ID} -a u-boot${UBOOT_POSTFIX}-blob -d /uboot${UBOOT_POSTFIX}"
+fi
+
 colour_echo "copy uboot${UBOOT_POSTFIX} binaries" "$Cyan"
 cp /uboot${UBOOT_POSTFIX}/* ${BOOTFS_PATH}/
 
