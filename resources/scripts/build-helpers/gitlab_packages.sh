@@ -3,9 +3,10 @@ set -e
 
 usage() {
   echo
-  echo "Usage: gitlab_packages -p PROJECT -a ARTIFACT [-d DESTINATION -v VERSION -e EXTENSION]"
+  echo "Usage: gitlab_packages -p PROJECT -a ARTIFACT [-l] [-d DESTINATION -v VERSION -e EXTENSION]"
   echo "           if -d is not used the current working directory is used"
   echo "           if -v is not used the latest version is used"
+  echo "           -l returns the latest version"
   echo "           a ARTIFACT.sha256 file is downloaded as well and the artifact is not extracted if it does not match"
   echo "           the version is appended to the artifact name before downloading, along with extension which defaults to \"tar.bz2\" if not set"
   exit 1
@@ -23,20 +24,22 @@ latest_pkg() {
   get_info "$1" | grep version | sed "s/v.*n.//" | sort | tail -n1
 }
 
-while getopts "p:a:d:v:e:" OPTS; do
+while getopts "p:a:d:v:e:l" OPTS; do
   case ${OPTS} in
     p) PROJ=${OPTARG} ;;
     a) ARTI=${OPTARG} ;;
     d) DEST=${OPTARG} ;;
     v) VER=${OPTARG} ;;
     e) EXT=${OPTARG} ;;
+    l) LATEST="TRUE" ;;
     *) usage ;;
   esac
 done
 
 [ -z "$PROJ" ] && echo "Need a project ID to download from (-p)" && usage
-[ -z "$ARTI" ] && echo "Need an artifact name to download (-a))" && usage
 [ -z "$VER" ] && VER="$(latest_pkg "$PROJ")"
+[ -n "$LATEST" ] && echo "$VER" && exit
+[ -z "$ARTI" ] && echo "Need an artifact name to download (-a))" && usage
 [ -z "$DEST" ] && DEST="$(pwd)"
 [ -z "$EXT" ] && EXT="tar.bz2"
 

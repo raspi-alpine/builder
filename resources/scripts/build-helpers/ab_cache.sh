@@ -25,7 +25,7 @@ done
 if [ -z "$SCRIPT" ] || [ -z "$CABPATH" ]; then
   usage
 fi
-[ -z "${CACHE_PATH}" ] && echo "CACHE_PATH is not set" && usage
+[ -z "${CACHE_PATH}" ] && echo "CACHE_PATH is not set, not saving archive"
 
 _DIRNAME=$(dirname "$CABPATH")
 _CNAME=$(basename "$CABPATH")
@@ -33,15 +33,17 @@ _ARCNAME=$(echo "$CABPATH" | tr '/*' '_')
 _LOCAL_CACHE="${CACHE_PATH}/${ARCH}/$_ARCNAME.tar.gz"
 _CHECKSUMS="${CACHE_PATH}/${ARCH}/checksums.cache"
 
-if echo "$SCRIPT" | grep -qE "^$INPUT_PATH|^$RES_PATH"; then
-  colour_echo "Checking checksum for: $SCRIPT" -Cyan
-  _DO_CHECKSUM="yes"
-  if [ -f "$_CHECKSUMS" ]; then
-    grep " $SCRIPT" "$_CHECKSUMS" | sha3sum -c && UP2DATE="YES"
+if [ -n "${CACHE_PATH}" ]; then
+  if echo "$SCRIPT" | grep -qE "^$INPUT_PATH|^$RES_PATH"; then
+    colour_echo "Checking checksum for: $SCRIPT" -Cyan
+    _DO_CHECKSUM="yes"
+    if [ -f "$_CHECKSUMS" ]; then
+      grep " $SCRIPT" "$_CHECKSUMS" | sha3sum -c && UP2DATE="YES"
+    fi
+  else
+    colour_echo "Not checking checksum for: $SCRIPT, not in $INPUT_PATH or $RES_PATH" -Cyan
+    UP2DATE="YES"
   fi
-else
-  colour_echo "Not checking checksum for: $SCRIPT, not in $INPUT_PATH or $RES_PATH" -Cyan
-  UP2DATE="YES"
 fi
 
 if [ -f "$_LOCAL_CACHE" ] && [ -n "$UP2DATE" ]; then
@@ -65,19 +67,21 @@ else
     fi
   fi
 
-  mkdir -p "$(dirname "$_LOCAL_CACHE")"
-  colour_echo "  creating cache archive  $_LOCAL_CACHE" -Red
-  (
-    cd "$_DIRNAME"
-    # use ls to get names to allow for wildcards
-    ls -1d "$_CNAME" >/tmp/cache.list
-    tar -cf "$_LOCAL_CACHE" -I pigz -T /tmp/cache.list
-    # store checksum if in script is in input or res path
-    if [ -n "$_DO_CHECKSUM" ]; then
-      touch "$_CHECKSUMS"
-      grep -v " $SCRIPT" "$_CHECKSUMS" >/tmp/cache.list && mv /tmp/cache.list "$_CHECKSUMS"
-      sha3sum "$SCRIPT" >>"$_CHECKSUMS"
-    fi
-    rm -f /tmp/cache.list
-  )
+  if [ -n "${CACHE_PATH}" ]; then
+    mkdir -p "$(dirname "$_LOCAL_CACHE")"
+    colour_echo "  creating cache archive  $_LOCAL_CACHE" -Red
+    (
+      cd "$_DIRNAME"
+      # use ls to get names to allow for wildcards
+      ls -1d "$_CNAME" >/tmp/cache.list
+      tar -cf "$_LOCAL_CACHE" -I pigz -T /tmp/cache.list
+      # store checksum if in script is in input or res path
+      if [ -n "$_DO_CHECKSUM" ]; then
+        touch "$_CHECKSUMS"
+        grep -v " $SCRIPT" "$_CHECKSUMS" >/tmp/cache.list && mv /tmp/cache.list "$_CHECKSUMS"
+        sha3sum "$SCRIPT" >>"$_CHECKSUMS"
+      fi
+      rm -f /tmp/cache.list
+    )
+  fi
 fi
