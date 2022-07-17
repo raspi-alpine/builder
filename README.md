@@ -90,8 +90,8 @@ builder.
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 | UBOOT_PACKAGE                 | none                                         | Leave empty to use default package, or use 'silent' for uboot package without output to console or serial port                  |
-| UBOOT_PROJ_ID                 | ID for raspi-alpine/crosscompile-uboot       | Set to the project ID of another gitlab repo to use u-boot artifacts from                                                       |
-| UBOOT_VESRION                 | unset (latest)                               | Change which version of u-boot to use                                                                                           |
+| UBOOT_PROJ_ID                 | ID for raspi-alpine/crosscompile-uboot       | Project ID of another gitlab repo to use u-boot artifacts from, will download and also cache if CACHE_PATH set                  |
+| UBOOT_VESRION                 | unset (latest)                               | Change which version of u-boot to use, downloaded if newer than bundled version or UBOOT_PROJ_ID is not default                 |
 
 #### ARCH variable
 
@@ -188,8 +188,9 @@ The image contains a simple tool that resets the boot counter and switch the
 active partition from the running OS. The sources of the script can be found 
 in the [uboot.c](resources/uboot.c).
 
-By default the latest version of u-boot is used.  The version, package, and repo the
-artifacts are downloaded from can be changed with the UBOOT_* [config variables](#config-variables).
+By default the u-boot version bundled at docker image creation is used.
+The version, package, and repo the artifacts are downloaded from can be
+changed with the `UBOOT_*` [config variables](#config-variables).
 
 #### USB booting and partition labels
 
