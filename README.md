@@ -129,6 +129,8 @@ The STAGES environment variable holds the order of stages to run, if a same name
 and the INPUT_PATH/stages/STAGE directory the INPUT_PATH one is used.  After the run of default stage scripts for that stage any
 remaining scripts in INPUT_PATH/stages/STAGE are run.
 
+**Stage script names could change when new features are added**
+
 |         | The Current build stages are:                         |
 | ------- | ----------------------------------------------------- |
 | Stage 0 | Prepare root FS                                       |
