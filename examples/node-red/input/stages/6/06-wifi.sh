@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # wifi stuff
 chroot_exec apk add wireless-tools wpa_supplicant
 chroot_exec rc-update add wpa_supplicant default

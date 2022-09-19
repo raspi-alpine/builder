@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # install deps and add avahi to default runlevel
 chroot_exec apk add avahi dbus dropbear-scp htop npm python3 py3-smbus
 chroot_exec rc-update add avahi-daemon default

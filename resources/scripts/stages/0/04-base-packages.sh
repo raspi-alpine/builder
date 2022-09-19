@@ -1,3 +1,5 @@
+#!/bin/sh
+
 BASE_PACKAGES="alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
                ifupdown-ng mkinitfs partx rng-tools-extra tzdata util-linux"
 

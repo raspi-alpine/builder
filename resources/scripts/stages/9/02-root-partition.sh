@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # root partition and shrink to minimum size if desired
 case "$SIZE_ROOT_FS" in
   0)

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 (
   mkdir -p ${BOOTFS_PATH}
   mkdir -p ${ROOTFS_PATH}

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # cache the git repo with megaind-rpi source if not downloaded
 ab_cache -p "${ROOTFS_PATH}"/tmp/megaind-rpi -s git -a "clone --depth 1 https://github.com/SequentMicrosystems/megaind-rpi.git ${ROOTFS_PATH}/tmp/megaind-rpi"
 

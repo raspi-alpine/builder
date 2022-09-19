@@ -1,3 +1,5 @@
+#!/bin/sh
+
 [ -n "${SIMPLE_IMAGE}" ] && exit
 
 # prepare /data init script

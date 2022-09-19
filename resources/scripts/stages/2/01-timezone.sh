@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # set timezone
 if [ -z "${SIMPLE_IMAGE}" ]; then
   echo "${DEFAULT_TIMEZONE}" >${ROOTFS_PATH}/etc/timezone.alpine-builder

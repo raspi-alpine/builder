@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # update native repositories to ALPINE_MIRROR, leaving version the same
 awk -v repo="$ALPINE_MIRROR" -F'/' '{print repo "\/" $(NF-1) "\/" $NF}' /etc/apk/repositories >/etc/apk/repositories.tmp
 mv -f /etc/apk/repositories.tmp /etc/apk/repositories

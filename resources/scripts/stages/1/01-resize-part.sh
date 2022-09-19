@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # add script to resize data partition with init script
 m4 -D xSIMPLEIMAGE=${SIMPLE_IMAGE} "$RES_PATH"/m4/ab_resizedata.sh.m4 >${WORK_PATH}/ab_resizedata.sh
 install -D ${WORK_PATH}/ab_resizedata.sh ${ROOTFS_PATH}/sbin/ab_resizedata

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # set user name for node red user, and i2c owner
 NME="megapi"
 # create user to run node-red

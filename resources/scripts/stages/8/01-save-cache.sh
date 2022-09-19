@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # save cache
 if [ -d "${ROOTFS_PATH}/etc/apk/cache" ]; then
   mkdir -p ${CACHE_PATH}/${ARCH}/apk/

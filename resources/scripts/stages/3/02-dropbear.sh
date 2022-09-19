@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # dropbear
 chroot_exec apk add dropbear
 chroot_exec rc-update add dropbear default

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo "Checking for modules in /etc/modules /etc/modules-load.d /usr/lib/modules-load.d"
 
 find-mods ${ROOTFS_PATH}/etc/modules

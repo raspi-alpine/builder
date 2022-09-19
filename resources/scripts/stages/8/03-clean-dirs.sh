@@ -1,3 +1,5 @@
+#!/bin/sh
+
 (
   cd ${ROOTFS_PATH}
   rm -rf var/cache/apk/* boot/initramfs* boot/System* boot/config* boot/dtbs-rpi*

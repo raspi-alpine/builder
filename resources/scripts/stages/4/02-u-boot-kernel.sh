@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # build uImage (for old installs)
 A=arm
 

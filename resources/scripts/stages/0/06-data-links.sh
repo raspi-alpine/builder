@@ -1,3 +1,5 @@
+#!/bin/sh
+
 [ -n "${SIMPLE_IMAGE}" ] && exit
 
 ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone

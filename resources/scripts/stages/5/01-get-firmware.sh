@@ -1,3 +1,5 @@
+#!/bin/sh
+
 case ${RPI_FIRMWARE_BRANCH} in
   alpine)
     FPATH="${ROOTFS_PATH}/boot"

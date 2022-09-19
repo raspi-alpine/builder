@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # download u-boot if needed
 [ -n "${UBOOT_PACKAGE}" ] && UBOOT_POSTFIX="-${UBOOT_PACKAGE}"
 

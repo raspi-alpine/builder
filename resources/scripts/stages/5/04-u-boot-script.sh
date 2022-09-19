@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # generate boot script
 case ${ARCH} in
   aarch64)

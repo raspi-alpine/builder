@@ -1,3 +1,5 @@
+#!/bin/sh
+
 case "$ARCH" in
   armhf)
     chroot_exec apk add linux-rpi linux-rpi2

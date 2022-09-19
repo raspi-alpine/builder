@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # set host name
 if [ -z "${SIMPLE_IMAGE}" ]; then
   echo "${DEFAULT_HOSTNAME}" >${ROOTFS_PATH}/etc/hostname.alpine-builder

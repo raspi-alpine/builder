@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # copy cache
 if [ -n "${CACHE_PATH}" ]; then
   mkdir -p ${ROOTFS_PATH}/etc/apk/cache

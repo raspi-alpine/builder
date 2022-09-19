@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # device manager service for device creation and /dev/stderr etc
 case ${DEV} in
   eudev)

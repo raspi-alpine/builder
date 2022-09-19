@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # copy linux device trees and overlays to boot
 # determine dtb and overlay path
 DTB_SOURCE_PATH=""

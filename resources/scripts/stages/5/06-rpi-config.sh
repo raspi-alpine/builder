@@ -1,3 +1,5 @@
+#!/bin/sh
+
 colour_echo "generating config.txt" "$Cyan"
 colour_echo "..." "$Cyan"
 eval m4 "$M4ARG" ${RES_PATH}/m4/config.txt.m4 >${BOOTFS_PATH}/config.txt

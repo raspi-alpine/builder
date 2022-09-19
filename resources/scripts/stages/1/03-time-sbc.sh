@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # add ab_clock as pi does not have a hardware clock
 install ${RES_PATH}/scripts/ab_clock.sh ${ROOTFS_PATH}/etc/init.d/ab_clock
 DEFAULT_SERVICES="${DEFAULT_SERVICES} ab_clock"

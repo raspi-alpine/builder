@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo
 colour_echo ">> Uncompressed Sizes"
 colour_echo "size of uboot partition: $SIZE_BOOT	| size of files on uboot partition:     $(du -sh ${BOOTFS_PATH} | sed "s/\s.*//")" "$Yellow"
