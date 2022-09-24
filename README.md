@@ -131,18 +131,18 @@ remaining scripts in INPUT_PATH/stages/STAGE are run.
 
 **Stage script names could change when new features are added**
 
-|         | The Current build stages are:                         |
-| ------- | ----------------------------------------------------- |
-| Stage 0 | Prepare root FS                                       |
-| Stage 1 | Configure root FS                                     |
-| Stage 2 | Configure system                                      |
-| Stage 3 | Install extras                                        |
-| Stage 4 | Kernel and u-boot                                     |
-| Stage 5 | Configure boot FS                                     |
-| Stage 6 | Running user image.sh script and user stage 6 scripts |
-| Stage 7 | Pruning kernel modules                                |
-| Stage 8 | Cleanup                                               |
-| Stage 9 | Create SD card image                                  |
+|          | The Current build stages are:                         |
+| -------- | ----------------------------------------------------- |
+| Stage 00 | Prepare root FS                                       |
+| Stage 10 | Configure root FS                                     |
+| Stage 20 | Configure system                                      |
+| Stage 30 | Install extras                                        |
+| Stage 40 | Kernel and u-boot                                     |
+| Stage 50 | Configure boot FS                                     |
+| Stage 60 | Running user image.sh script and user stage 6 scripts |
+| Stage 70 | Pruning kernel modules                                |
+| Stage 80 | Cleanup                                               |
+| Stage 90 | Create SD card image                                  |
 
 
 #### Caching the build
