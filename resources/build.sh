@@ -37,7 +37,7 @@ set -e
 : "${CUSTOM_IMAGE_SCRIPT:="image.sh"}"
 : "${SIMPLE_IMAGE:=""}"
 
-: "${STAGES:="0 1 2 3 4 5 6 7 8 9"}"
+: "${STAGES:="00 10 20 30 40 50 60 70 80 90"}"
 
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 
