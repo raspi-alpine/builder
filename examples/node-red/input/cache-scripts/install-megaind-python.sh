@@ -2,4 +2,5 @@
 
 # install megaind python library
 cd /tmp/megaind-rpi/python || exit 1
-python3 setup.py install
+python3 -m build --no-isolation --wheel
+python3 -m installer ./dist/megaind*.whl
