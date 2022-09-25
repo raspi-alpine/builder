@@ -89,7 +89,7 @@ builder.
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
 | SIZE_ROOT_FS                  | 200M                                         | Size of root file system (0 for automatic shrink to content)                                                                    |
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
-| STAGES                        | 0 1 2 3 4 5 6 7 8 9                          | Stages enabled for image build                                                                                                  |
+| STAGES                        | 00 10 20 30 40 50 60 70 80 90                | Stages enabled for image build                                                                                                  |
 | SYSINIT_SERVICES              | rngd                                         | Default services to add to sysinit runlevel                                                                                     |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 | UBOOT_PACKAGE                 | none                                         | Leave empty to use default package, or use 'silent' for uboot package without output to console or serial port                  |
