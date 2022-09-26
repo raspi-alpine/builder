@@ -3,14 +3,12 @@
 
 depend() {
   need localmount
+  need resize_last
   before networking
 }
 
 start() {
-  ebegin Preparing persistent data
-  /sbin/ab_resizedata
-  # make sure /data is mounted
-  mount -a
+  ebegin Checking persistent data
 
   if [ ! -d /data/etc ]; then
     # mount data with tmpfs if cannot create dir

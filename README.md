@@ -16,7 +16,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 * Read only root filesystem
 * Optional caching during build
 * Boot from SD Card or USB (PI2B to PI4)
-
+* Build is seperated into stages that can be overridden, or use a custom stages/order
 
 ## Usage
 
@@ -76,6 +76,7 @@ builder.
 | DEFAULT_HOSTNAME              | alpine                                       | Default hostname                                                                                                                |
 | DEFAULT_KERNEL_MODULES        | ipv6 af_packet                               | Kernel modules to keep in image                                                                                                 |
 | DEFAULT_ROOT_PASSWORD         | alpine                                       | Default password for root user                                                                                                  |
+| DEFAULT_SERVICES              | hostname local modules networking ntpd syslog| Services to add to default runlevel                                                                                             |
 | DEFAULT_TIMEZONE              | Etc/UTC                                      | Default [Timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) to use for image                               |
 | DEV                           | mdev                                         | Device manager to use, can be mdev or eudev                                                                                     |
 | IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
@@ -88,6 +89,8 @@ builder.
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
 | SIZE_ROOT_FS                  | 200M                                         | Size of root file system (0 for automatic shrink to content)                                                                    |
 | SIZE_ROOT_PART                | 500M                                         | Size of root partition                                                                                                          |
+| STAGES                        | 00 10 20 30 40 50 60 70 80 90                | Stages enabled for image build                                                                                                  |
+| SYSINIT_SERVICES              | rngd                                         | Default services to add to sysinit runlevel                                                                                     |
 | UBOOT_COUNTER_RESET_ENABLED   | true                                         | True to enable simple boot counter reset service                                                                                |
 | UBOOT_PACKAGE                 | none                                         | Leave empty to use default package, or use 'silent' for uboot package without output to console or serial port                  |
 | UBOOT_PROJ_ID                 | ID for raspi-alpine/crosscompile-uboot       | Project ID of another gitlab repo to use u-boot artifacts from, will download and also cache if CACHE_PATH set                  |
@@ -121,6 +124,26 @@ are checked for `.conf` files.  Any modules in these files are kept as well.
 As well as the environment variables some files change the building of the image as well.
 
 In the INPUT_PATH if there is an m4 folder with the file hdmi.m4 this will be included instead of the default hdmi section in config.txt, to let the kernel decide hdmi settings just create a blank hdmi.m4 file.
+
+The STAGES environment variable holds the order of stages to run, if a same named file exists in the default stage directory
+and the INPUT_PATH/stages/STAGE directory the INPUT_PATH one is used.  After the run of default stage scripts for that stage any
+remaining scripts in INPUT_PATH/stages/STAGE are run.
+
+**Stage script names could change when new features are added**
+
+|          | The Current build stages are:                         |
+| -------- | ----------------------------------------------------- |
+| Stage 00 | Prepare root FS                                       |
+| Stage 10 | Configure root FS                                     |
+| Stage 20 | Configure system                                      |
+| Stage 30 | Install extras                                        |
+| Stage 40 | Kernel and u-boot                                     |
+| Stage 50 | Configure boot FS                                     |
+| Stage 60 | Running user image.sh script and user stage 6 scripts |
+| Stage 70 | Pruning kernel modules                                |
+| Stage 80 | Cleanup                                               |
+| Stage 90 | Create SD card image                                  |
+
 
 #### Caching the build
 
