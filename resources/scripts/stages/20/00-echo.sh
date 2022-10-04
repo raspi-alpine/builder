@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colour_echo ">> Stage 2 - Configure system"
+colour_echo ">> Stage 20 - Configure system"
