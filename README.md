@@ -16,7 +16,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 * Read only root filesystem
 * Optional caching during build
 * Boot from SD Card or USB (PI2B to PI4)
-* Build is seperated into stages that can be overridden, or use a custom stages/order
+* Build is seperated into stages that can be overridden, or use custom stages/order
 
 ## Usage
 
@@ -24,6 +24,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 > destination, you can use [qemu-user-static](https://github.com/multiarch/qemu-user-static):
 >
 > `docker run --privileged --rm multiarch/qemu-user-static --persistent yes`
+> (this is already installed if using docker desktop)
 
 ### Image Creation
 
@@ -41,8 +42,9 @@ This will create 2 image files in the directory `$PWD/output/`:
 
 > For each image a *.sha256 file will be generated to validate integrity.
 
-To add custom modifications mount a script to `/input/image.sh`.
-The following variables can be useful for the for and `image.sh`:
+To add custom modifications mount a script to `/input/image.sh`, or create seperate scripts in [/input/stages/60](examples/node-red/input/stages/60).
+If both are used the `/input/image.sh` script is run first.
+The following variables can be useful for the `image.sh` script or /input/stages/60 scripts:
 
 | Variable    | Description                 |
 | ----------- | --------------------------- |
@@ -66,12 +68,12 @@ builder.
 | ----------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | ADDITIONAL_DIR_KERNEL_MODULES | none                                         | Directories in kernel modules to include all modules from, eg "w1" for one wire modules                                         |
 | ADDITIONAL_KERNEL_MODULES     | none                                         | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones                    |
-| ALPINE_BRANCH                 | v3.15                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
+| ALPINE_BRANCH                 | v3.16                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
 | ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
 | CACHE_PATH                    | none                                         | Cache directory inside container (needs volume mounting unless in input|output path), if set firmware and apk files are cached  |
-| CMDLINE                       | [resources/build.sh](resources/build.sh#L18) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
-| CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir)                                                                 |
+| CMDLINE                       | [resources/build.sh](resources/build.sh#L25) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
+| CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir), scripts in `input/stages/60` can be used instead               |
 | DEFAULT_DROPBEAR_ENABLED      | true                                         | True to enable SSH server by default                                                                                            |
 | DEFAULT_HOSTNAME              | alpine                                       | Default hostname                                                                                                                |
 | DEFAULT_KERNEL_MODULES        | ipv6 af_packet                               | Kernel modules to keep in image                                                                                                 |
@@ -131,28 +133,28 @@ remaining scripts in INPUT_PATH/stages/STAGE are run.
 
 **Stage script names could change when new features are added**
 
-|          | The Current build stages are:                         |
-| -------- | ----------------------------------------------------- |
-| Stage 00 | Prepare root FS                                       |
-| Stage 10 | Configure root FS                                     |
-| Stage 20 | Configure system                                      |
-| Stage 30 | Install extras                                        |
-| Stage 40 | Kernel and u-boot                                     |
-| Stage 50 | Configure boot FS                                     |
-| Stage 60 | Running user image.sh script and user stage 6 scripts |
-| Stage 70 | Pruning kernel modules                                |
-| Stage 80 | Cleanup                                               |
-| Stage 90 | Create SD card image                                  |
+|          | The Current build stages are:                          |
+| -------- | ------------------------------------------------------ |
+| Stage 00 | Prepare root FS                                        |
+| Stage 10 | Configure root FS                                      |
+| Stage 20 | Configure system                                       |
+| Stage 30 | Install extras                                         |
+| Stage 40 | Kernel and u-boot                                      |
+| Stage 50 | Configure boot FS                                      |
+| Stage 60 | Running user image.sh script and user stage 60 scripts |
+| Stage 70 | Pruning kernel modules                                 |
+| Stage 80 | Cleanup                                                |
+| Stage 90 | Create SD card image                                   |
 
 
 #### Caching the build
 
 If CACHE_PATH is set apk files and firmware are saved there, there is also a command `ab_cache` which can be used
 to cache files or directories.  These can be created with a single command, or a script which is run if the cache 
-archive is missing.  Files can have wildards, see [examples/node-red](examples/node-red).  If a script is used
-and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.  A checksum is not
-saved if no command/script is given, or if the script/command is outside INPUT_PATH or RES_PATH.  In which case the
-the cache archive needs to be deleted to build it again.
+archive is missing.  Files can have wildards, see [examples/node-red](examples/node-red/input/stages/60/04-node-red.sh).
+If a script is used and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.
+A checksum is not saved if no command/script is given, or if the script/command is outside INPUT_PATH or RES_PATH.
+In which case the the cache archive needs to be deleted to build it again.
 
 ### Update running system
 
@@ -209,7 +211,7 @@ switch the active partition if the active one will not start.
 
 The image contains a simple tool that resets the boot counter and switch the 
 active partition from the running OS. The sources of the script can be found 
-in the [uboot.c](resources/uboot.c).
+in the [uboot.c](https://gitlab.com/raspi-alpine/crosscompile-uboot-tool/-/blob/main/resources/uboot.c).
 
 By default the u-boot version bundled at docker image creation is used.
 The version, package, and repo the artifacts are downloaded from can be
