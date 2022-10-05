@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colour_echo ">> Stage 1 - Configure root FS"
+colour_echo ">> Stage 10 - Configure root FS"

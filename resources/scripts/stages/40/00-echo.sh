@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colour_echo ">> Stage 4 - Kernel and u-boot"
+colour_echo ">> Stage 40 - Kernel and u-boot"

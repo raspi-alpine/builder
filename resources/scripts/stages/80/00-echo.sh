@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colour_echo ">> Stage 8 - Cleanup"
+colour_echo ">> Stage 80 - Cleanup"
