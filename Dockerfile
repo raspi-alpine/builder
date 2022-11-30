@@ -1,5 +1,5 @@
 ARG UB_PROJ_ID=32838267
-ARG ALPINE_VER=3.16
+ARG ALPINE_VER=3.17
 ####
 FROM docker.io/alpine:$ALPINE_VER AS uboot-base
 
@@ -26,7 +26,7 @@ FROM docker.io/alpine:$ALPINE_VER as keys
 RUN apk add alpine-keys
 
 ####
-FROM docker.io/alpine:3.16
+FROM docker.io/alpine:3.17
 LABEL org.opencontainers.image.description Create minimal Linux images based on Alpine Linux for the Raspberry PI
 LABEL org.opencontainers.image.licenses Apache-2.0
 ARG UB_PROJ_ID

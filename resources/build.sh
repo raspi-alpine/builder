@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: "${ALPINE_BRANCH:="v3.16"}"
+: "${ALPINE_BRANCH:="v3.17"}"
 : "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
 : "${DEFAULT_TIMEZONE:="Etc/UTC"}"
