@@ -6,10 +6,4 @@ NME="megapi"
 # set cpu govenor
 echo conservative > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 
-# startup script
-NDIR="/data/$NME"
-
-mkdir -p "$NDIR" || exit 1
-chown "$NME":"$NME" "$NDIR" /dev/i2c-*
-
-su -c "node-red-pi --userDir $NDIR flows.json" - "$NME" &
+su -c "node-red-pi flows.json" - "$NME" &
