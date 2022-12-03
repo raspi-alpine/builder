@@ -17,8 +17,8 @@ usage() {
 }
 
 failed() {
-	echo "<<<< Failed on test: $1 >>>>"
-	exit 1
+  echo "<<<< Failed on test: $1 >>>>"
+  exit 1
 }
 
 while getopts "i:f78p" OPTS; do
