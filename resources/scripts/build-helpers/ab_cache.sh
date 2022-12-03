@@ -74,7 +74,11 @@ else
       cd "$_DIRNAME"
       # use find to get names to allow for wildcards
       find ./ -maxdepth 1 -name "$_CNAME" -fprint /tmp/cache.list
-      [ ! -s /tmp/cache.list ] && colour_echo "  ERR: $_DIRNAME/$_LOCAL_CACHE not found" "$Red" && exit 1
+      if [ ! -s /tmp/cache.list ]; then
+        colour_echo "  ERR: $_DIRNAME/$_CNAME not found" -Red
+        rm -f /tmp/cache.list
+        exit 1
+      fi
       tar -cf "$_LOCAL_CACHE" -I pigz -T /tmp/cache.list
       # store checksum if in script is in input or res path
       if [ -n "$_DO_CHECKSUM" ]; then
