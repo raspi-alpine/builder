@@ -49,7 +49,7 @@ fi
 # build for armhf and set SIZE_ROOT_FS manually
 if [ -n "$ARMHF" ]; then
   docker run --rm -v "$PWD":/input -v "$PWD"/output/armhf:/output \
-    --env ARCH=armhf --env SIZE_ROOT_FS="150M" --env ALPINE_BRANCH="edge" \
+    --env ARCH=armhf --env SIZE_ROOT_FS="180M" --env ALPINE_BRANCH="edge" \
     --env ADDITIONAL_DIR_KERNEL_MODULES="w1" --env RPI_FIRMWARE_BRANCH="alpine" "$IMG" || failed "armhf"
 fi
 
