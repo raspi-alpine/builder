@@ -16,6 +16,11 @@ usage() {
   exit 1
 }
 
+failed() {
+	echo "<<<< Failed on test: $1 >>>>"
+	exit 1
+}
+
 while getopts "i:f78p" OPTS; do
   case ${OPTS} in
     i) IMG=${OPTARG} ;;
@@ -38,14 +43,14 @@ fi
 # shrink  rootfs size to minimum
 if [ -n "$ARMV7" ]; then
   docker run --rm -v "$PWD":/input -v "$PWD"/output/armv7:/output \
-    --env ALPINE_BRANCH=3.14 --env UBOOT_VERSION=2022.04 --env SIZE_ROOT_FS="0" "$IMG"
+    --env ALPINE_BRANCH=3.14 --env UBOOT_VERSION=2022.04 --env SIZE_ROOT_FS="0" "$IMG" || failed "armv7"
 fi
 
 # build for armhf and set SIZE_ROOT_FS manually
 if [ -n "$ARMHF" ]; then
   docker run --rm -v "$PWD":/input -v "$PWD"/output/armhf:/output \
     --env ARCH=armhf --env SIZE_ROOT_FS="150M" --env ALPINE_BRANCH="edge" \
-    --env ADDITIONAL_DIR_KERNEL_MODULES="w1" --env RPI_FIRMWARE_BRANCH="alpine" "$IMG"
+    --env ADDITIONAL_DIR_KERNEL_MODULES="w1" --env RPI_FIRMWARE_BRANCH="alpine" "$IMG" || failed "armhf"
 fi
 
 # test hdmi include, test env file with CMDLINE environment variable, test cache
@@ -53,7 +58,7 @@ if [ -n "$ARMV8" ]; then
   mkdir -p m4
   echo "# this is included instead of default hdmi" >m4/hdmi.m4
   docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64-silent:/output -v "$PWD"/cache:/cache \
-    --env-file=env-files/builder-silent.env "$IMG"
+    --env-file=env-files/builder-silent.env "$IMG" || failed "aarch64-silent"
   docker run --rm -v "$PWD":/input -v "$PWD"/output/aarch64:/output -v "$PWD"/cache:/cache \
-    --env-file=env-files/builder.env "$IMG"
+    --env-file=env-files/builder.env "$IMG" || failed "aarch64"
 fi
