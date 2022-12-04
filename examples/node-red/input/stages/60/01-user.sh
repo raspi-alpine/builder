@@ -4,6 +4,7 @@
 NME="megapi"
 # create user to run node-red
 chroot_exec adduser -D -g "Mega User" -h /data/"$NME" "$NME" "$NME"
+chroot_exec adduser "$NME" dialout
 
 # copy flow to run at start
 cp "$INPUT_PATH"/flows.json "$ROOTFS_PATH"/data/"$NME"/
