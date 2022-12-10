@@ -6,4 +6,7 @@ NME="megapi"
 # set cpu govenor
 echo conservative > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 
-su -c "node-red-pi flows.json" - "$NME" &
+# release rs485 before running node red
+/usr/local/bin/megaind 7 rs485wr 0 9600 1 0 1
+
+su -c "/usr/local/bin/node-red-pi flows.json" - "$NME" &

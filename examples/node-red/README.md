@@ -3,6 +3,8 @@
 The arch for the image is set to aarch64 in `megaind.env`
 
 This example installs the software to use the [SequentSystems megaind-rpi board](https://github.com/SequentMicrosystems/megaind-rpi), it also installs the node-red module for 16inputs-rpi.
+To use the RS485 on the card which can be passed through to the PI uart pins (14,15) the `silent` `UBOOT_PACKAGE` is used and `CMDLINE`
+is changed to remove the console on serial0
 
 The `flows.json` file is started by node-red on startup, it is in the read/write data partition.  But once node-red has created its files it can be in a read only filesystem, which means it can no longer be edited.
 
