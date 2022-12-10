@@ -149,9 +149,11 @@ remaining scripts in INPUT_PATH/stages/STAGE are run.
 
 #### Caching the build
 
-If CACHE_PATH is set apk files and firmware are saved there, there is also a command `ab_cache` which can be used
-to cache files or directories.  These can be created with a single command, or a script which is run if the cache 
-archive is missing.  Files can have wildards, see [examples/node-red](examples/node-red/input/stages/60/04-node-red.sh).
+If CACHE_PATH is set apk files and firmware are saved there, there is also commands `ab_cache` and `ab_git` which
+can be used to cache files and directories or git repositories.
+`ab_cache` can be used with a single command, or a script which is run if the cache archive is missing, or no command
+if caching objects from a previous step.
+Files can have wildards, see [examples/node-red](examples/node-red/input/stages/60/04-node-red.sh).
 If a script is used and it is in the INPUT_PATH or RES_PATH a checksum is saved so the script is run again if changed.
 A checksum is not saved if no command/script is given, or if the script/command is outside INPUT_PATH or RES_PATH.
 In which case the the cache archive needs to be deleted to build it again.
