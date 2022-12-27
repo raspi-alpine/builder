@@ -35,10 +35,10 @@ _CHECKSUMS="${CACHE_PATH}/${ARCH}/checksums.cache"
 
 if [ -n "${CACHE_PATH}" ]; then
   if echo "$SCRIPT" | grep -qE "^$INPUT_PATH|^$RES_PATH"; then
-    colour_echo "Checking checksum for: $SCRIPT" -Cyan
+    colour_echo "Checking checksum for:-" -Cyan
     _DO_CHECKSUM="yes"
     if [ -f "$_CHECKSUMS" ]; then
-      grep " $SCRIPT" "$_CHECKSUMS" | sha3sum -c && UP2DATE="YES"
+      grep "$SCRIPT" "$_CHECKSUMS" | sha3sum -c && UP2DATE="YES"
     fi
   else
     colour_echo "Not checking checksum for: $SCRIPT, not in $INPUT_PATH or $RES_PATH" -Cyan
@@ -80,10 +80,11 @@ else
         exit 1
       fi
       tar -cf "$_LOCAL_CACHE" -I pigz -T /tmp/cache.list
-      # store checksum if in script is in input or res path
+      # store checksum if script is in INPUT or RES_PATH
       if [ -n "$_DO_CHECKSUM" ]; then
         touch "$_CHECKSUMS"
-        grep -v " $SCRIPT" "$_CHECKSUMS" >/tmp/cache.list && mv /tmp/cache.list "$_CHECKSUMS"
+        _ESCSCRIPT="$(echo ${SCRIPT} | sed 's+\/+\\\/+g')"
+        sed "/$_ESCSCRIPT/d" -i "$_CHECKSUMS"
         sha3sum "$SCRIPT" >>"$_CHECKSUMS"
       fi
       rm -f /tmp/cache.list
