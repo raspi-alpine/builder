@@ -23,8 +23,8 @@ else
   exit 1
 fi
 cp -r ${OVERLAY_SOURCE_PATH} ${BOOTFS_PATH}/
-colour_echo "contents of uboot" "$Cyan"
+colour_echo "contents of uboot" -Cyan
 ls -C ${BOOTFS_PATH}
-colour_echo "overlays" "$Cyan"
+colour_echo "overlays" -Cyan
 ls -C "$BOOTFS_PATH"/overlays
-colour_echo "end of overlays" "$Cyan"
+colour_echo "end of overlays" -Cyan

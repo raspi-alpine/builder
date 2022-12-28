@@ -17,7 +17,7 @@ usage() {
 }
 
 failed() {
-  echo "<<<< Failed on test: $1 >>>>"
+  echo "--<< Failed on test: $1 >>--"
   exit 1
 }
 

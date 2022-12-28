@@ -52,10 +52,13 @@ export INPUT_PATH
 export ROOTFS_PATH="${WORK_PATH}/root_fs"
 export BOOTFS_PATH="${WORK_PATH}/boot_fs"
 [ -z "${SIMPLE_IMAGE}" ] && export DATAFS_PATH="${WORK_PATH}/data_fs"
+# shellcheck disable=SC2034
 [ -z "${SIMPLE_IMAGE}" ] && SETUP_PREFIX="/data"
 
 # console colours (default Green)
+# shellcheck disable=SC2034
 Red='-Red'
+# shellcheck disable=SC2034
 Yellow='-Yellow'
 Blue='-Blue'
 #Purple='-Purple'
@@ -81,25 +84,28 @@ make_image() {
 # run stage scripts
 run_stage_scripts() {
   _srun=""
-  for S in ${DEF_STAGE_PATH}/"$1"/*.sh; do
+  for S in "${DEF_STAGE_PATH}/$1"/*.sh; do
     _sname=$(basename "$S")
     [ "$_sname" = "*.sh" ] && break
     colour_echo "  Found $_sname" "$Cyan"
     if [ -f ${INPUT_PATH}/stages/"$1"/"$_sname" ]; then
       colour_echo "  Overriding $_sname with user version" "$Blue"
+      # shellcheck disable=SC1090
       . ${INPUT_PATH}/stages/"$1"/"$_sname"
       _srun="$_srun $_sname"
     else
+      # shellcheck disable=SC1090
       . "$S"
     fi
   done
   # run remaining user stage scripts
   colour_echo "  Running user Stage $1 scripts" "$Cyan"
-  for S in ${INPUT_PATH}/stages/"$1"/*.sh; do
+  for S in "${INPUT_PATH}/stages/$1"/*.sh; do
     _sname=$(basename "$S")
     [ "$_sname" = "*.sh" ] && break
     if ! echo "$_srun" | grep -q "$_sname"; then
       colour_echo "  Found $_sname" "$Cyan"
+      # shellcheck disable=SC1090
       . "$S"
     fi
   done

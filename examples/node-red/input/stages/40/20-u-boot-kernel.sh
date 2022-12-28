@@ -1,3 +1,3 @@
 #!/bin/sh
 
-colour_echo "    Skipping legacy kernel image wrapper" "$Blue"
+colour_echo "    Skipping legacy kernel image wrapper" -Blue

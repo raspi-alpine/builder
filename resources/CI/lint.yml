@@ -14,7 +14,7 @@ shellcheck:
   before_script:
     - shellcheck --version
   script:
-    - find ./ -type f -name "*.sh" -exec shellcheck {} \;
+    - find ./ -type f -name "*.sh" -exec shellcheck --exclude SC2086 {} \;
   allow_failure: true
 
 shfmt:
