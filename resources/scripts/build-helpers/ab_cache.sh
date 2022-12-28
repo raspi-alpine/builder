@@ -35,7 +35,7 @@ _CHECKSUMS="${CACHE_PATH}/${ARCH}/checksums.cache"
 
 if [ -n "${CACHE_PATH}" ]; then
   if echo "$SCRIPT" | grep -qE "^$INPUT_PATH|^$RES_PATH"; then
-    colour_echo "Checking checksum for:-" -Cyan
+    colour_echo "Checking cache checksum for $SCRIPT" -Cyan
     _DO_CHECKSUM="yes"
     if [ -f "$_CHECKSUMS" ]; then
       grep "$SCRIPT" "$_CHECKSUMS" | sha3sum -c && UP2DATE="YES"
