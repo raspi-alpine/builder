@@ -13,7 +13,7 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
   * Simple update of whole system
   * Fallback if update failed
 * Choice of three base image cpu types for targeting every Raspberry PI
-* Read only root filesystem
+* Read only root filesystem, with optional overlay mounted /etc
 * Optional caching during build
 * Boot from SD Card or USB (PI2B to PI4)
 * Build is seperated into stages that can be overridden, or use custom stages/order
@@ -83,7 +83,9 @@ builder.
 | DEV                           | mdev                                         | Device manager to use, can be mdev or eudev                                                                                     |
 | IMG_NAME                      | sdcard                                       | Base name of created image file                                                                                                 |
 | INPUT_PATH                    | /input                                       | Input directory inside container                                                                                                |
+| LIB_LOG                       | unset                                        | If set create /data/var/lib and /data/var/log and bind mount to /var/, also save startup log to /var/log/rc.log                 |
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
+| OVERLAY                       | unset                                        | If set then mount /etc as an overlay with /data/etc as upperdir, this makes /etc writable but changes are saved in /data/etc    |
 | PI3USB                        | unset                                        | If set then `program_usb_boot_mode=1` is added to the end of `/boot/config.txt`.  See [examples/pi3-usb](examples/pi3-usb)      |
 | RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
@@ -125,7 +127,8 @@ are checked for `.conf` files.  Any modules in these files are kept as well.
 
 As well as the environment variables some files change the building of the image as well.
 
-In the INPUT_PATH if there is an m4 folder with the file hdmi.m4 this will be included instead of the default hdmi section in config.txt, to let the kernel decide hdmi settings just create a blank hdmi.m4 file.
+In the INPUT_PATH if there is an m4 directory with the file hdmi.m4 this will be included instead of the default hdmi section in config.txt, to let the kernel decide hdmi settings just create a blank hdmi.m4 file.
+If the INPUT_PATH m4 directory has fstab.m4, this is included at the end of the generated fstab file.
 
 The STAGES environment variable holds the order of stages to run, if a same named file exists in the default stage directory
 and the INPUT_PATH/stages/STAGE directory the INPUT_PATH one is used.  After the run of default stage scripts for that stage any

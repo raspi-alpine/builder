@@ -1,9 +1,10 @@
 #!/bin/sh
 
-[ -n "${SIMPLE_IMAGE}" ] && exit
+if [ -z "${SIMPLE_IMAGE}" ] && [ -z "${OVERLAY}" ]; then
 
-ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone
-ln -fs /data/etc/localtime ${ROOTFS_PATH}/etc/localtime
+  ln -fs /data/etc/timezone ${ROOTFS_PATH}/etc/timezone
+  ln -fs /data/etc/localtime ${ROOTFS_PATH}/etc/localtime
 
-ln -fs /data/etc/hostname ${ROOTFS_PATH}/etc/hostname
-ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
+  ln -fs /data/etc/hostname ${ROOTFS_PATH}/etc/hostname
+  ln -fs /data/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces
+fi
