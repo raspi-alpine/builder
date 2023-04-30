@@ -1,1 +1,1 @@
-echo "# this is included instead of default hdmi"
+# this is included instead of default hdmi

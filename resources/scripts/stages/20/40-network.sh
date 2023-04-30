@@ -4,19 +4,22 @@
 # use hostname in /etc/hostname for dhcp
 sed -E "s/eval echo .IF_DHCP_HOSTNAME/cat \/etc\/hostname/" -i ${ROOTFS_PATH}/usr/libexec/ifupdown-ng/dhcp
 
-cat >${ROOTFS_PATH}/etc/network/interfaces.alpine-builder <<EOF2
+if [ -n "${OVERLAY}" ] || [ -n "${SIMPLE_IMAGE}" ]; then
+  _interfaces=${ROOTFS_PATH}/etc/network/interfaces
+else
+  _interfaces=${DATAFS_PATH}/etc/network/interfaces
+fi
+cat >"$_interfaces" <<EOF2
 auto lo
 iface lo inet loopback
 
 auto eth0
 iface eth0 inet dhcp
 EOF2
-cp ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder ${DATAFS_PATH}/etc/network/interfaces
 
-if [ -z "${SIMPLE_IMAGE}" ]; then
+if [ -z "${SIMPLE_IMAGE}" ] && [ -z "${OVERLAY}" ]; then
+  cp ${DATAFS_PATH}/etc/network/interfaces ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder
   # udhcpc & resolv.conf
   mkdir -p ${ROOTFS_PATH}/etc/udhcpc
-  echo "RESOLV_CONF=/data/etc/resolv.conf" >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf
-else
-  rm ${ROOTFS_PATH}/etc/network/interfaces.alpine-builder
+  [ -z "${OVERLAY}" ] && echo "RESOLV_CONF=/data/etc/resolv.conf" >${ROOTFS_PATH}/etc/udhcpc/udhcpc.conf
 fi
