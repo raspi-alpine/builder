@@ -8,11 +8,13 @@ if [ -z "$image_file" ]; then
   return 1
 fi
 
-# change to directory containing update file
-cd "$(dirname "$image_file")"
+if [ "-" != "$image_file" ]; then
+  # change to directory containing update file
+  cd "$(dirname "$image_file")"
 
-# check integrity of image
-sha256sum -c "$image_file".sha256
+  # check integrity of image
+  sha256sum -c "$image_file".sha256
+fi
 
 # get current mounted partition index
 current_idx=$(ab_bootparam root | grep -Eo '[0-9]+$')
