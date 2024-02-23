@@ -3,6 +3,7 @@ test_*
 tmp/
 tests/simple-image/output/
 tests/simple-image/cache/
+tests/simple-image/m4/hdmi.m4
 examples/node-red/input/build_cache
 sdcard.img.gz*
 sdcard_update.img.gz*
