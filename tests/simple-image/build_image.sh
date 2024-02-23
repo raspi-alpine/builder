@@ -43,7 +43,7 @@ fi
 # shrink  rootfs size to minimum
 if [ -n "$ARMV7" ]; then
   docker run --rm -v "$PWD":/input -v "$PWD"/output/armv7:/output \
-    --env ALPINE_BRANCH=3.14 --env UBOOT_VERSION=2022.04 --env SIZE_ROOT_FS="0" "$IMG" || failed "armv7"
+    --env ALPINE_BRANCH=3.18 --env UBOOT_VERSION=2022.04 --env SIZE_ROOT_FS="0" "$IMG" || failed "armv7"
 fi
 
 # build for armhf and set SIZE_ROOT_FS manually

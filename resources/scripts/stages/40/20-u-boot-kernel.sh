@@ -1,29 +1,31 @@
-#!/bin/sh
+#!/bin/ash
 
-# build uImage (for old installs)
-A=arm
+create_image() {
+  mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" -d "$0" "$1"
+}
 
-# uImage2 is for armhf and armv7 only
-if [ "$ARCH" != "aarch64" ]; then
-  colour_echo "rpi2 image"
-  mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-    -d "$ROOTFS_PATH"/boot/vmlinuz-rpi2 "$ROOTFS_PATH"/boot/uImage2
-fi
+if [ -n "$OLDKERNEL" ]; then
+  # build uImage (for old installs)
+  A=arm
 
-# there is no uImage4 in armhf
-case "$ARCH" in
-  armhf)
-    colour_echo "rpi image"
-    mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 -n "Linux kernel" \
-      -d "$ROOTFS_PATH"/boot/vmlinuz-rpi "$ROOTFS_PATH"/boot/uImage
-    sed "s/uImage4/uImage2/" -i "$RES_PATH"/boot.cmd
-    ;;
-  aarch64)
-    A=arm64
-    ;;
-esac
-if [ "$ARCH" != "armhf" ]; then
-  colour_echo "rpi4 image"
-  mkimage -A "$A" -O linux -T kernel -C none -a 0x00200000 -e 0x00200000 \
-    -n "Linux kernel" -d "$ROOTFS_PATH"/boot/vmlinuz-rpi4 "$ROOTFS_PATH"/boot/uImage4
+  case "$ARCH" in
+    armhf)
+      # armhf there is no uimage4
+      sed "s/uImage4/uImage2/" -i "$RES_PATH"/m4/boot.cmd.m4
+      ;;
+    aarch64)
+      A=arm64
+      ;;
+  esac
+
+  for VMLINUZ in vmlinuz-rpi vmlinuz-rpi2 vmlinuz-rpi4; do
+    FULL_KERN="$ROOTFS_PATH/boot/$VMLINUZ"
+    if [ -f "$FULL_KERN" ]; then
+      create_image "$FULL_KERN" "${FULL_KERN/vmlinuz-rpi/uImage}"
+    fi
+  done
+
+  colour_echo "rpi $ARCH image"
+else
+  colour_echo "skipping kernel wrapper as alpine 3.19 changed kernel names"
 fi
