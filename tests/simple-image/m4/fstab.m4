@@ -1,1 +1,1 @@
-/data/var/log   /mnt    none     defaults,bind       0 0
+/data/var/test        /test           none     defaults,bind       0 0

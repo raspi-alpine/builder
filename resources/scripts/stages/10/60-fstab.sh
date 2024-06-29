@@ -12,6 +12,9 @@ if [ -n "$OVERLAY" ]; then
   M4ARG="$M4ARG -D xOVERLAY=${OVERLAY}"
   echo 'overlay' >"$ROOTFS_PATH"/etc/modules-load.d/overlay.conf
 fi
+if [ "$DEFAULT_DROPBEAR_ENABLED" = "true" ]; then
+  M4ARG="$M4ARG -D xDROPBEAR=TRUE"
+fi
 colour_echo "   calling m4 with $M4ARG"
 # install fstab
 m4 ${M4ARG} "$RES_PATH"/m4/fstab.m4 >${ROOTFS_PATH}/etc/fstab
