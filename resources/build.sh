@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: "${ALPINE_BRANCH:="v3.18"}"
+: "${ALPINE_BRANCH:="v3.21"}"
 : "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
 : "${DEFAULT_TIMEZONE:="Etc/UTC"}"
@@ -40,6 +40,12 @@ set -e
 : "${STAGES:="00 10 20 30 40 50 60 70 80 90"}"
 
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
+COMP="3.19
+${ALPINE_BRANCH#v}"
+
+if [ "$ALPINE_BRANCH" != "edge" ]; then
+  [ "$COMP" != "$(echo "$COMP" | sort -V)" ] && export OLDKERNEL="yes"
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
@@ -87,9 +93,9 @@ run_stage_scripts() {
   for S in "${DEF_STAGE_PATH}/$1"/*.sh; do
     _sname=$(basename "$S")
     [ "$_sname" = "*.sh" ] && break
-    colour_echo "  Found $_sname" "$Cyan"
+    colour_echo "  Stage $1 Found $_sname" "$Cyan"
     if [ -f ${INPUT_PATH}/stages/"$1"/"$_sname" ]; then
-      colour_echo "  Overriding $_sname with user version" "$Blue"
+      colour_echo "  Overriding $1 $_sname with user version" "$Blue"
       # shellcheck disable=SC1090
       . ${INPUT_PATH}/stages/"$1"/"$_sname"
       _srun="$_srun $_sname"
