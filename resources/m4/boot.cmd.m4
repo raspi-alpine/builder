@@ -101,7 +101,9 @@ fatwrite ${boot_dev} 0:1 0x10000 uboot.dat 0x400
 echo "selecting kernel"
 setenv boot_kernel "/boot/vmlinuz-rpi"
 
-# only if new pi a new kernel is required
+ifelse(len(xOLDKERNEL), 0, `# new kernel names used',
+
+`# only if new pi a new kernel is required
 # https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
 setexpr board_new_pi ${board_revision} \& 0x800000
 if test ${board_new_pi} > 0; then
@@ -124,7 +126,7 @@ if test ${board_new_pi} > 0; then
   fi
 else
   echo "old board"
-fi
+fi')
 echo "Load kernel ${boot_kernel}"
 
 

@@ -39,6 +39,7 @@ set -e
 
 : "${STAGES:="00 10 20 30 40 50 60 70 80 90"}"
 
+# alpine 3.19 and later only have linux-rpi not linux-rpi4 etc
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
 COMP="3.19
 ${ALPINE_BRANCH#v}"
