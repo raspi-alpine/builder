@@ -19,8 +19,8 @@ set -e
 # Project ID for raspi-alpine/crosscompile-uboot
 : "${UBOOT_PROJ_ID:=$DEFAULT_UBOOT_PROJ_ID}"
 : "${UBOOT_VERSION:=""}"
-: "${ARCH:="armv7"}"
-: "${RPI_FIRMWARE_BRANCH:="stable"}"
+: "${ARCH:="aarch64"}"
+: "${RPI_FIRMWARE_BRANCH:="alpine"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
 : "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/root rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
 : "${DEV:="mdev"}"

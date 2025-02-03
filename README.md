@@ -68,9 +68,9 @@ builder.
 | ----------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | ADDITIONAL_DIR_KERNEL_MODULES | none                                         | Directories in kernel modules to include all modules from, eg "w1" for one wire modules                                         |
 | ADDITIONAL_KERNEL_MODULES     | none                                         | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones                    |
-| ALPINE_BRANCH                 | v3.18                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
+| ALPINE_BRANCH                 | v3.21                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
-| ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
+| ARCH                          | aarch64                                      | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
 | CACHE_PATH                    | none                                         | Cache directory inside container (needs volume mounting unless in input|output path), if set firmware and apk files are cached  |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L25) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir), scripts in `input/stages/60` can be used instead               |
