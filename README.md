@@ -3,6 +3,12 @@
 Create minimal Linux images based on [Alpine Linux](https://alpinelinux.org/)
 for the [Raspberry PI](https://www.raspberrypi.org/).
 
+## Important Changes
+
+**04/02/25**
+From alpine 3.19 the kernel names have changed so a full image must be used to upgrade as the u-boot script has changed because of this.
+
+The default arch is now aarch64 and default RPI_FIRMWARE_BRANCH is now alpine.
 
 ## Features
 
@@ -87,7 +93,7 @@ builder.
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
 | OVERLAY                       | unset                                        | If set then mount /etc as an overlay with /data/etc as upperdir, this makes /etc writable but changes are saved in /data/etc    |
 | PI3USB                        | unset                                        | If set then `program_usb_boot_mode=1` is added to the end of `/boot/config.txt`.  See [examples/pi3-usb](examples/pi3-usb)      |
-| RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
+| RPI_FIRMWARE_BRANCH           | alpine                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
 | SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
