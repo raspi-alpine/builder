@@ -7,5 +7,5 @@ depend() {
 }
 
 start() {
-  /sbin/ab_resizedata
+  ab_resizedata
 }

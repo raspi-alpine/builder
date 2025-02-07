@@ -3,7 +3,7 @@
 [ -n "${SIMPLE_IMAGE}" ] && exit
 
 # u-boot tools
-install /uboot_tool ${ROOTFS_PATH}/sbin/uboot_tool
+install /uboot_tool ${ROOTFS_PATH}/usr/sbin/uboot_tool
 
 if [ "$UBOOT_COUNTER_RESET_ENABLED" = "true" ]; then
   # mark system as booted (should be moved to application)
