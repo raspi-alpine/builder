@@ -44,7 +44,7 @@ if [ "$current_idx" != "$uboot_idx" ]; then
   echo "U-boot partition already set to inactive partition"
 else
   mount -o remount,rw /uboot
-  /sbin/uboot_tool part_switch
+  uboot_tool part_switch
   sync
   mount -o remount,ro /uboot
 fi

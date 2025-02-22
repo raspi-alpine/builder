@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z "$OLDKERNEL" ]; then
+  colour_echo "  skipping kernel wrapper as alpine 3.19 changed kernel names"
+  return
+fi
+
 # build uImage (for old installs)
 A=arm
 

@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: "${ALPINE_BRANCH:="v3.18"}"
+: "${ALPINE_BRANCH:="v3.21"}"
 : "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
 : "${DEFAULT_TIMEZONE:="Etc/UTC"}"
@@ -19,8 +19,8 @@ set -e
 # Project ID for raspi-alpine/crosscompile-uboot
 : "${UBOOT_PROJ_ID:=$DEFAULT_UBOOT_PROJ_ID}"
 : "${UBOOT_VERSION:=""}"
-: "${ARCH:="armv7"}"
-: "${RPI_FIRMWARE_BRANCH:="stable"}"
+: "${ARCH:="aarch64"}"
+: "${RPI_FIRMWARE_BRANCH:="alpine"}"
 : "${RPI_FIRMWARE_GIT:="https://github.com/raspberrypi/firmware"}"
 : "${CMDLINE:="console=serial0,115200 console=tty1 root=/dev/root rootfstype=ext4 fsck.repair=yes ro rootwait quiet"}"
 : "${DEV:="mdev"}"
@@ -39,7 +39,14 @@ set -e
 
 : "${STAGES:="00 10 20 30 40 50 60 70 80 90"}"
 
+# alpine 3.19 and later only have linux-rpi not linux-rpi4 etc
 ALPINE_BRANCH=$(echo $ALPINE_BRANCH | sed '/^[0-9]/s/^/v/')
+COMP="3.19
+${ALPINE_BRANCH#v}"
+
+if [ "$ALPINE_BRANCH" != "edge" ]; then
+  [ "$COMP" != "$(echo "$COMP" | sort -V)" ] && export OLDKERNEL="yes"
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # static config
@@ -87,9 +94,9 @@ run_stage_scripts() {
   for S in "${DEF_STAGE_PATH}/$1"/*.sh; do
     _sname=$(basename "$S")
     [ "$_sname" = "*.sh" ] && break
-    colour_echo "  Found $_sname" "$Cyan"
+    colour_echo "  Stage $1 Found $_sname" "$Cyan"
     if [ -f ${INPUT_PATH}/stages/"$1"/"$_sname" ]; then
-      colour_echo "  Overriding $_sname with user version" "$Blue"
+      colour_echo "  Overriding $1 $_sname with user version" "$Blue"
       # shellcheck disable=SC1090
       . ${INPUT_PATH}/stages/"$1"/"$_sname"
       _srun="$_srun $_sname"

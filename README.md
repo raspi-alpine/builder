@@ -3,6 +3,12 @@
 Create minimal Linux images based on [Alpine Linux](https://alpinelinux.org/)
 for the [Raspberry PI](https://www.raspberrypi.org/).
 
+## Important Changes
+
+**04/02/25**
+From alpine 3.19 the kernel names have changed so a full image must be used to upgrade as the u-boot script has changed because of this.
+
+The default arch is now aarch64 and default RPI_FIRMWARE_BRANCH is now alpine.
 
 ## Features
 
@@ -68,9 +74,9 @@ builder.
 | ----------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | ADDITIONAL_DIR_KERNEL_MODULES | none                                         | Directories in kernel modules to include all modules from, eg "w1" for one wire modules                                         |
 | ADDITIONAL_KERNEL_MODULES     | none                                         | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones                    |
-| ALPINE_BRANCH                 | v3.18                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
+| ALPINE_BRANCH                 | v3.21                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
-| ARCH                          | armv7                                        | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
+| ARCH                          | aarch64                                      | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
 | CACHE_PATH                    | none                                         | Cache directory inside container (needs volume mounting unless in input|output path), if set firmware and apk files are cached  |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L25) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir), scripts in `input/stages/60` can be used instead               |
@@ -87,7 +93,7 @@ builder.
 | OUTPUT_PATH                   | /output                                      | Output directory inside container                                                                                               |
 | OVERLAY                       | unset                                        | If set then mount /etc as an overlay with /data/etc as upperdir, this makes /etc writable but changes are saved in /data/etc    |
 | PI3USB                        | unset                                        | If set then `program_usb_boot_mode=1` is added to the end of `/boot/config.txt`.  See [examples/pi3-usb](examples/pi3-usb)      |
-| RPI_FIRMWARE_BRANCH           | stable                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
+| RPI_FIRMWARE_BRANCH           | alpine                                       | [Raspberry Pi Branch](https://github.com/raspberrypi/firmware/branches) to use for firmware, 'alpine' uses alpine version       |
 | RPI_FIRMWARE_GIT              | https://github.com/raspberrypi/firmware      | Raspberry Pi firmware Repo Mirror                                                                                               |
 | SIZE_BOOT                     | 100M                                         | Size of boot partition                                                                                                          |
 | SIZE_DATA                     | 20M                                          | Initial Size of data partition                                                                                                  |
