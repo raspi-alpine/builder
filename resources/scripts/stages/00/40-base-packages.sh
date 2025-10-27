@@ -3,7 +3,7 @@
 # initial package installation
 apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys-stable --arch "$ARCH" add \
   alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
-  ifupdown-ng mkinitfs partx rng-tools-extra tzdata util-linux
+  ifupdown-ng mkinitfs partx rng-tools-extra tzdata util-linux !usr-merge-nag
 
 if chroot_exec apk update; then
   colour_echo "   applying updates"
