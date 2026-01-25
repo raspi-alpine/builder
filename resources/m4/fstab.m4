@@ -5,7 +5,7 @@ ifelse(len(xSIMPLEIMAGE), 0,`LABEL=data      /data       ext4     defaults      
 ifdef(`xLIBLOG', `/data/var/lib   /var/lib    none     defaults,bind       0 0
 /data/var/log   /var/log    none     defaults,bind       0 0')
 ifdef(`xOVERLAY', `overlay         /etc        overlay  defaults,nofail,lowerdir=/etc,upperdir=/data/etc,workdir=/data/workdir 0 0')
-
+ifdef(`xDROPBEAR', `/data/etc/dropbear   /etc/dropbear  none     defaults,bind       0 0')
 proc            /proc       proc     defaults            0 0
 sysfs           /sys        sysfs    defaults            0 0
 devpts          /dev/pts    devpts   gid=4,mode=620      0 0
