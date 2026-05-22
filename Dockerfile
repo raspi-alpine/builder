@@ -1,5 +1,5 @@
 ARG UB_PROJ_ID=32838267
-ARG ALPINE_VER=3.21
+ARG ALPINE_VER=3.23
 ####
 FROM docker.io/alpine:$ALPINE_VER AS uboot-base
 
