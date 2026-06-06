@@ -33,7 +33,7 @@ ARG UB_PROJ_ID
 ENV DEFAULT_UBOOT_PROJ_ID=$UB_PROJ_ID
 
 RUN apk add --no-cache --upgrade curl dosfstools e2fsprogs-extra findutils \
-	genimage git m4 mtools pigz tar u-boot-tools
+	genimage git m4 mtools pigz tar u-boot-tools qemu-arm
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/

@@ -1,5 +1,6 @@
 #!/bin/sh
 
+colour_echo "   Initial package installation for alpine linunx version: $ALPINE_BRANCH"
 # initial package installation
 apk --root "$ROOTFS_PATH" --update-cache --initdb --keys-dir=/usr/share/apk/keys-stable --arch "$ARCH" add \
   alpine-base cloud-utils-growpart coreutils e2fsprogs-extra \
