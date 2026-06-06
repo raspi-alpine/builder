@@ -27,3 +27,36 @@ test_build:
       tests/simple-image/build_image.sh -i "$CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
       ls -lahR tests/simple-image/cache
       ls -lahR tests/simple-image/output
+  artifacts:
+    paths:
+      - tests/simple-image/output/
+    expire_in: 1 week
+
+test_image:
+  stage: test
+  image: alpine
+  tags:
+    - saas-linux-small-arm64
+  needs:
+    - job: test_build
+  before_script:
+    - apk add --no-cache qemu-system-aarch64 qemu-img mtools
+  script:
+    - gunzip -c tests/simple-image/output/aarch64/sdcard.img.gz > sdcard.img
+    - mcopy -i sdcard.img@@512 ::u-boot_rpi-64.bin .
+    - mcopy -i sdcard.img@@512 ::bcm2710-rpi-3-b.dtb .
+    - qemu-img resize -f raw sdcard.img 2G
+    - |
+      timeout 120 qemu-system-aarch64 -M raspi3b \
+        -kernel u-boot_rpi-64.bin \
+        -dtb bcm2710-rpi-3-b.dtb \
+        -drive file=sdcard.img,if=sd,format=raw \
+        -serial stdio -display none \
+        -append "console=ttyAMA1,115200 root=/dev/mmcblk0p2 ro rootwait" > qemu.log 2>&1 || true
+      cat qemu.log
+      if grep -q "hello world!" qemu.log; then
+        echo "QEMU boot test completed successfully."
+      else
+        echo "QEMU boot test failed (hello world not found)."
+        exit 1
+      fi
