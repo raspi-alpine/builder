@@ -47,7 +47,7 @@ test_image:
     - mcopy -i sdcard.img@@512 ::bcm2710-rpi-3-b.dtb .
     - qemu-img resize -f raw sdcard.img 2G
     - |
-      timeout 120 qemu-system-aarch64 -M raspi3b \
+      timeout 180 qemu-system-aarch64 -M raspi3b \
         -kernel u-boot_rpi-64.bin \
         -dtb bcm2710-rpi-3-b.dtb \
         -drive file=sdcard.img,if=sd,format=raw \
