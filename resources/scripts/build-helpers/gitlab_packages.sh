@@ -47,6 +47,8 @@ NAME=$(get_proj_name "$PROJ")
 N="$ARTI-$VER.$EXT"
 FN="$NAME/$VER/$N"
 
+printf "Fetching from: "
+curl -s "https://gitlab.com/api/v4/projects/$PROJ" | grep -o '"path_with_namespace":"[^"]*"' | head -n1 | cut -d'"' -f4
 echo "Fetching version: $VER, with name $FN"
 wget "https://gitlab.com/api/v4/projects/$PROJ/packages/generic/$FN"
 wget "https://gitlab.com/api/v4/projects/$PROJ/packages/generic/$FN.sha256"
