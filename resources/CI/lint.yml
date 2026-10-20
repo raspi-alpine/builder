@@ -8,15 +8,6 @@ checkbashisms:
   script:
     - find ./ -type f -name "*.sh" -exec checkbashisms -f {} \;
 
-shellcheck:
-  image: koalaman/shellcheck-alpine:stable
-  stage: lint
-  before_script:
-    - shellcheck --version
-  script:
-    - find ./ -type f -name "*.sh" -exec shellcheck --exclude SC2086 {} \;
-  allow_failure: true
-
 shfmt:
   image: mvdan/shfmt:latest-alpine
   stage: lint
@@ -24,3 +15,42 @@ shfmt:
     - shfmt -version
   script:
     - shfmt -i 2 -ci -d .
+
+code_quality:
+  # The Code-Quality template is deprecated (GitLab 17.3) and no longer works:
+  # it runs the CodeClimate engine, whose plugin images (codeclimate/*) have
+  # been removed from Docker Hub, so the job always failed while trying to
+  # install them. Code Quality is an open format though, so run our own
+  # linter and emit the report directly.
+  # https://docs.gitlab.com/ci/testing/code_quality/
+  image: koalaman/shellcheck-alpine:stable
+  stage: lint
+  before_script:
+    - apk add --no-cache python3
+  script:
+    - |
+      # shellcheck reports findings on stdout and exits non-zero. Capture the
+      # output rather than piping it, so the exit status is xargs' and not
+      # the last command in a pipeline. xargs only aborts early on exit
+      # status 255, so every file is still checked.
+      set +e
+      find . -type f -name '*.sh' -not -path './.git/*' -print0 |
+        xargs -0 -r shellcheck --exclude=SC2086 --format=gcc > shellcheck.txt
+      set -e
+      cat shellcheck.txt
+      python3 resources/CI/shellcheck2codequality.py < shellcheck.txt \
+        > gl-code-quality-report.json
+      cat gl-code-quality-report.json
+      # Fail the job when there are findings, but write the report first.
+      if [ -s shellcheck.txt ]; then
+        echo "shellcheck reported findings"
+        exit 1
+      fi
+  artifacts:
+    access: 'developer'
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
+    expire_in: 1 week
+  allow_failure: true
