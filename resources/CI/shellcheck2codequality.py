@@ -17,16 +17,18 @@ import sys
 
 # path:line:column: severity: message [SC1234]
 # The column is optional so that the older "gcc1" output works too.
+# shellcheck severities are error, warning, info, style and note.
 LINE_RE = re.compile(
     r"^(?P<path>.*?):(?P<line>\d+)(?::(?P<col>\d+))?: "
-    r"(?P<severity>error|warning|info|style): "
+    r"(?P<severity>error|warning|info|style|note): "
     r"(?P<message>.*?)\s*\[(?P<check>SC\d+)\]\s*$")
 
 SEVERITY = {
     "error": "critical",
     "warning": "major",
-    "info": "minor",
     "style": "minor",
+    "info": "minor",
+    "note": "info",
 }
 
 
