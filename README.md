@@ -5,7 +5,10 @@ for the [Raspberry PI](https://www.raspberrypi.org/).
 
 ## Important Changes
 
-**04/02/25**
+**20/10/2026**
+PI5 support has been added but it does not currently display u-boot text, only the logo, serial console output works.
+
+**04/02/2025**
 From alpine 3.19 the kernel names have changed so a full image must be used to upgrade as the u-boot script has changed because of this.
 
 The default arch is now aarch64 and default RPI_FIRMWARE_BRANCH is now alpine.
@@ -21,7 +24,7 @@ The default arch is now aarch64 and default RPI_FIRMWARE_BRANCH is now alpine.
 * Choice of three base image cpu types for targeting every Raspberry PI
 * Read only root filesystem, with optional overlay mounted /etc
 * Optional caching during build
-* Boot from SD Card or USB (PI2B to PI4)
+* Boot from SD Card or USB (PI2B to PI5)
 * Build is seperated into stages that can be overridden, or use custom stages/order
 
 ## Usage
@@ -76,7 +79,7 @@ builder.
 | ADDITIONAL_KERNEL_MODULES     | none                                         | Kernel modules to keep in addition to DEFAULT_KERNEL_MODULES, so you don't have to add back the default ones                    |
 | ALPINE_BRANCH                 | v3.24                                        | [Alpine Branch](https://alpinelinux.org/releases) to use for image                                                              |
 | ALPINE_MIRROR                 | https://dl-cdn.alpinelinux.org/alpine        | Mirror used for package download                                                                                                |
-| ARCH                          | aarch64                                      | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3 and 4), or armhf for pi zero and pi1 (will not boot on pi4) |
+| ARCH                          | aarch64                                      | Set to aarch64 to enable 64bit uboot and kernel (for raspberry pi 3-5), or armhf for pi zero and pi1 (will not boot on pi4&5) |
 | CACHE_PATH                    | none                                         | Cache directory inside container (needs volume mounting unless in input|output path), if set firmware and apk files are cached  |
 | CMDLINE                       | [resources/build.sh](resources/build.sh#L25) | Override default cmdline for kernel (needs setting in an env file not with --env, see test/simple-image for example)            |
 | CUSTOM_IMAGE_SCRIPT           | image.sh                                     | Name of script for image customizations (relative to input dir), scripts in `input/stages/60` can be used instead               |
@@ -117,6 +120,7 @@ Setting the ARCH variable effects which pi versions the image will run on:
 | pi2             | ✅     | ✅    |         |
 | pi3, pi0w2, cm3 | ✅     | ✅    | ✅      |
 | pi4, pi400, cm4 |        | ✅    | ✅      |
+| pi5             |        |       | ✅      |
 
 ### Kernel Modules
 
