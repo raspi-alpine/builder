@@ -30,10 +30,14 @@ FROM docker.io/alpine:$ALPINE_VER
 LABEL org.opencontainers.image.description="Create minimal Linux images based on Alpine Linux for the Raspberry PI"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
 ARG UB_PROJ_ID
+ARG TARGETARCH
 ENV DEFAULT_UBOOT_PROJ_ID=$UB_PROJ_ID
 
 RUN apk add --no-cache --upgrade curl dosfstools e2fsprogs-extra findutils \
-	genimage git m4 mtools pigz tar u-boot-tools qemu-arm
+	genimage git m4 mtools pigz tar u-boot-tools \
+	&& case "${TARGETARCH:-$(uname -m)}" in \
+		amd64|x86_64|arm64|aarch64) apk add --no-cache qemu-arm ;; \
+	esac
 
 ADD ./resources /resources
 COPY --from=uboot /uboot/ /uboot/
