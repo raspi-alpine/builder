@@ -13,7 +13,19 @@ usage() {
 }
 
 get_info() {
-  curl -s -o - https://gitlab.com/api/v4/projects/"$1"/packages | xargs | tr ',' '\n'
+  # The packages API returns at most 100 packages per page, so fetch every
+  # page; requesting past the last page returns an empty list.
+  PKG_LIST=""
+  PAGE=1
+  while :; do
+    PKGS="$(curl -s "https://gitlab.com/api/v4/projects/$1/packages?per_page=100&page=$PAGE")"
+    if [ -z "$PKGS" ] || [ "$PKGS" = "[]" ]; then
+      break
+    fi
+    PKG_LIST="$PKG_LIST $PKGS"
+    PAGE=$((PAGE + 1))
+  done
+  printf '%s' "$PKG_LIST" | xargs | tr ',' '\n'
 }
 
 get_proj_name() {
@@ -21,7 +33,7 @@ get_proj_name() {
 }
 
 latest_pkg() {
-  get_info "$1" | grep version | sed "s/v.*n.//" | sort | tail -n1
+  get_info "$1" | grep version | sed "s/v.*n.//" | sort -V | tail -n1
 }
 
 while getopts "p:a:d:v:e:l" OPTS; do

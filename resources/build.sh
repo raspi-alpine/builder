@@ -4,7 +4,7 @@ set -e
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # User config
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-: "${ALPINE_BRANCH:="v3.23"}"
+: "${ALPINE_BRANCH:="v3.24"}"
 : "${ALPINE_MIRROR:="https://dl-cdn.alpinelinux.org/alpine"}"
 
 : "${DEFAULT_TIMEZONE:="Etc/UTC"}"
@@ -79,7 +79,7 @@ rm -rf ${WORK_PATH:?}/*
 if [ -d /proc/sys/fs/binfmt_misc ]; then
   mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc 2>/dev/null || true
   if [ -f /proc/sys/fs/binfmt_misc/register ]; then
-    echo ':qemu-arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm:F' >/proc/sys/fs/binfmt_misc/register 2>/dev/null || true
+    printf '%s\n' ':qemu-arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm:F' >/proc/sys/fs/binfmt_misc/register 2>/dev/null || true
   fi
 fi
 

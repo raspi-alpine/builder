@@ -139,6 +139,22 @@ fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
 # overwrite boot partition
 setexpr bootargs sub " root=[^ ]+" " root=${boot_partition_base}${boot_partition}" "${bootargs}"
 
+# drop the legacy framebuffer node
+#
+# When the RPi firmware chain-loads a bootloader such as U-Boot it leaves the
+# legacy "bcm2708-fb" node in the device tree without any geometry of its own -
+# the node only points at the firmware, which is expected to hand the
+# framebuffer details over its mailbox. That mailbox is not available while
+# U-Boot is running, so the kernel ends up with a framebuffer with a bogus
+# stride, and the fbcon console then writes outside the buffer. That kills
+# init and panics the kernel ("Unable to handle kernel paging request" in
+# cfb_fillrect). Remove the node so that the kernel uses the properly
+# described "simple-framebuffer" node instead.
+#
+# The path is the bcm2712 one; the older models use /soc/fb and are not
+# affected, fdt rm just reports that the node is not there.
+fdt rm /soc@107c000000/fb
+
 # load kernel and boot
 ext4load ${boot_dev} 0:${boot_partition} ${kernel_addr_r} ${boot_kernel}
 
