@@ -25,8 +25,11 @@ code_quality:
   # https://docs.gitlab.com/ci/testing/code_quality/
   image: koalaman/shellcheck-alpine:stable
   stage: lint
+  variables:
+    # Override this when including lint.yml from a fork or a pinned ref.
+    CODE_QUALITY_CONVERTER_URL: https://gitlab.com/raspi-alpine/builder/-/raw/master/resources/CI/shellcheck_to_code_quality.py
   before_script:
-    - apk add --no-cache python3
+    - apk add --no-cache curl python3
   script:
     - |
       # shellcheck reports findings on stdout and exits non-zero. Capture the
@@ -38,8 +41,15 @@ code_quality:
         xargs -0 -r shellcheck --exclude=SC2086 --format=gcc > shellcheck.txt
       set -e
       cat shellcheck.txt
-      python3 resources/CI/shellcheck2codequality.py < shellcheck.txt \
-        > gl-code-quality-report.json
+      # An included CI file runs in the calling project's checkout, which does
+      # not contain this repository's helper scripts.
+      CONVERTER=resources/CI/shellcheck_to_code_quality.py
+      if [ ! -f "$CONVERTER" ]; then
+        CONVERTER=/tmp/shellcheck_to_code_quality.py
+        curl --fail --location --silent --show-error \
+          "$CODE_QUALITY_CONVERTER_URL" --output "$CONVERTER"
+      fi
+      python3 "$CONVERTER" < shellcheck.txt > gl-code-quality-report.json
       cat gl-code-quality-report.json
       # Fail the job when there are findings, but write the report first.
       if [ -s shellcheck.txt ]; then
